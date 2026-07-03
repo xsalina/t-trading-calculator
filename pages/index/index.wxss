@@ -1,1 +1,219 @@
+/* 全局页面底色 */
+.page {
+  min-height: 100vh;
+  background-color: #f6f8fa;
+  padding: 32rpx;
+  box-sizing: border-box;
+  font-family: -apple-system, BlinkMacSystemFont, 'Helvetica Neue', sans-serif;
+}
 
+/* 顶部 Header：改为清爽白底，用主题色左边框提神，看久了不累 */
+.topbar {
+  background: #ffffff;
+  padding: 36rpx 40rpx;
+  border-radius: 24rpx;
+  margin-bottom: 32rpx;
+  box-shadow: 0 4rpx 16rpx rgba(0, 0, 0, 0.02);
+  border-left: 8rpx solid #00b894; /* 用主题色做精致的左边条 */
+}
+
+.topbar .title {
+  font-size: 40rpx;
+  font-weight: bold;
+  color: #1e293b;
+}
+
+.topbar .subtitle {
+  font-size: 24rpx;
+  color: #64748b;
+  margin-top: 8rpx;
+  line-height: 1.5;
+}
+
+/* 功能列表卡片 */
+.card {
+  background: #ffffff;
+  border-radius: 24rpx;
+  padding: 8rpx 0;
+  margin-bottom: 32rpx;
+  box-shadow: 0 4rpx 16rpx rgba(0, 0, 0, 0.02);
+}
+
+.list-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 32rpx 40rpx;
+  position: relative;
+}
+
+.list-item:not(:last-child)::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 40rpx;
+  right: 40rpx;
+  height: 1rpx;
+  background-color: #f1f5f9;
+}
+
+.list-item-hover {
+  background-color: #f8fafc;
+}
+
+.list-item-left {
+  display: flex;
+  align-items: center;
+}
+
+/* 新增：列表图标容器样式 */
+.list-icon {
+  width: 72rpx;
+  height: 72rpx;
+  background-color: #f0fdf4; /* 淡淡的绿底，呼应主题色 */
+  border-radius: 16rpx;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 36rpx;
+  margin-right: 28rpx;
+  flex-shrink: 0;
+}
+
+.list-title {
+  font-size: 30rpx;
+  font-weight: 600;
+  color: #1e293b;
+}
+
+.list-desc {
+  font-size: 24rpx;
+  color: #64748b;
+  margin-top: 6rpx;
+}
+
+.arrow {
+  font-size: 36rpx;
+  color: #cbd5e1;
+}
+
+/* 核心推荐卡片 Pro版 */
+.miniapp-card {
+  background: linear-gradient(90deg, #1e293b 0%, #334155 100%);
+  padding: 36rpx 40rpx;
+  border-radius: 24rpx;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 40rpx;
+  box-shadow: 0 12rpx 24rpx rgba(30, 41, 59, 0.12);
+}
+
+.miniapp-card-hover {
+  opacity: 0.9;
+}
+
+.miniapp-content {
+  display: flex;
+  align-items: center;
+}
+
+.miniapp-icon {
+  font-size: 40rpx;
+  margin-right: 24rpx;
+}
+
+.miniapp-title {
+  font-size: 32rpx;
+  font-weight: bold;
+  color: #00b894;
+}
+
+.miniapp-desc {
+  font-size: 24rpx;
+  color: #94a3b8;
+  margin-top: 4rpx;
+}
+
+.arrow-white {
+  font-size: 36rpx;
+  color: #94a3b8;
+}
+
+/* 辅助按钮区域布局 */
+.action-area {
+  display: flex;
+  gap: 20rpx;
+  margin-bottom: 40rpx;
+}
+
+.action-area .button {
+  flex: 1;
+  margin: 0 !important;
+}
+
+/* 通用按钮基础样式 */
+.button {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 28rpx;
+  font-weight: 500;
+  border-radius: 16rpx;
+  transition: all 0.2s ease;
+}
+
+/* 次要轻量按钮（手续费/客服） */
+.button.secondary {
+  background-color: #ffffff;
+  color: #475569;
+  border: 1rpx solid #e2e8f0;
+  padding: 24rpx 0;
+  line-height: 1.5;
+}
+
+.button.secondary::after {
+  border: none;
+}
+
+.btn-hover {
+  background-color: #f1f5f9 !important;
+  color: #1e293b !important;
+}
+
+/* 分享区域主按钮 */
+.share-area {
+  margin-bottom: 48rpx;
+  text-align: center;
+}
+
+.button.primary.share-button {
+  background-color: #00b894;
+  color: #ffffff;
+  padding: 26rpx 0;
+  font-size: 30rpx;
+  font-weight: 600;
+  box-shadow: 0 8rpx 20rpx rgba(0, 184, 148, 0.2);
+  width: 100% !important;
+}
+
+.share-btn-hover {
+  background-color: #00a383 !important;
+  box-shadow: none !important;
+}
+
+.share-copy {
+  font-size: 24rpx;
+  color: #94a3b8;
+  margin-top: 16rpx;
+}
+
+/* 底部免责声明 */
+.notice {
+  font-size: 22rpx;
+  color: #cbd5e1;
+  text-align: center;
+  line-height: 1.6;
+  padding: 0 40rpx;
+  margin-top: 32rpx;
+}
