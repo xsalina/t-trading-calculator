@@ -1,0 +1,25 @@
+{
+  "pages": [
+    "pages/index/index",
+    "pages/t-profit/t-profit",
+    "pages/break-even/break-even",
+    "pages/reverse-t/reverse-t",
+    "pages/take-profit/take-profit",
+    "pages/average-down/average-down",
+    "pages/sell-estimate/sell-estimate",
+    "pages/grid/grid",
+    "pages/price-projection/price-projection",
+    "pages/fee-settings/fee-settings"
+  ],
+  "window": {
+    "navigationBarTitleText": "做T交易计算器",
+    "navigationBarBackgroundColor": "#00b894",
+    "navigationBarTextStyle": "white",
+    "backgroundColor": "#f6f7fb"
+  },
+  "navigateToMiniProgramAppIdList": [
+    "wx253309efe732b547"
+  ],
+  "style": "v2",
+  "sitemapLocation": "sitemap.json"
+}

@@ -1,0 +1,58 @@
+<view class="page">
+  <view class="card">
+    <view class="section-head">
+      <view class="section-title">涨跌幅推演计算器</view>
+      <view class="remember-top"><text>记住数据</text><switch color="#00b894" checked="{{rememberData}}" bindchange="onRememberSwitch" /></view>
+    </view>
+    <view class="field">
+      <text class="label">起始价格</text>
+      <view class="step-field"><button class="step-button" data-key="startPrice" data-step="-0.01" data-min="0" bindtap="adjustNumber">-</button><input class="input" type="digit" value="{{form.startPrice}}" data-key="startPrice" bindinput="onInput" /><button class="step-button" data-key="startPrice" data-step="0.01" data-min="0" bindtap="adjustNumber">+</button></view>
+    </view>
+    <view class="field">
+      <text class="label">股票数量</text>
+      <view class="step-field"><button class="step-button" data-key="shares" data-step="-100" data-min="0" bindtap="adjustNumber">-</button><input class="input" type="number" value="{{form.shares}}" data-key="shares" bindinput="onInput" /><button class="step-button" data-key="shares" data-step="100" data-min="0" bindtap="adjustNumber">+</button></view>
+    </view>
+    <view class="field">
+      <text class="label">每日涨跌幅（%）</text>
+      <view class="step-field"><button class="step-button" data-key="changeRate" data-step="-0.5" bindtap="adjustNumber">-</button><input class="input" value="{{form.changeRate}}" data-key="changeRate" bindinput="onInput" placeholder="上涨填 2，下跌填 -2" /><button class="step-button" data-key="changeRate" data-step="0.5" bindtap="adjustNumber">+</button></view>
+      <view class="hint">支持正负数，例如 2 表示每天上涨 2%，-2 表示每天下跌 2%。</view>
+    </view>
+  </view>
+
+  <view class="button-row action-row">
+    <button class="button primary" bindtap="calculate">计算50天</button>
+    <button class="button plain" bindtap="goBack">返回</button>
+  </view>
+
+  <view wx:if="{{result}}" class="card" style="margin-top: 20rpx;">
+    <view class="section-title">{{resultTitle}}</view>
+    <block wx:for="{{result.rows}}" wx:key="label">
+      <view class="result-row">
+        <text>{{item.label}}</text>
+        <text class="result-value {{item.className}}">{{item.value}}</text>
+      </view>
+    </block>
+  </view>
+
+  <view wx:if="{{result}}" class="card">
+    <view class="section-title">近50天明细</view>
+    <view class="projection-table">
+      <view class="projection-head">
+        <text>日期</text>
+        <text>价格</text>
+        <text>市值</text>
+        <text>累计涨跌</text>
+      </view>
+      <block wx:for="{{result.projectionRows}}" wx:key="day">
+        <view class="projection-line">
+          <text>{{item.dateText}}</text>
+          <text>{{item.price}}</text>
+          <text>{{item.marketValue}}</text>
+          <text class="{{item.className}}">{{item.changeRate}}</text>
+        </view>
+      </block>
+    </view>
+  </view>
+
+  <view class="notice">本页按固定涨跌幅做复利推演，不代表真实行情。本工具仅用于测算，不构成任何投资建议。</view>
+</view>

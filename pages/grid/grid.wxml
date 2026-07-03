@@ -1,0 +1,52 @@
+<view class="page">
+  <view class="card">
+    <view class="section-head">
+      <view class="section-title">网格区间计算器</view>
+      <view class="remember-top"><text>记住数据</text><switch color="#00b894" checked="{{rememberData}}" bindchange="onRememberSwitch" /></view>
+    </view>
+    <view class="switch-row fee-top-row">
+      <view class="switch-copy"><view>计入手续费</view><view class="hint">{{form.includeFee ? "本次计算会自动估算券商佣金、过户费、印花税" : "本次计算将忽略所有手续费"}}</view></view>
+      <switch color="#00b894" checked="{{form.includeFee}}" bindchange="onFeeSwitch" />
+    </view>
+    <view class="field"><text class="label">当前价</text><view class="step-field"><button class="step-button" data-key="currentPrice" data-step="-0.01" data-min="0" bindtap="adjustNumber">-</button><input class="input" type="digit" value="{{form.currentPrice}}" data-key="currentPrice" bindinput="onInput" /><button class="step-button" data-key="currentPrice" data-step="0.01" data-min="0" bindtap="adjustNumber">+</button></view></view>
+    <view class="field"><text class="label">上涨间隔比例（%）</text><view class="step-field"><button class="step-button" data-key="upRate" data-step="-0.5" data-min="0" bindtap="adjustNumber">-</button><input class="input" type="digit" value="{{form.upRate}}" data-key="upRate" bindinput="onInput" /><button class="step-button" data-key="upRate" data-step="0.5" data-min="0" bindtap="adjustNumber">+</button></view></view>
+    <view class="field"><text class="label">下跌间隔比例（%）</text><view class="step-field"><button class="step-button" data-key="downRate" data-step="-0.5" data-min="0" bindtap="adjustNumber">-</button><input class="input" type="digit" value="{{form.downRate}}" data-key="downRate" bindinput="onInput" /><button class="step-button" data-key="downRate" data-step="0.5" data-min="0" bindtap="adjustNumber">+</button></view></view>
+    <view class="field"><text class="label">网格档数</text><input class="input" type="number" value="{{form.levels}}" data-key="levels" bindinput="onInput" /></view>
+    <view class="field"><text class="label">每档股数</text><view class="step-field"><button class="step-button" data-key="shares" data-step="-100" data-min="0" bindtap="adjustNumber">-</button><input class="input" type="number" value="{{form.shares}}" data-key="shares" bindinput="onInput" /><button class="step-button" data-key="shares" data-step="100" data-min="0" bindtap="adjustNumber">+</button></view></view>
+  </view>
+  <view class="button-row action-row">
+    <button class="button primary" bindtap="calculate">计算</button>
+    <button class="button plain" bindtap="goBack">返回</button>
+  </view>
+  <navigator class="button secondary" style="margin-top: 16rpx;" url="/pages/fee-settings/fee-settings">手续费设置</navigator>
+  <result-list records="{{records}}" bindclear="clearRecords" bindremove="removeRecord" />
+
+  <view wx:if="{{result}}" class="card" style="margin-top: 20rpx;">
+    <view class="section-title">基础结果</view>
+    <block wx:for="{{result.rows}}" wx:key="label">
+      <view class="result-row"><text>{{item.label}}</text><text class="result-value">{{item.value}}</text></view>
+    </block>
+  </view>
+
+  <view wx:if="{{result}}" class="card">
+    <view class="section-title">网格明细</view>
+    <view class="grid-table">
+      <view class="grid-head"><text>档位</text><text>买入价</text><text>卖出价</text><text>单档净收益</text></view>
+      <block wx:for="{{result.gridRows}}" wx:key="level">
+        <view class="grid-line"><text>{{item.level}}</text><text>{{item.buyPrice}}</text><text>{{item.sellPrice}}</text><text class="{{item.className}}">{{item.netProfit}}</text></view>
+      </block>
+    </view>
+  </view>
+
+  <view wx:if="{{result}}" class="card">
+    <view class="section-title">费用明细</view>
+    <block wx:if="{{form.includeFee}}">
+      <view class="fee-row"><text>券商佣金</text><text>¥{{result.fee.commissionText}}</text></view>
+      <view class="fee-row"><text>过户费</text><text>¥{{result.fee.transferText}}</text></view>
+      <view class="fee-row"><text>印花税</text><text>¥{{result.fee.stampDutyText}}</text></view>
+      <view class="fee-row"><text>费用合计</text><text class="result-value">¥{{result.fee.totalText}}</text></view>
+    </block>
+    <view wx:else class="muted">已忽略手续费</view>
+  </view>
+  <view class="notice">以上结果已根据当前手续费设置估算，仅供交易记录和盈亏测算使用。本工具不构成任何投资建议。</view>
+</view>

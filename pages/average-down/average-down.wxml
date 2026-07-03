@@ -1,0 +1,44 @@
+<view class="page">
+  <view class="card">
+    <view class="section-head">
+      <view class="section-title">补仓降本计算器</view>
+      <view class="remember-top"><text>记住数据</text><switch color="#00b894" checked="{{rememberData}}" bindchange="onRememberSwitch" /></view>
+    </view>
+    <view class="switch-row fee-top-row">
+      <view class="switch-copy"><view>计入手续费</view><view class="hint">{{form.includeFee ? "本次计算会自动估算券商佣金、过户费、印花税" : "本次计算将忽略所有手续费"}}</view></view>
+      <switch color="#00b894" checked="{{form.includeFee}}" bindchange="onFeeSwitch" />
+    </view>
+    <view class="field"><text class="label">原成本价</text><view class="step-field"><button class="step-button" data-key="originalCost" data-step="-0.01" data-min="0" bindtap="adjustNumber">-</button><input class="input" type="digit" value="{{form.originalCost}}" data-key="originalCost" bindinput="onInput" /><button class="step-button" data-key="originalCost" data-step="0.01" data-min="0" bindtap="adjustNumber">+</button></view></view>
+    <view class="field"><text class="label">原股数</text><view class="step-field"><button class="step-button" data-key="originalShares" data-step="-100" data-min="0" bindtap="adjustNumber">-</button><input class="input" type="number" value="{{form.originalShares}}" data-key="originalShares" bindinput="onInput" /><button class="step-button" data-key="originalShares" data-step="100" data-min="0" bindtap="adjustNumber">+</button></view></view>
+    <view class="field"><text class="label">计划补仓金额</text><view class="step-field"><button class="step-button" data-key="buyAmount" data-step="-1000" data-min="0" bindtap="adjustNumber">-</button><input class="input" type="digit" value="{{form.buyAmount}}" data-key="buyAmount" bindinput="onInput" placeholder="可选，填金额和价格自动算股数" /><button class="step-button" data-key="buyAmount" data-step="1000" data-min="0" bindtap="adjustNumber">+</button></view></view>
+    <view class="field"><text class="label">补仓价格</text><view class="step-field"><button class="step-button" data-key="buyPrice" data-step="-0.01" data-min="0" bindtap="adjustNumber">-</button><input class="input" type="digit" value="{{form.buyPrice}}" data-key="buyPrice" bindinput="onInput" /><button class="step-button" data-key="buyPrice" data-step="0.01" data-min="0" bindtap="adjustNumber">+</button></view></view>
+    <view class="switch-row" style="margin-bottom: 22rpx;">
+      <view class="switch-copy"><view>金额换算整手</view><view class="hint">开启按 100 股、200 股这种整手换算；关闭按 1 股、2 股换算。</view></view>
+      <switch color="#00b894" checked="{{form.roundLot}}" data-key="roundLot" bindchange="onFormSwitch" />
+    </view>
+    <view class="field"><text class="label">补仓股数</text><view class="step-field"><button class="step-button" data-key="buyShares" data-step="-100" data-min="0" bindtap="adjustNumber">-</button><input class="input" type="number" value="{{form.buyShares}}" data-key="buyShares" bindinput="onInput" /><button class="step-button" data-key="buyShares" data-step="100" data-min="0" bindtap="adjustNumber">+</button></view></view>
+  </view>
+  <view class="button-row action-row">
+    <button class="button primary" bindtap="calculate">计算</button>
+    <button class="button plain" bindtap="goBack">返回</button>
+  </view>
+  <navigator class="button secondary" style="margin-top: 16rpx;" url="/pages/fee-settings/fee-settings">手续费设置</navigator>
+  <result-list records="{{records}}" bindclear="clearRecords" bindremove="removeRecord" />
+  <view wx:if="{{result}}" class="card" style="margin-top: 20rpx;">
+    <view class="section-title">计算结果</view>
+    <block wx:for="{{result.rows}}" wx:key="label">
+      <view class="result-row"><text>{{item.label}}</text><text class="result-value {{item.className}}">{{item.value}}</text></view>
+    </block>
+  </view>
+  <view wx:if="{{result}}" class="card">
+    <view class="section-title">费用明细</view>
+    <block wx:if="{{form.includeFee}}">
+      <view class="fee-row"><text>券商佣金</text><text>¥{{result.fee.commissionText}}</text></view>
+      <view class="fee-row"><text>过户费</text><text>¥{{result.fee.transferText}}</text></view>
+      <view class="fee-row"><text>印花税</text><text>¥{{result.fee.stampDutyText}}</text></view>
+      <view class="fee-row"><text>费用合计</text><text class="result-value">¥{{result.fee.totalText}}</text></view>
+    </block>
+    <view wx:else class="muted">已忽略手续费</view>
+  </view>
+  <view class="notice">以上结果已根据当前手续费设置估算，仅供交易记录和盈亏测算使用。本工具不构成任何投资建议。</view>
+</view>

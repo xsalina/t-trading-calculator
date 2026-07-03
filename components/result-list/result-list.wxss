@@ -1,0 +1,63 @@
+.result-head,
+.record-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20rpx;
+}
+
+.record {
+  border-top: 1rpx solid #eef1f5;
+  padding-top: 22rpx;
+  margin-top: 22rpx;
+}
+
+.record:first-of-type {
+  border-top: 0;
+  padding-top: 0;
+  margin-top: 0;
+}
+
+.record-title {
+  font-size: 30rpx;
+  font-weight: 700;
+  color: #16202a;
+}
+
+.section-subtitle {
+  margin-top: 22rpx;
+  margin-bottom: 10rpx;
+  color: #465567;
+  font-size: 26rpx;
+  font-weight: 700;
+}
+
+.small-button,
+.text-button {
+  margin: 0;
+  padding: 0 18rpx;
+  width: auto;
+  min-width: 0;
+  max-width: 140rpx;
+  box-sizing: border-box;
+  height: 56rpx;
+  line-height: 56rpx;
+  border-radius: 8rpx;
+  font-size: 24rpx;
+}
+
+.small-button {
+  color: #4b5b70;
+  background: #ffffff;
+  border: 1rpx solid #d9e0ea;
+}
+
+.text-button {
+  color: #00b894;
+  background: transparent;
+}
+
+.small-button::after,
+.text-button::after {
+  border: 0;
+}

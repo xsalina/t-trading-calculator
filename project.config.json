@@ -1,0 +1,28 @@
+{
+    "description": "做T计算器",
+    "appid": "wx2d335ad7d259fad0",
+    "projectname": "t-trading-calculator",
+    "miniprogramRoot": "",
+    "compileType": "miniprogram",
+    "setting": {
+        "es6": true,
+        "postcss": true,
+        "minified": true,
+        "urlCheck": false,
+        "babelSetting": {
+            "ignore": [],
+            "disablePlugins": [],
+            "outputPath": ""
+        }
+    },
+    "libVersion": "3.16.2",
+    "packOptions": {
+        "ignore": [],
+        "include": []
+    },
+    "condition": {},
+    "editorSetting": {
+        "tabIndent": "auto",
+        "tabSize": 4
+    }
+}

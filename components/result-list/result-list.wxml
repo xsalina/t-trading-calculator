@@ -1,0 +1,39 @@
+<view wx:if="{{records.length}}" class="card">
+  <view class="result-head">
+    <view class="section-title">测算记录</view>
+    <button class="small-button" bindtap="clear">清空</button>
+  </view>
+
+  <block wx:for="{{records}}" wx:key="id">
+    <view class="record">
+      <view class="record-head">
+        <view>
+          <view class="record-title">{{item.title}}</view>
+          <view class="hint">{{item.timeText}}</view>
+        </view>
+        <button class="text-button" data-id="{{item.id}}" bindtap="remove">删除</button>
+      </view>
+
+      <view class="section-subtitle">计算结果</view>
+      <block wx:for="{{item.result.rows}}" wx:key="label" wx:for-item="row">
+        <view class="result-row"><text>{{row.label}}</text><text class="result-value {{row.className}}">{{row.value}}</text></view>
+      </block>
+
+      <view wx:if="{{item.result.gridRows}}" class="grid-table">
+        <view class="grid-head"><text>档位</text><text>买入价</text><text>卖出价</text><text>单档净收益</text></view>
+        <block wx:for="{{item.result.gridRows}}" wx:key="level" wx:for-item="grid">
+          <view class="grid-line"><text>{{grid.level}}</text><text>{{grid.buyPrice}}</text><text>{{grid.sellPrice}}</text><text class="{{grid.className}}">{{grid.netProfit}}</text></view>
+        </block>
+      </view>
+
+      <view class="section-subtitle">费用明细</view>
+      <block wx:if="{{item.includeFee}}">
+        <view class="fee-row"><text>券商佣金</text><text>¥{{item.result.fee.commissionText}}</text></view>
+        <view class="fee-row"><text>过户费</text><text>¥{{item.result.fee.transferText}}</text></view>
+        <view class="fee-row"><text>印花税</text><text>¥{{item.result.fee.stampDutyText}}</text></view>
+        <view class="fee-row"><text>费用合计</text><text class="result-value">¥{{item.result.fee.totalText}}</text></view>
+      </block>
+      <view wx:else class="muted">已忽略手续费</view>
+    </view>
+  </block>
+</view>
