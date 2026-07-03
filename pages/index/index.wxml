@@ -4,6 +4,7 @@
       <view class="title">做T交易计算器</view>
       <view class="subtitle">做T、回本、回补、止盈、补仓、卖出和网格区间测算</view>
     </view>
+    <view class="article-bulb" bindtap="openArticle">💡</view>
   </view>
 
   <view class="card">

@@ -9,6 +9,7 @@
     "pages/sell-estimate/sell-estimate",
     "pages/grid/grid",
     "pages/price-projection/price-projection",
+    "pages/article-webview/article-webview",
     "pages/fee-settings/fee-settings"
   ],
   "window": {

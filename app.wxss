@@ -41,6 +41,10 @@ button {
 }
 
 .card {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: flex-start;
   background: #ffffff;
   border: 1rpx solid #e4e8ef;
   border-radius: 8rpx;
@@ -50,6 +54,7 @@ button {
 }
 
 .section-title {
+  width: 100%;
   font-size: 32rpx;
   font-weight: 700;
   margin-bottom: 20rpx;
@@ -57,6 +62,8 @@ button {
 }
 
 .field {
+  width: calc(50% - 10rpx);
+  box-sizing: border-box;
   margin-bottom: 22rpx;
 }
 
@@ -73,34 +80,34 @@ button {
 
 .input {
   width: 100%;
-  height: 76rpx;
-  padding: 0 20rpx;
+  height: 64rpx;
+  padding: 0 14rpx;
   border: 1rpx solid #d9e0ea;
   border-radius: 8rpx;
   background: #fbfcfe;
   box-sizing: border-box;
-  font-size: 30rpx;
+  font-size: 28rpx;
 }
 
 .step-field {
   display: grid;
-  grid-template-columns: 64rpx minmax(0, 1fr) 64rpx;
+  grid-template-columns: 54rpx minmax(0, 1fr) 54rpx;
   align-items: center;
-  gap: 10rpx;
+  gap: 8rpx;
 }
 
 .step-button {
-  width: 64rpx;
-  min-width: 64rpx;
-  max-width: 64rpx;
-  height: 64rpx;
-  line-height: 64rpx;
+  width: 54rpx;
+  min-width: 54rpx;
+  max-width: 54rpx;
+  height: 54rpx;
+  line-height: 54rpx;
   padding: 0;
   margin: 0;
   border-radius: 8rpx;
   background: rgba(0, 184, 148, 0.12);
   color: #008f73;
-  font-size: 34rpx;
+  font-size: 30rpx;
   font-weight: 700;
 }
 
@@ -113,6 +120,7 @@ button {
 }
 
 .section-head {
+  width: 100%;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -142,6 +150,7 @@ button {
 .switch-row,
 .result-row,
 .fee-row {
+  width: 100%;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -272,6 +281,7 @@ button {
 }
 
 .notice {
+  width: 100%;
   color: #7a5b12;
   background: #fff7df;
   border: 1rpx solid #f2dfaa;
@@ -282,6 +292,7 @@ button {
 }
 
 .segmented {
+  width: 100%;
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 12rpx;
@@ -306,6 +317,7 @@ button {
 }
 
 .trade-record {
+  width: 100%;
   padding: 18rpx 0;
   border-top: 1rpx solid #eef1f5;
 }
@@ -335,6 +347,7 @@ button {
 }
 
 .list-item {
+  width: 100%;
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -347,6 +360,7 @@ button {
 }
 
 .miniapp-card {
+  width: 100%;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -387,6 +401,7 @@ button {
 }
 
 .grid-table {
+  width: 100%;
   overflow-x: auto;
 }
 
@@ -410,6 +425,7 @@ button {
 }
 
 .projection-table {
+  width: 100%;
   overflow-x: auto;
 }
 

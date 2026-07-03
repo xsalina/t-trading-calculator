@@ -1,5 +1,6 @@
 const TRADE_RECORD_MINI_PROGRAM_APP_ID = "wx253309efe732b547";
 const { getShareMessage, getShareTimelineMessage } = require("../../utils/share");
+const { ARTICLE_URL } = require("../../utils/article");
 
 Page({
   data: {
@@ -50,6 +51,20 @@ Page({
   openTradeRecordMiniProgram() {
     wx.navigateToMiniProgram({
       appId: TRADE_RECORD_MINI_PROGRAM_APP_ID
+    });
+  },
+
+  openArticle() {
+    if (!ARTICLE_URL) {
+      wx.showToast({
+        title: "文章链接待配置",
+        icon: "none"
+      });
+      return;
+    }
+
+    wx.navigateTo({
+      url: "/pages/article-webview/article-webview?url=" + encodeURIComponent(ARTICLE_URL)
     });
   },
 

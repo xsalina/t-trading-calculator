@@ -23,7 +23,7 @@
     </view>
 
     <view wx:if="{{form.direction === 'BUY'}}" class="field">
-      <text class="label">打算成交金额</text>
+      <text class="label">成交金额</text>
       <view class="step-field"><button class="step-button" data-key="tradeAmount" data-step="-1000" data-min="0" bindtap="adjustNumber">-</button><input class="input" type="digit" value="{{form.tradeAmount}}" data-key="tradeAmount" bindinput="onInput" placeholder="可选，填金额和买入价格自动算数量" /><button class="step-button" data-key="tradeAmount" data-step="1000" data-min="0" bindtap="adjustNumber">+</button></view>
     </view>
 
