@@ -115,6 +115,7 @@
         <view class="picker-title">⭐ 选择首页默认计算器</view>
         <view class="picker-close" bindtap="closeDefaultPicker">关闭</view>
       </view>
+      <view class="picker-tip">选择后，首页会优先展示这个计算器，方便下次打开直接测算。</view>
       <block wx:for="{{calculators}}" wx:key="type">
         <view class="picker-item" data-type="{{item.type}}" bindtap="chooseDefaultCalculator" hover-class="picker-item-hover">
           <view class="list-item-left picker-left">
@@ -127,7 +128,6 @@
           <view wx:if="{{item.type === defaultCalculatorType}}" class="picker-current">当前</view>
         </view>
       </block>
-      <view class="picker-tip">默认计算器仅影响直接打开本小程序或从个人中心进入时的首页展示；从交易详情页进入时，会优先打开对应场景的计算器。</view>
     </view>
   </view>
 </view>
