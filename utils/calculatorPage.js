@@ -7,6 +7,7 @@ const {
 } = require("./pageState");
 const { safeNumber, roundTo } = require("./math");
 const { getShareMessage, getShareTimelineMessage } = require("./share");
+const { applyExternalFormPreset } = require("./externalEntry");
 
 function createCalculatorPage(options) {
   const defaultForm = Object.assign({
@@ -21,21 +22,34 @@ function createCalculatorPage(options) {
       records: []
     },
 
+    onLoad(query) {
+      this.externalEntryQuery = query || {};
+    },
+
     onShow() {
       const feeSettings = getFeeSettings();
       const saved = getSavedState(options.pageKey);
       const rememberData = saved.rememberData !== false;
       const savedForm = saved.form || {};
-      const form = rememberData
+      let form = rememberData
         ? Object.assign({}, defaultForm, savedForm, {
           includeFee: typeof savedForm.includeFee === "boolean" ? savedForm.includeFee : feeSettings.useFee
         })
         : Object.assign({}, this.data.form, { includeFee: feeSettings.useFee });
+      const externalPreset = applyExternalFormPreset(options.pageKey, form, this.externalEntryQuery || {});
+      form = externalPreset.form;
+      if (externalPreset.applied) {
+        this.externalEntryQuery = {};
+      }
 
       this.setData({
         feeSettings,
         rememberData,
         form
+      }, () => {
+        if (externalPreset.applied) {
+          this.persistForm();
+        }
       });
     },
 

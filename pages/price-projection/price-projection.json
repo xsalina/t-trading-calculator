@@ -1,3 +1,6 @@
 {
-  "navigationBarTitleText": "涨跌幅推演计算器"
+  "navigationBarTitleText": "涨跌幅推演计算器",
+  "usingComponents": {
+    "price-projection-calculator": "/components/calculators/price-projection/price-projection"
+  }
 }

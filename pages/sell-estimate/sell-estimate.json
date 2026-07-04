@@ -1,6 +1,6 @@
 {
   "navigationBarTitleText": "卖出测算计算器",
   "usingComponents": {
-    "result-list": "/components/result-list/result-list"
+    "sell-estimate-calculator": "/components/calculators/sell-estimate/sell-estimate"
   }
 }

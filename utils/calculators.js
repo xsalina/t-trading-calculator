@@ -229,6 +229,7 @@ function calcPriceProjection(input) {
     currentDate.setDate(startDate.getDate() + day);
     const price = safeMultiply(startPrice, Math.pow(1 + changeRate, day));
     const marketValue = safeMultiply(price, shares);
+    const profit = safeSubtract(marketValue, safeMultiply(startPrice, shares));
     const changeAmount = safeSubtract(price, startPrice);
     const totalChangeRate = safeMultiply(safeDivide(changeAmount, startPrice), 100);
 
@@ -237,6 +238,7 @@ function calcPriceProjection(input) {
       dateText: `${currentDate.getMonth() + 1}/${currentDate.getDate()}`,
       price: "¥" + formatNumber(price, 4),
       marketValue: "¥" + formatMoney(marketValue),
+      profit: "¥" + formatMoney(profit),
       changeRate: formatRate(totalChangeRate),
       className: resultClass(totalChangeRate)
     });
@@ -255,7 +257,7 @@ function calcPriceProjection(input) {
       { label: "每日涨跌幅", value: formatRate(safeNumber(input.changeRate)), className: resultClass(input.changeRate) },
       { label: "第50天价格", value: finalRow.price || "¥0.0000", className: finalRow.className || "" },
       { label: "第50天市值", value: "¥" + formatMoney(finalMarketValue), className: resultClass(marketValueChange) },
-      { label: "市值变化", value: "¥" + formatMoney(marketValueChange), className: resultClass(marketValueChange) }
+      { label: "第50天盈亏", value: "¥" + formatMoney(marketValueChange), className: resultClass(marketValueChange) }
     ],
     projectionRows: rows
   };

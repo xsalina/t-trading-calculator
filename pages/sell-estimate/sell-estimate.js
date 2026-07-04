@@ -1,13 +1,3 @@
-const { createCalculatorPage } = require("../../utils/calculatorPage");
-const { calcSellEstimate } = require("../../utils/calculators");
+const { createCalculatorPageShell } = require("../../utils/calculatorPageShell");
 
-Page(createCalculatorPage({
-  pageKey: "sell-estimate",
-  defaultForm: {
-    costPrice: "",
-    sellPrice: "",
-    totalShares: "",
-    sellShares: ""
-  },
-  calculate: calcSellEstimate
-}));
+Page(createCalculatorPageShell());

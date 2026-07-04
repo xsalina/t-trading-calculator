@@ -7,6 +7,10 @@ Component({
     records: {
       type: Array,
       value: []
+    },
+    removeText: {
+      type: String,
+      value: "删除"
     }
   },
 

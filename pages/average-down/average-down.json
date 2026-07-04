@@ -1,6 +1,6 @@
 {
   "navigationBarTitleText": "补仓降本计算器",
   "usingComponents": {
-    "result-list": "/components/result-list/result-list"
+    "average-down-calculator": "/components/calculators/average-down/average-down"
   }
 }

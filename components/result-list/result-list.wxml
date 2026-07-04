@@ -11,7 +11,7 @@
           <view class="record-title">{{item.title}}</view>
           <view class="hint">{{item.timeText}}</view>
         </view>
-        <button class="text-button" data-id="{{item.id}}" bindtap="remove">删除</button>
+        <button class="text-button" data-id="{{item.id}}" bindtap="remove">{{removeText}}</button>
       </view>
 
       <view class="section-subtitle">计算结果</view>

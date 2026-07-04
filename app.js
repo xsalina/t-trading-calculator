@@ -1,7 +1,8 @@
 App({
   globalData: {
     shareImage: "/assets/images/share-t.png",
-    shareImageLocal: ""
+    shareImageLocal: "",
+    appMiniName:'做T交易计算器'
   },
 
   onLaunch() {

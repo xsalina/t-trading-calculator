@@ -1,6 +1,6 @@
 {
   "navigationBarTitleText": "止盈目标价计算器",
   "usingComponents": {
-    "result-list": "/components/result-list/result-list"
+    "take-profit-calculator": "/components/calculators/take-profit/take-profit"
   }
 }

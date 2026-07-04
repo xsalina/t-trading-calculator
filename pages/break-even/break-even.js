@@ -1,12 +1,3 @@
-const { createCalculatorPage } = require("../../utils/calculatorPage");
-const { calcBreakEven } = require("../../utils/calculators");
+const { createCalculatorPageShell } = require("../../utils/calculatorPageShell");
 
-Page(createCalculatorPage({
-  pageKey: "break-even",
-  defaultForm: {
-    costPrice: "",
-    currentPrice: "",
-    shares: ""
-  },
-  calculate: calcBreakEven
-}));
+Page(createCalculatorPageShell());

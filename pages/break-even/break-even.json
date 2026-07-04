@@ -1,6 +1,6 @@
 {
   "navigationBarTitleText": "回本计算器",
   "usingComponents": {
-    "result-list": "/components/result-list/result-list"
+    "break-even-calculator": "/components/calculators/break-even/break-even"
   }
 }

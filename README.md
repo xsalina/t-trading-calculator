@@ -74,6 +74,12 @@
 ## 通用交互
 
 - 主题色：`#00b894`
+- 首页默认计算器改为轻量状态栏，可通过“更换”设置最常用计算器
+- 首页新增横向快捷入口，点击后在首页直接切换展示对应计算器组件
+- 首页会按默认计算器直接渲染对应计算器组件
+- 首页首屏压缩介绍和辅助入口，优先露出当前计算器输入表单
+- 做T记录助手Pro 入口位于首页介绍下方，计算出结果后会出现“去做T记录助手Pro记录这一笔”主按钮
+- 首页保留全部计算器列表，当前默认计算器会显示“默认”标识，列表项仍可进入独立页面
 - 每个计算器页面默认开启“记住数据”
 - 首页提供“做T记录助手Pro”小程序跳转入口，入口文案为“开始管理我的做T记录”
 - 首页提供“在线客服 / 反馈建议”按钮，使用微信原生客服会话能力
@@ -89,11 +95,22 @@
 - 计算器页面底部提供“计算 / 返回”或对应操作按钮
 - 本工具仅用于测算，不构成任何投资建议
 
+## 外部小程序跳转参数
+
+- 支持其他小程序通过 `wx.navigateToMiniProgram` 跳转到本小程序
+- `source=account`：进入首页，不自动跳转到具体计算器
+- `source=tradeDetail` 且 `direction=BUY`：按正常持仓处理，默认进入做T计算器
+- `source=tradeDetail` 且 `direction=REVERSE_T`：按反T待回补处理，自动进入反T回补计算器
+- 支持参数：`type`、`avgCost`、`quantity`、`fee`、`currentPrice`、`direction`、`stockCode`、`stockName`、`currency`、`market`、`source`
+- 常用字段会自动预填到对应计算器，例如成本价、当前价、股数、反T卖出均价和待回补数量
+- `type` 支持 `t-profit`、`break-even`、`reverse-t`、`take-profit`、`average-down`、`sell-estimate`、`grid`、`price-projection`，也兼容驼峰写法
+
 ## 项目结构
 
 - `app.json`：小程序页面配置
 - `app.wxss`：全局样式
 - `pages/`：各计算器页面
+- `components/calculators/`：各计算器核心表单和计算组件
 - `utils/math.js`：安全小数计算和格式化工具
 - `utils/fee.js`：手续费配置和手续费计算
 - `utils/calculators.js`：各类计算器核心公式

@@ -1,12 +1,3 @@
-const { createCalculatorPage } = require("../../utils/calculatorPage");
-const { calcTakeProfit } = require("../../utils/calculators");
+const { createCalculatorPageShell } = require("../../utils/calculatorPageShell");
 
-Page(createCalculatorPage({
-  pageKey: "take-profit",
-  defaultForm: {
-    costPrice: "",
-    shares: "",
-    targetProfit: ""
-  },
-  calculate: calcTakeProfit
-}));
+Page(createCalculatorPageShell());

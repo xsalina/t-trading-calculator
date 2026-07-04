@@ -1,3 +1,13 @@
 {
-  "navigationBarTitleText": "做T交易计算器"
+  "navigationBarTitleText": "做T交易计算器",
+  "usingComponents": {
+    "t-profit-calculator": "/components/calculators/t-profit/t-profit",
+    "break-even-calculator": "/components/calculators/break-even/break-even",
+    "reverse-t-calculator": "/components/calculators/reverse-t/reverse-t",
+    "take-profit-calculator": "/components/calculators/take-profit/take-profit",
+    "average-down-calculator": "/components/calculators/average-down/average-down",
+    "sell-estimate-calculator": "/components/calculators/sell-estimate/sell-estimate",
+    "grid-calculator": "/components/calculators/grid/grid",
+    "price-projection-calculator": "/components/calculators/price-projection/price-projection"
+  }
 }

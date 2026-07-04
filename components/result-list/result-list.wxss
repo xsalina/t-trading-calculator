@@ -35,26 +35,31 @@
 .small-button,
 .text-button {
   margin: 0;
-  padding: 0 18rpx;
+  padding: 0 16rpx;
   width: auto;
   min-width: 0;
-  max-width: 140rpx;
+  max-width: 120rpx;
   box-sizing: border-box;
-  height: 56rpx;
-  line-height: 56rpx;
-  border-radius: 8rpx;
-  font-size: 24rpx;
+  height: 48rpx;
+  line-height: 48rpx;
+  border-radius: 999rpx;
+  font-size: 22rpx;
+  font-weight: 500;
 }
 
 .small-button {
-  color: #4b5b70;
-  background: #ffffff;
-  border: 1rpx solid #d9e0ea;
+  color: #64748b;
+  background: #f8fafc;
+  border: 1rpx solid #e2e8f0;
 }
 
 .text-button {
-  color: #00b894;
-  background: transparent;
+  min-width: 132rpx;
+  max-width: none;
+  color: #ef4444;
+  background: #fff5f5;
+  border: 1rpx solid #fee2e2;
+  white-space: nowrap;
 }
 
 .small-button::after,

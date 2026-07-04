@@ -1,14 +1,3 @@
-const { createCalculatorPage } = require("../../utils/calculatorPage");
-const { calcGrid } = require("../../utils/calculators");
+const { createCalculatorPageShell } = require("../../utils/calculatorPageShell");
 
-Page(createCalculatorPage({
-  pageKey: "grid",
-  defaultForm: {
-    currentPrice: "",
-    upRate: "",
-    downRate: "",
-    levels: "",
-    shares: ""
-  },
-  calculate: calcGrid
-}));
+Page(createCalculatorPageShell());

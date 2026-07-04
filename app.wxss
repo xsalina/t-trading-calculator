@@ -20,6 +20,17 @@ button {
   box-sizing: border-box;
 }
 
+.calculator-shell.standalone {
+  min-height: 100vh;
+  padding: 28rpx;
+  box-sizing: border-box;
+}
+
+.calculator-shell.embedded {
+  padding: 0;
+  box-sizing: border-box;
+}
+
 .topbar {
   display: flex;
   align-items: center;
@@ -67,6 +78,10 @@ button {
   margin-bottom: 22rpx;
 }
 
+.full-field {
+  width: 100%;
+}
+
 .field:last-child {
   margin-bottom: 0;
 }
@@ -76,6 +91,13 @@ button {
   margin-bottom: 10rpx;
   color: #465567;
   font-size: 26rpx;
+}
+
+.field-tip {
+  margin-top: 8rpx;
+  color: #8a97a8;
+  font-size: 21rpx;
+  line-height: 1.35;
 }
 
 .input {
@@ -289,6 +311,7 @@ button {
   padding: 20rpx;
   line-height: 1.5;
   font-size: 24rpx;
+  box-sizing: border-box;
 }
 
 .segmented {
@@ -316,6 +339,32 @@ button {
   background: #00b894;
 }
 
+.choice-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 14rpx;
+  width: 100%;
+}
+
+.choice-item {
+  height: 64rpx;
+  line-height: 64rpx;
+  text-align: center;
+  border-radius: 8rpx;
+  border: 1rpx solid #d9e0ea;
+  background: #ffffff;
+  color: #4b5b70;
+  font-size: 26rpx;
+  font-weight: 600;
+  box-sizing: border-box;
+}
+
+.choice-item.active {
+  color: #008f73;
+  background: rgba(0, 184, 148, 0.12);
+  border-color: rgba(0, 184, 148, 0.36);
+}
+
 .trade-record {
   width: 100%;
   padding: 18rpx 0;
@@ -325,6 +374,66 @@ button {
 .trade-record:first-of-type {
   border-top: 0;
   padding-top: 0;
+}
+
+.trade-actions {
+  display: flex;
+  align-items: center;
+  gap: 12rpx;
+}
+
+.undo-button {
+  width: auto;
+  min-width: 132rpx;
+  height: 46rpx;
+  line-height: 46rpx;
+  margin: 0;
+  padding: 0 16rpx;
+  border-radius: 999rpx;
+  color: #ef4444;
+  background: #fff5f5;
+  border: 1rpx solid #fee2e2;
+  font-size: 22rpx;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.undo-button::after {
+  border: 0;
+}
+
+.result-head {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20rpx;
+}
+
+.record-title {
+  font-size: 30rpx;
+  font-weight: 700;
+  color: #16202a;
+}
+
+.small-button {
+  width: auto;
+  min-width: 0;
+  max-width: 160rpx;
+  height: 48rpx;
+  line-height: 48rpx;
+  margin: 0;
+  padding: 0 16rpx;
+  border-radius: 999rpx;
+  background: #f8fafc;
+  color: #64748b;
+  border: 1rpx solid #e2e8f0;
+  font-size: 22rpx;
+  font-weight: 500;
+}
+
+.small-button::after {
+  border: 0;
 }
 
 .trade-head,
@@ -432,8 +541,8 @@ button {
 .projection-head,
 .projection-line {
   display: grid;
-  grid-template-columns: 110rpx 170rpx 220rpx 150rpx;
-  min-width: 650rpx;
+  grid-template-columns: 110rpx 170rpx 220rpx 200rpx 150rpx;
+  min-width: 850rpx;
   align-items: center;
 }
 
