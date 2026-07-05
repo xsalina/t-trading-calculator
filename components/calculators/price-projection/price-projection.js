@@ -1,6 +1,6 @@
 const { calcPriceProjection } = require("../../../utils/calculators");
 const { getSavedState, saveState } = require("../../../utils/pageState");
-const { safeNumber, roundTo } = require("../../../utils/math");
+const { safeNumber, safeMultiply, roundTo, formatMoney, formatNumber, formatPrice } = require("../../../utils/math");
 const { applyExternalFormPreset } = require("../../../utils/externalEntry");
 const { appendSource, copyText, rowMap } = require("../../../utils/resultCopy");
 
@@ -10,6 +10,10 @@ const DEFAULT_FORM = {
   shares: "",
   changeRate: ""
 };
+
+function findRow(result, label) {
+  return ((result && result.rows) || []).find((row) => row.label === label) || {};
+}
 
 Component({
   properties: {
@@ -23,6 +27,10 @@ Component({
     embedded: {
       type: Boolean,
       value: false
+    },
+    isDefaultCalculator: {
+      type: Boolean,
+      value: false
     }
   },
 
@@ -30,7 +38,7 @@ Component({
     form: DEFAULT_FORM,
     rememberData: true,
     result: null,
-    resultTitle: "计算结果"
+    records: []
   },
 
   lifetimes: {
@@ -104,11 +112,44 @@ Component({
     },
 
     calculate() {
+      const result = calcPriceProjection(this.data.form);
+      const finalRow = ((result && result.projectionRows) || [])[49] || {};
+      const startPrice = safeNumber(this.data.form.startPrice);
+      const shares = safeNumber(this.data.form.shares);
+      const startMarketValue = safeMultiply(startPrice, shares);
+      const record = {
+        id: Date.now() + "-" + this.data.records.length,
+        result,
+        resultTitle: "推演结果",
+        resultTagText: "第50天",
+        resultTheme: safeNumber(this.data.form.changeRate) >= 0 ? "sell" : "buy",
+        mainItems: [
+          { label: "第50天价格", value: findRow(result, "第50天价格").value || "-", className: findRow(result, "第50天价格").className || "" },
+          { label: "第50天盈亏", value: findRow(result, "第50天盈亏").value || "-", className: findRow(result, "第50天盈亏").className || "" }
+        ],
+        detailItems: [
+          { label: "第50天市值", value: findRow(result, "第50天市值").value || "-", className: findRow(result, "第50天市值").className || "" },
+          { label: "累计涨跌幅", value: finalRow.changeRate || "-", className: finalRow.className || "" },
+          { label: "起始价格", value: " " + formatPrice(startPrice, this.data.form.startPrice) },
+          { label: "股票数量", value: formatNumber(shares, 0) + "股" },
+          { label: "每日涨跌幅", value: (this.data.form.changeRate || "0") + "%", className: findRow(result, "每日涨跌幅").className || "" },
+          { label: "起始市值", value: " " + formatMoney(startMarketValue) }
+        ]
+      };
       this.setData({
-        result: calcPriceProjection(this.data.form),
-        resultTitle: "计算结果"
+        result,
+        records: [record].concat(this.data.records)
       });
       this.persistForm();
+    },
+
+    removeRecord(event) {
+      const id = event.detail && event.detail.id ? event.detail.id : event.currentTarget.dataset.id;
+      const records = this.data.records.filter((record) => record.id !== id);
+      this.setData({
+        records,
+        result: records.length ? records[0].result : null
+      });
     },
 
     goBack() {
@@ -124,6 +165,10 @@ Component({
       wx.navigateToMiniProgram({
         appId: "wx253309efe732b547"
       });
+    },
+
+    onDefaultCalculatorTap() {
+      this.triggerEvent("setdefaultcalculator");
     },
 
     copyResult() {

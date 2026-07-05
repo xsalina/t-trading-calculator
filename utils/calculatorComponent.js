@@ -27,6 +27,10 @@ function createCalculatorComponent(options) {
       embedded: {
         type: Boolean,
         value: false
+      },
+      isDefaultCalculator: {
+        type: Boolean,
+        value: false
       }
     },
 
@@ -71,6 +75,9 @@ function createCalculatorComponent(options) {
           rememberData,
           form
         }, () => {
+          if (typeof options.afterInit === "function") {
+            options.afterInit.call(this, externalPreset);
+          }
           if (externalPreset.applied) {
             this.persistForm();
           }
@@ -88,6 +95,8 @@ function createCalculatorComponent(options) {
         this.setData({
           "form.includeFee": event.detail.value,
           feeSummary: buildFeeSummary(this.data.feeSettings, event.detail.value)
+        }, () => {
+          this.afterFormChange("includeFee");
         });
         this.persistForm();
       },
@@ -144,13 +153,21 @@ function createCalculatorComponent(options) {
       calculate() {
         const result = options.calculate(this.data.form, this.data.feeSettings);
         const nextCount = this.data.records.length + 1;
-        const record = {
+        let record = {
           id: Date.now() + "-" + nextCount,
           title: "测算 " + nextCount,
           timeText: makeTimeText(),
           includeFee: this.data.form.includeFee,
           result
         };
+        if (typeof options.decorateRecord === "function") {
+          record = Object.assign(record, options.decorateRecord.call(this, {
+            result,
+            form: this.data.form,
+            record,
+            count: nextCount
+          }));
+        }
 
         this.setData({
           result,
@@ -174,6 +191,10 @@ function createCalculatorComponent(options) {
         });
       },
 
+      onDefaultCalculatorTap() {
+        this.triggerEvent("setdefaultcalculator");
+      },
+
       copyResult() {
         if (!this.data.result) {
           wx.showToast({ title: "请先完成测算", icon: "none" });
@@ -192,13 +213,15 @@ function createCalculatorComponent(options) {
       },
 
       clearRecords() {
-        this.setData({ records: [] });
+        this.setData({ records: [], result: null });
       },
 
       removeRecord(event) {
         const id = event.detail && event.detail.id ? event.detail.id : event.currentTarget.dataset.id;
+        const records = this.data.records.filter((record) => record.id !== id);
         this.setData({
-          records: this.data.records.filter((record) => record.id !== id)
+          records,
+          result: records.length ? records[0].result : null
         });
       }
     }, options.methods || {})

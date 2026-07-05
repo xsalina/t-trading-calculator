@@ -1,6 +1,11 @@
 <view class="calculator-form-header {{home ? 'home' : ''}} {{showFee ? 'has-fee' : 'no-fee'}}">
   <view class="calculator-form-title-row">
-    <text class="calculator-form-title">{{title}}</text>
+    <view class="calculator-form-title-wrap">
+      <text class="calculator-form-title">{{title}}</text>
+      <view wx:if="{{showDefault}}" class="calculator-form-default-pill {{(managedDefault ? isDefault : localIsDefault) ? 'is-default' : 'can-set'}}" bindtap="onDefaultTap">
+        {{(managedDefault ? isDefault : localIsDefault) ? '默认' : '设为默认 >'}}
+      </view>
+    </view>
     <view class="calculator-form-remember">
       <text>记住数据</text>
       <switch color="#00b894" checked="{{rememberData}}" bindchange="onRememberChange" />

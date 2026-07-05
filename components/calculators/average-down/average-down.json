@@ -3,6 +3,6 @@
   "styleIsolation": "apply-shared",
   "usingComponents": {
     "calculator-form-header": "/components/calculator-form-header/calculator-form-header",
-    "result-list": "/components/result-list/result-list"
+    "calculator-result-card": "/components/calculator-result-card/calculator-result-card"
   }
 }

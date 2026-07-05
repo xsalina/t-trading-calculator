@@ -1,0 +1,32 @@
+<view class="calculator-result-card {{theme}}">
+  <view class="result-card-head">
+    <view class="result-card-title-row">
+      <view class="result-card-title">{{title}}</view>
+    </view>
+    <view class="result-card-actions">
+      <view wx:if="{{tag || timeText}}" class="result-card-meta">
+        <view wx:if="{{tag}}" class="result-card-tag">{{tag}}</view>
+        <view wx:if="{{timeText}}" class="result-card-time">{{timeText}}</view>
+      </view>
+      <button wx:if="{{removable}}" class="undo-button" bindtap="onRemove">{{removeText || '撤销本笔'}}</button>
+    </view>
+  </view>
+
+  <view wx:if="{{mainItems.length}}" class="result-card-main">
+    <block wx:for="{{mainItems}}" wx:key="label">
+      <view class="result-card-main-item">
+        <text>{{item.label}}</text>
+        <text class="{{item.className}}">{{item.value}}</text>
+      </view>
+    </block>
+  </view>
+
+  <view wx:if="{{detailItems.length}}" class="result-card-detail">
+    <block wx:for="{{detailItems}}" wx:key="label">
+      <view>
+        <text>{{item.label}}</text>
+        <text class="{{item.className}}">{{item.value}}</text>
+      </view>
+    </block>
+  </view>
+</view>

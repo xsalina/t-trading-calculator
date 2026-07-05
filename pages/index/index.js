@@ -2,8 +2,7 @@ const TRADE_RECORD_MINI_PROGRAM_APP_ID = "wx253309efe732b547";
 const DEFAULT_CALCULATOR_TYPE_KEY = "defaultCalculatorType";
 const SYSTEM_DEFAULT_CALCULATOR_TYPE = "t-profit";
 const { getShareMessage, getShareTimelineMessage } = require("../../utils/share");
-const { ARTICLE_URL } = require("../../utils/article");
-const { getEntryRedirectUrl } = require("../../utils/externalEntry");
+const { getEntryCalculatorType, isExternalEntry } = require("../../utils/externalEntry");
 
 const CALCULATORS = [
   {
@@ -64,35 +63,22 @@ const CALCULATORS = [
   }
 ];
 
-const FEATURED_CALCULATOR_TYPES = ["t-profit", "break-even", "average-down"];
-
-function getFeaturedCalculators() {
-  return FEATURED_CALCULATOR_TYPES
-    .map((type) => CALCULATORS.find((item) => item.type === type))
-    .filter(Boolean);
-}
-
 Page({
   data: {
     calculators: CALCULATORS,
-    featuredCalculators: getFeaturedCalculators(),
     showAllCalculators: false,
     defaultCalculatorType: SYSTEM_DEFAULT_CALCULATOR_TYPE,
     defaultCalculator: CALCULATORS[0],
     activeCalculatorType: SYSTEM_DEFAULT_CALCULATOR_TYPE,
     activeCalculator: CALCULATORS[0],
+    entryQuery: {},
     showDefaultPicker: false
   },
 
   onLoad(options) {
-    const url = getEntryRedirectUrl(options || {});
-    if (url) {
-      wx.redirectTo({ url });
-      return;
-    }
-
     this.hasActiveCalculatorChanged = false;
     this.initDefaultCalculator();
+    this.applyEntryQuery(options || {});
   },
 
   onShow() {
@@ -139,6 +125,16 @@ Page({
     this.setActiveCalculator(event.currentTarget.dataset.type);
   },
 
+  applyEntryQuery(query) {
+    if (!isExternalEntry(query || {})) return;
+
+    const calculatorType = getEntryCalculatorType(query || {});
+    this.setData({ entryQuery: query || {} });
+    if (!calculatorType) return;
+
+    this.setActiveCalculator(calculatorType);
+  },
+
   setActiveCalculator(type) {
     const calculator = this.data.calculators.find((item) => item.type === type);
     if (!calculator) {
@@ -167,7 +163,7 @@ Page({
       defaultCalculator: calculator
     });
     wx.showToast({
-      title: "已设为默认",
+      title: "已设为首页默认",
       icon: "success"
     });
   },
@@ -219,7 +215,7 @@ Page({
       showDefaultPicker: false
     });
     wx.showToast({
-      title: "已设为默认",
+      title: "已设为首页默认",
       icon: "success"
     });
   },
@@ -234,16 +230,9 @@ Page({
   },
 
   openArticle() {
-    if (!ARTICLE_URL) {
-      wx.showToast({
-        title: "文章链接待配置",
-        icon: "none"
-      });
-      return;
-    }
-
-    wx.navigateTo({
-      url: "/pages/article-webview/article-webview?url=" + encodeURIComponent(ARTICLE_URL)
+    wx.showToast({
+      title: "使用说明更新中",
+      icon: "none"
     });
   },
 

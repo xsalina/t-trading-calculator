@@ -13,39 +13,25 @@
         </view>
       </scroll-view>
     </view>
-    <t-profit-calculator wx:if="{{activeCalculatorType === 't-profit'}}" embedded="{{true}}"></t-profit-calculator>
-    <break-even-calculator wx:elif="{{activeCalculatorType === 'break-even'}}" embedded="{{true}}"></break-even-calculator>
-    <reverse-t-calculator wx:elif="{{activeCalculatorType === 'reverse-t'}}" embedded="{{true}}"></reverse-t-calculator>
-    <take-profit-calculator wx:elif="{{activeCalculatorType === 'take-profit'}}" embedded="{{true}}"></take-profit-calculator>
-    <average-down-calculator wx:elif="{{activeCalculatorType === 'average-down'}}" embedded="{{true}}"></average-down-calculator>
-    <sell-estimate-calculator wx:elif="{{activeCalculatorType === 'sell-estimate'}}" embedded="{{true}}"></sell-estimate-calculator>
-    <grid-calculator wx:elif="{{activeCalculatorType === 'grid'}}" embedded="{{true}}"></grid-calculator>
-    <price-projection-calculator wx:elif="{{activeCalculatorType === 'price-projection'}}" embedded="{{true}}"></price-projection-calculator>
+    <t-profit-calculator wx:if="{{activeCalculatorType === 't-profit'}}" embedded="{{true}}" entry-query="{{entryQuery}}" is-default-calculator="{{activeCalculatorType === defaultCalculatorType}}" bindsetdefaultcalculator="setCurrentAsDefault"></t-profit-calculator>
+    <break-even-calculator wx:elif="{{activeCalculatorType === 'break-even'}}" embedded="{{true}}" entry-query="{{entryQuery}}" is-default-calculator="{{activeCalculatorType === defaultCalculatorType}}" bindsetdefaultcalculator="setCurrentAsDefault"></break-even-calculator>
+    <reverse-t-calculator wx:elif="{{activeCalculatorType === 'reverse-t'}}" embedded="{{true}}" entry-query="{{entryQuery}}" is-default-calculator="{{activeCalculatorType === defaultCalculatorType}}" bindsetdefaultcalculator="setCurrentAsDefault"></reverse-t-calculator>
+    <take-profit-calculator wx:elif="{{activeCalculatorType === 'take-profit'}}" embedded="{{true}}" entry-query="{{entryQuery}}" is-default-calculator="{{activeCalculatorType === defaultCalculatorType}}" bindsetdefaultcalculator="setCurrentAsDefault"></take-profit-calculator>
+    <average-down-calculator wx:elif="{{activeCalculatorType === 'average-down'}}" embedded="{{true}}" entry-query="{{entryQuery}}" is-default-calculator="{{activeCalculatorType === defaultCalculatorType}}" bindsetdefaultcalculator="setCurrentAsDefault"></average-down-calculator>
+    <sell-estimate-calculator wx:elif="{{activeCalculatorType === 'sell-estimate'}}" embedded="{{true}}" entry-query="{{entryQuery}}" is-default-calculator="{{activeCalculatorType === defaultCalculatorType}}" bindsetdefaultcalculator="setCurrentAsDefault"></sell-estimate-calculator>
+    <grid-calculator wx:elif="{{activeCalculatorType === 'grid'}}" embedded="{{true}}" entry-query="{{entryQuery}}" is-default-calculator="{{activeCalculatorType === defaultCalculatorType}}" bindsetdefaultcalculator="setCurrentAsDefault"></grid-calculator>
+    <price-projection-calculator wx:elif="{{activeCalculatorType === 'price-projection'}}" embedded="{{true}}" entry-query="{{entryQuery}}" is-default-calculator="{{activeCalculatorType === defaultCalculatorType}}" bindsetdefaultcalculator="setCurrentAsDefault"></price-projection-calculator>
   </view>
 
-  <view class="card calculator-card compact-calculator-card">
-    <view class="independent-head">
-      <view>
-        <view class="independent-title">需要连续测算？</view>
-        <view class="independent-desc">进入独立计算器页面，支持多次计算和完整记录</view>
+  <view class="miniapp-card compact-pro-card" bindtap="openTradeRecordMiniProgram" hover-class="miniapp-card-hover">
+    <view class="miniapp-content">
+      <view class="miniapp-icon">📱</view>
+      <view class="miniapp-copy">
+        <view class="miniapp-title">做T记录助手Pro</view>
+        <view class="miniapp-desc">股友好评的做T记录神器</view>
       </view>
-      <view class="independent-toggle" bindtap="toggleAllCalculators">{{showAllCalculators ? '收起' : '查看全部 8 个 >'}}</view>
     </view>
-    <block wx:for="{{showAllCalculators ? calculators : featuredCalculators}}" wx:key="type">
-      <view class="list-item" data-url="{{item.url}}" bindtap="goCalculatorPage" hover-class="list-item-hover">
-        <view class="list-item-left">
-          <view class="list-icon">{{item.shortName}}</view>
-          <view class="list-copy">
-            <view class="list-title">
-              <text>{{item.name}}</text>
-              <text wx:if="{{item.type === defaultCalculatorType}}" class="default-tag">默认</text>
-            </view>
-            <view class="list-desc">{{item.desc}}</view>
-          </view>
-        </view>
-        <view class="arrow">›</view>
-      </view>
-    </block>
+    <view class="arrow-white">去记录 ></view>
   </view>
 
   <view class="share-area">
@@ -62,6 +48,32 @@
       hover-class="btn-hover"
     >在线客服 / 反馈建议</button>
     <button class="button secondary contact-button" bindtap="openArticle" hover-class="btn-hover">使用说明 / 文章教程</button>
+  </view>
+
+  <view class="all-calculators-entry" bindtap="toggleAllCalculators" hover-class="all-calculators-hover">
+    <view class="all-calculators-copy">
+      <view class="all-calculators-title">全部计算器</view>
+      <view class="all-calculators-desc">查看完整计算工具</view>
+    </view>
+    <view class="all-calculators-action">{{showAllCalculators ? '收起' : '查看 8 个 >'}}</view>
+  </view>
+
+  <view wx:if="{{showAllCalculators}}" class="card calculator-card compact-calculator-card bottom-calculator-list">
+    <block wx:for="{{calculators}}" wx:key="type">
+      <view class="list-item" data-url="{{item.url}}" bindtap="goCalculatorPage" hover-class="list-item-hover">
+        <view class="list-item-left">
+          <view class="list-icon">{{item.shortName}}</view>
+          <view class="list-copy">
+            <view class="list-title">
+              <text>{{item.name}}</text>
+              <text wx:if="{{item.type === defaultCalculatorType}}" class="default-tag">默认</text>
+            </view>
+            <view class="list-desc">{{item.desc}}</view>
+          </view>
+        </view>
+        <view class="arrow">›</view>
+      </view>
+    </block>
   </view>
 
   <view class="notice">本工具仅用于盈亏测算，不构成任何投资建议。</view>

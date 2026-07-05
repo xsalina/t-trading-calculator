@@ -7,7 +7,8 @@ const {
   roundTo,
   formatMoney,
   formatRate,
-  formatNumber
+  formatNumber,
+  formatPrice
 } = require("./math");
 const { calcTradeFee } = require("./fee");
 
@@ -63,10 +64,10 @@ function calcTProfit(input, feeSettings) {
   return {
     fee: decorateFee(totalFee),
     rows: [
-      { label: "买入金额", value: "¥" + formatMoney(buyAmount) },
-      { label: "卖出金额", value: "¥" + formatMoney(sellAmount) },
-      { label: "毛收益", value: "¥" + formatMoney(grossProfit), className: resultClass(grossProfit) },
-      { label: "净收益", value: "¥" + formatMoney(netProfit), className: resultClass(netProfit) },
+      { label: "买入金额", value: " " + formatMoney(buyAmount) },
+      { label: "卖出金额", value: " " + formatMoney(sellAmount) },
+      { label: "毛收益", value: " " + formatMoney(grossProfit), className: resultClass(grossProfit) },
+      { label: "净收益", value: " " + formatMoney(netProfit), className: resultClass(netProfit) },
       { label: "收益率", value: formatRate(profitRate), className: resultClass(profitRate) }
     ]
   };
@@ -89,10 +90,10 @@ function calcReverseT(input, feeSettings) {
   return {
     fee: decorateFee(totalFee),
     rows: [
-      { label: "卖出金额", value: "¥" + formatMoney(sellAmount) },
-      { label: "回补金额", value: "¥" + formatMoney(coverAmount) },
-      { label: "价差收益", value: "¥" + formatMoney(spreadProfit), className: resultClass(spreadProfit) },
-      { label: "反T净收益", value: "¥" + formatMoney(netProfit), className: resultClass(netProfit) },
+      { label: "卖出金额", value: " " + formatMoney(sellAmount) },
+      { label: "回补金额", value: " " + formatMoney(coverAmount) },
+      { label: "价差收益", value: " " + formatMoney(spreadProfit), className: resultClass(spreadProfit) },
+      { label: "反T净收益", value: " " + formatMoney(netProfit), className: resultClass(netProfit) },
       { label: "回补空间", value: formatRate(coverSpace), className: resultClass(coverSpace) }
     ]
   };
@@ -113,10 +114,10 @@ function calcTakeProfit(input, feeSettings) {
   return {
     fee: decorateFee(sellFee),
     rows: [
-      { label: "持仓成本", value: "¥" + formatMoney(costAmount) },
-      { label: "目标收益", value: "¥" + formatMoney(targetProfit), className: resultClass(targetProfit) },
-      { label: "目标卖出价", value: "¥" + formatNumber(targetPrice, 4), className: resultClass(targetProfit) },
-      { label: "预计卖出金额", value: "¥" + formatMoney(finalSellAmount) }
+      { label: "持仓成本", value: " " + formatMoney(costAmount) },
+      { label: "目标收益", value: " " + formatMoney(targetProfit), className: resultClass(targetProfit) },
+      { label: "目标卖出价", value: " " + formatPrice(targetPrice), className: resultClass(targetProfit) },
+      { label: "预计卖出金额", value: " " + formatMoney(finalSellAmount) }
     ]
   };
 }
@@ -140,10 +141,10 @@ function calcAverageDown(input, feeSettings) {
   return {
     fee: decorateFee(buyFee),
     rows: [
-      { label: "原持仓成本", value: "¥" + formatMoney(originalAmount) },
-      { label: "补仓总成本", value: "¥" + formatMoney(buyTotalCost) },
-      { label: "补仓后成本价", value: "¥" + formatNumber(newCost, 4) },
-      { label: "成本降低金额", value: "¥" + formatNumber(reduceAmount, 4), className: resultClass(reduceAmount) },
+      { label: "原持仓成本", value: " " + formatMoney(originalAmount) },
+      { label: "补仓总成本", value: " " + formatMoney(buyTotalCost) },
+      { label: "补仓后成本价", value: " " + formatPrice(newCost) },
+      { label: "成本降低金额", value: " " + formatMoney(reduceAmount), className: resultClass(reduceAmount) },
       { label: "成本降低比例", value: formatRate(reduceRate), className: resultClass(reduceRate) }
     ]
   };
@@ -165,12 +166,12 @@ function calcSellEstimate(input, feeSettings) {
   return {
     fee: decorateFee(sellFee),
     rows: [
-      { label: "卖出金额", value: "¥" + formatMoney(sellAmount) },
-      { label: "卖出部分成本", value: "¥" + formatMoney(soldCost) },
-      { label: "卖出毛收益", value: "¥" + formatMoney(grossProfit), className: resultClass(grossProfit) },
-      { label: "卖出净收益", value: "¥" + formatMoney(netProfit), className: resultClass(netProfit) },
+      { label: "卖出金额", value: " " + formatMoney(sellAmount) },
+      { label: "卖出部分成本", value: " " + formatMoney(soldCost) },
+      { label: "卖出毛收益", value: " " + formatMoney(grossProfit), className: resultClass(grossProfit) },
+      { label: "卖出净收益", value: " " + formatMoney(netProfit), className: resultClass(netProfit) },
       { label: "剩余股数", value: formatNumber(remainShares, 0) + " 股" },
-      { label: "剩余持仓成本价", value: "¥" + formatNumber(costPrice, 4) }
+      { label: "剩余持仓成本价", value: " " + formatPrice(costPrice, input.costPrice) }
     ]
   };
 }
@@ -198,9 +199,9 @@ function calcGrid(input, feeSettings) {
     feeTotal = sumFees([feeTotal, levelFee]);
     rows.push({
       level: i,
-      buyPrice: "¥" + formatNumber(downPrice, 4),
-      sellPrice: "¥" + formatNumber(upPrice, 4),
-      netProfit: "¥" + formatMoney(netProfit),
+      buyPrice: " " + formatPrice(downPrice),
+      sellPrice: " " + formatPrice(upPrice),
+      netProfit: " " + formatMoney(netProfit),
       className: resultClass(netProfit)
     });
   }
@@ -209,7 +210,7 @@ function calcGrid(input, feeSettings) {
     fee: decorateFee(feeTotal),
     gridRows: rows,
     rows: [
-      { label: "当前价", value: "¥" + formatNumber(currentPrice, 4) },
+      { label: "当前价", value: " " + formatPrice(currentPrice, input.currentPrice) },
       { label: "网格档数", value: levels + " 档" },
       { label: "每档股数", value: formatNumber(shares, 0) + " 股" }
     ]
@@ -236,9 +237,9 @@ function calcPriceProjection(input) {
     rows.push({
       day,
       dateText: `${currentDate.getMonth() + 1}/${currentDate.getDate()}`,
-      price: "¥" + formatNumber(price, 4),
-      marketValue: "¥" + formatMoney(marketValue),
-      profit: "¥" + formatMoney(profit),
+      price: " " + formatPrice(price),
+      marketValue: " " + formatMoney(marketValue),
+      profit: " " + formatMoney(profit),
       changeRate: formatRate(totalChangeRate),
       className: resultClass(totalChangeRate)
     });
@@ -252,12 +253,12 @@ function calcPriceProjection(input) {
 
   return {
     rows: [
-      { label: "起始价格", value: "¥" + formatNumber(startPrice, 4) },
+      { label: "起始价格", value: " " + formatPrice(startPrice, input.startPrice) },
       { label: "股票数量", value: formatNumber(shares, 0) + " 股" },
       { label: "每日涨跌幅", value: formatRate(safeNumber(input.changeRate)), className: resultClass(input.changeRate) },
-      { label: "第50天价格", value: finalRow.price || "¥0.0000", className: finalRow.className || "" },
-      { label: "第50天市值", value: "¥" + formatMoney(finalMarketValue), className: resultClass(marketValueChange) },
-      { label: "第50天盈亏", value: "¥" + formatMoney(marketValueChange), className: resultClass(marketValueChange) }
+      { label: "第50天价格", value: finalRow.price || " 0.0000", className: finalRow.className || "" },
+      { label: "第50天市值", value: " " + formatMoney(finalMarketValue), className: resultClass(marketValueChange) },
+      { label: "第50天盈亏", value: " " + formatMoney(marketValueChange), className: resultClass(marketValueChange) }
     ],
     projectionRows: rows
   };
@@ -276,12 +277,12 @@ function calcBreakEven(input) {
 
   return {
     rows: [
-      { label: "持仓成本", value: "¥" + formatMoney(costAmount) },
-      { label: "当前市值", value: "¥" + formatMoney(currentValue) },
-      { label: "当前盈亏", value: "¥" + formatMoney(profit), className: resultClass(profit) },
-      { label: "回本目标价", value: "¥" + formatNumber(costPrice, 4) },
-      { label: "回本目标市值", value: "¥" + formatMoney(breakEvenValue) },
-      { label: "需上涨金额", value: "¥" + formatNumber(needPriceAmount, 4), className: resultClass(needPriceAmount) },
+      { label: "持仓成本", value: " " + formatMoney(costAmount) },
+      { label: "当前市值", value: " " + formatMoney(currentValue) },
+      { label: "当前盈亏", value: " " + formatMoney(profit), className: resultClass(profit) },
+      { label: "回本目标价", value: " " + formatPrice(costPrice, input.costPrice) },
+      { label: "回本目标市值", value: " " + formatMoney(breakEvenValue) },
+      { label: "需上涨金额", value: " " + formatMoney(needPriceAmount), className: resultClass(needPriceAmount) },
       { label: "需上涨比例", value: formatRate(needRate), className: resultClass(needRate) }
     ]
   };

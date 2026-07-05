@@ -1,11 +1,72 @@
 <view class="calculator-shell {{embedded ? 'embedded' : 'standalone'}} {{records.length && !embedded ? 'has-fixed-action' : ''}}">
-  <view class="card">
-    <calculator-form-header title="反T回补计算器" remember-data="{{rememberData}}" show-fee="{{true}}" include-fee="{{form.includeFee}}" bindrememberchange="onRememberSwitch" bindfeechange="onFeeSwitch" />
-    <view class="field"><text class="label">卖出价</text><view class="step-field"><button class="step-button" data-key="sellPrice" data-step="-0.01" data-min="0" bindtap="adjustNumber">-</button><input class="input" type="digit" value="{{form.sellPrice}}" data-key="sellPrice" bindinput="onInput" /><button class="step-button" data-key="sellPrice" data-step="0.01" data-min="0" bindtap="adjustNumber">+</button></view></view>
-    <view class="field"><text class="label">回补价</text><view class="step-field"><button class="step-button" data-key="coverPrice" data-step="-0.01" data-min="0" bindtap="adjustNumber">-</button><input class="input" type="digit" value="{{form.coverPrice}}" data-key="coverPrice" bindinput="onInput" /><button class="step-button" data-key="coverPrice" data-step="0.01" data-min="0" bindtap="adjustNumber">+</button></view></view>
-    <view class="field full-field"><text class="label">回补股数</text><view class="step-field"><button class="step-button" data-key="shares" data-step="-100" data-min="0" bindtap="adjustNumber">-</button><input class="input" type="number" value="{{form.shares}}" data-key="shares" bindinput="onInput" /><button class="step-button" data-key="shares" data-step="100" data-min="0" bindtap="adjustNumber">+</button></view></view>
-    <view class="field full-field"><text class="label">回补金额（可选）</text><view class="step-field"><button class="step-button" data-key="coverAmount" data-step="-1000" data-min="0" bindtap="adjustNumber">-</button><input class="input" type="digit" value="{{form.coverAmount}}" data-key="coverAmount" bindinput="onInput" placeholder="填金额" /><button class="step-button" data-key="coverAmount" data-step="1000" data-min="0" bindtap="adjustNumber">+</button></view><view class="field-tip">填金额后，按回补价换算股数</view></view>
-    <view class="field full-field">
+  <view class="card t-home-form-card">
+    <calculator-form-header title="反T回补计算器" calculator-type="reverse-t" remember-data="{{rememberData}}" show-fee="{{true}}" include-fee="{{form.includeFee}}" home="{{embedded}}" show-default="{{true}}" managed-default="{{embedded}}" is-default="{{isDefaultCalculator}}" bindrememberchange="onRememberSwitch" bindfeechange="onFeeSwitch" binddefaulttap="onDefaultCalculatorTap" />
+
+    <view wx:if="{{!form.baseInitialized}}" class="field">
+      <text class="label">卖出价</text>
+      <view class="step-field">
+        <button class="step-button" data-key="sellPrice" data-step="-0.01" data-min="0" bindtap="adjustNumber">-</button>
+        <input class="input" type="digit" value="{{form.sellPrice}}" data-key="sellPrice" bindinput="onInput" />
+        <button class="step-button" data-key="sellPrice" data-step="0.01" data-min="0" bindtap="adjustNumber">+</button>
+      </view>
+    </view>
+
+    <view wx:if="{{!form.baseInitialized}}" class="field">
+      <text class="label">待回补股数</text>
+      <view class="step-field">
+        <button class="step-button" data-key="shares" data-step="-100" data-min="0" bindtap="adjustNumber">-</button>
+        <input class="input" type="number" value="{{form.shares}}" data-key="shares" bindinput="onInput" />
+        <button class="step-button" data-key="shares" data-step="100" data-min="0" bindtap="adjustNumber">+</button>
+      </view>
+    </view>
+
+    <calculator-result-card
+      wx:if="{{form.baseInitialized && baseSellCard}}"
+      title="{{baseSellCard.title}}"
+      tag="{{baseSellCard.tag}}"
+      theme="{{baseSellCard.theme}}"
+      main-items="{{baseSellCard.mainItems}}"
+      detail-items="{{baseSellCard.detailItems}}"
+    />
+
+    <view wx:if="{{form.baseInitialized}}" class="form-subtitle form-subtitle-row operation-title-row">
+      <text>本次回补</text>
+    </view>
+
+    <view wx:if="{{form.baseInitialized}}" class="field">
+      <text class="label">回补价</text>
+      <view class="step-field">
+        <button class="step-button" data-key="coverPrice" data-step="-0.01" data-min="0" bindtap="adjustNumber">-</button>
+        <input class="input" type="digit" value="{{form.coverPrice}}" data-key="coverPrice" bindinput="onInput" />
+        <button class="step-button" data-key="coverPrice" data-step="0.01" data-min="0" bindtap="adjustNumber">+</button>
+      </view>
+    </view>
+
+    <view wx:if="{{form.baseInitialized}}" class="field">
+      <text class="label">回补股数</text>
+      <view class="step-field">
+        <button class="step-button" data-key="shares" data-step="-100" data-min="0" bindtap="adjustNumber">-</button>
+        <input class="input" type="number" value="{{form.shares}}" data-key="shares" bindinput="onInput" />
+        <button class="step-button" data-key="shares" data-step="100" data-min="0" bindtap="adjustNumber">+</button>
+      </view>
+    </view>
+
+    <view wx:if="{{form.baseInitialized}}" class="amount-toggle" bindtap="toggleAmountPanel">
+      <text>按金额换算股数</text>
+      <text>{{showAmountPanel ? '收起' : '>'}}</text>
+    </view>
+
+    <view wx:if="{{form.baseInitialized && showAmountPanel}}" class="field full-field">
+      <text class="label">回补金额（可选）</text>
+      <view class="step-field">
+        <button class="step-button" data-key="coverAmount" data-step="-1000" data-min="0" bindtap="adjustNumber">-</button>
+        <input class="input" type="digit" value="{{form.coverAmount}}" data-key="coverAmount" bindinput="onInput" placeholder="填金额（可选）" />
+        <button class="step-button" data-key="coverAmount" data-step="1000" data-min="0" bindtap="adjustNumber">+</button>
+      </view>
+      <view class="field-tip">填金额后，按回补价换算股数</view>
+    </view>
+
+    <view wx:if="{{form.baseInitialized && showAmountPanel}}" class="field full-field">
       <text class="label">换算单位</text>
       <view class="choice-row">
         <view class="choice-item {{form.convertUnit === '100' ? 'active' : ''}}" data-unit="100" bindtap="setConvertUnit">100股</view>
@@ -14,50 +75,60 @@
       </view>
       <view class="field-tip">填写金额后，将按所选单位自动换算股数</view>
     </view>
+
+    <view class="button-row">
+      <button class="button primary" bindtap="calculate">{{form.baseInitialized ? '保存回补' : '初始化卖出'}}</button>
+      <button class="button plain" bindtap="clearRecords">全部清除</button>
+    </view>
   </view>
-  <view class="button-row action-row">
-    <button class="button primary" bindtap="calculate">计算</button>
-    <button wx:if="{{!embedded}}" class="button plain" bindtap="goBack">返回</button>
+
+  <calculator-result-card
+    wx:if="{{preview && form.baseInitialized}}"
+    title="{{preview.title}}"
+    tag="{{preview.tag}}"
+    theme="{{preview.theme}}"
+    main-items="{{preview.mainItems}}"
+    detail-items="{{preview.detailItems}}"
+  />
+
+  <view wx:if="{{result}}" class="card compact-summary-card">
+    <view class="summary-title">回补结果</view>
+    <view class="summary-grid">
+      <block wx:for="{{result.rows}}" wx:key="label">
+        <view class="summary-grid-item {{index < 2 ? 'highlight' : ''}}">
+          <text>{{item.label}}</text>
+          <text class="result-value {{item.className}}">{{item.value}}</text>
+        </view>
+      </block>
+    </view>
   </view>
-  <view wx:if="{{result}}" class="card" style="margin-top: 20rpx;">
-    <view class="section-title">计算结果</view>
-    <block wx:for="{{result.rows}}" wx:key="label">
-      <view class="result-row"><text>{{item.label}}</text><text class="result-value {{item.className}}">{{item.value}}</text></view>
+
+  <view wx:if="{{records.length}}" class="embedded-record-list">
+    <block wx:for="{{records}}" wx:key="id">
+      <calculator-result-card
+        title="{{item.resultTitle}}"
+        tag="{{item.resultTagText}}"
+        time-text="{{item.resultTimeText}}"
+        theme="{{item.resultTheme}}"
+        main-items="{{item.mainItems}}"
+        detail-items="{{item.detailItems}}"
+        removable="{{true}}"
+        remove-text="撤销本笔"
+        record-id="{{item.id}}"
+        bindremove="undoCoverRecord"
+      />
     </block>
   </view>
+
   <view wx:if="{{records.length && embedded}}" class="result-action-row">
-    <button class="button secondary result-copy-button" bindtap="copyResult">复制结果</button>
     <button class="button secondary result-share-button" open-type="share">分享给朋友</button>
-    <button class="button primary pro-record-button" bindtap="openTradeRecordMiniProgram">顺手记录到做T记录助手Pro ></button>
+    <button class="button secondary result-copy-button" bindtap="copyResult">复制结果</button>
   </view>
   <view wx:if="{{records.length && !embedded}}" class="result-action-bar">
     <button class="action-primary" bindtap="openTradeRecordMiniProgram">算完顺手记录这一笔</button>
     <button class="action-secondary" open-type="share">分享给朋友</button>
     <button class="action-secondary" bindtap="copyResult">复制结果</button>
   </view>
-
-  <view wx:if="{{records.length}}" class="card">
-    <view class="result-head">
-      <view class="section-title">回补记录</view>
-      <button class="small-button" bindtap="clearRecords">全部清除</button>
-    </view>
-    <block wx:for="{{records}}" wx:key="id">
-      <view class="trade-record">
-        <view class="trade-head">
-          <view>
-            <view class="record-title">{{item.title}}</view>
-            <view class="hint">{{item.timeText}}</view>
-          </view>
-          <button class="undo-button" data-id="{{item.id}}" bindtap="undoCoverRecord">撤销本笔</button>
-        </view>
-        <view class="trade-line"><text>回补价</text><text>{{item.coverPriceText}}</text></view>
-        <view class="trade-line"><text>回补数量</text><text>{{item.sharesText}}</text></view>
-        <view class="trade-line"><text>回补金额</text><text>{{item.coverAmountText}}</text></view>
-        <view class="trade-line"><text>手续费</text><text>{{item.feeText}}</text></view>
-        <view class="trade-line"><text>本笔反T收益</text><text class="{{item.netProfitClass}}">{{item.netProfitText}}</text></view>
-        <view class="trade-line"><text>操作后剩余待回补</text><text>{{item.remainingSharesText}}</text></view>
-      </view>
-    </block>
-  </view>
+  <button wx:if="{{!embedded}}" class="button plain action-row" bindtap="goBack">返回</button>
   <view class="notice">以上结果已根据当前手续费设置估算，仅供交易记录和盈亏测算使用。本工具不构成任何投资建议。</view>
 </view>

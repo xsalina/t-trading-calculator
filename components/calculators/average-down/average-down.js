@@ -9,6 +9,7 @@ const {
   safeDivide,
   formatMoney,
   formatNumber,
+  formatPrice,
   formatRate
 } = require("../../../utils/math");
 const { appendSource, rowMap } = require("../../../utils/resultCopy");
@@ -37,6 +38,13 @@ function resultClass(value) {
   return "";
 }
 
+function formatSignedMoney(value) {
+  const num = safeNumber(value);
+  if (num > 0) return "+ " + formatMoney(num);
+  if (num < 0) return "- " + formatMoney(Math.abs(num));
+  return " 0.00";
+}
+
 function decorateFee(fee) {
   return {
     commissionFee: fee.commissionFee,
@@ -59,9 +67,22 @@ Component(createCalculatorComponent({
     buyPrice: "",
     buyShares: "",
     convertUnit: "100",
-    roundLot: true
+    roundLot: true,
+    baseInitialized: false
   },
   calculate: calcAverageDown,
+  afterInit() {
+    if (!this.data.form.baseInitialized) return;
+    const basePosition = this.getBasePosition(
+      safeNumber(this.data.form.originalCost),
+      safeNumber(this.data.form.originalShares)
+    );
+    if (!basePosition || !safeNumber(basePosition.shares)) return;
+    this.setData({
+      basePosition,
+      basePositionCard: this.buildBasePositionCard(basePosition)
+    }, () => this.refreshPreview());
+  },
   buildCopy() {
     if (!this.data.result) return "";
     const rows = rowMap(this.data.result);
@@ -78,6 +99,14 @@ Component(createCalculatorComponent({
     ]);
   },
   methods: {
+    toggleAmountPanel() {
+      this.setData({ showAmountPanel: !this.data.showAmountPanel });
+    },
+
+    refreshPreview() {
+      this.setData({ preview: this.buildPreview() });
+    },
+
     setConvertUnit(event) {
       const convertUnit = String(event.currentTarget.dataset.unit || "100");
       this.setData({ "form.convertUnit": convertUnit });
@@ -86,12 +115,17 @@ Component(createCalculatorComponent({
     },
 
     calculate() {
+      if (!this.data.form.baseInitialized) {
+        this.initializeBasePosition();
+        return;
+      }
+
       const originalCost = safeNumber(this.data.form.originalCost);
       const originalShares = safeNumber(this.data.form.originalShares);
       const buyPrice = safeNumber(this.data.form.buyPrice);
       const buyShares = safeNumber(this.data.form.buyShares);
       if (!originalCost || !originalShares || !buyPrice || !buyShares) {
-        wx.showToast({ title: "请填写成本、股数和补仓信息", icon: "none" });
+        wx.showToast({ title: "请填写补仓价和补仓数量", icon: "none" });
         return;
       }
 
@@ -109,7 +143,24 @@ Component(createCalculatorComponent({
         basePosition,
         records,
         result: this.buildCumulativeResult(records, basePosition)
-      });
+      }, () => this.refreshPreview());
+      this.persistForm();
+    },
+
+    initializeBasePosition() {
+      const originalCost = safeNumber(this.data.form.originalCost);
+      const originalShares = safeNumber(this.data.form.originalShares);
+      if (!originalCost || !originalShares) {
+        wx.showToast({ title: "请填写原成本价和原持仓数量", icon: "none" });
+        return;
+      }
+
+      const basePosition = this.getBasePosition(originalCost, originalShares);
+      this.setData({
+        basePosition,
+        basePositionCard: this.buildBasePositionCard(basePosition),
+        "form.baseInitialized": true
+      }, () => this.refreshPreview());
       this.persistForm();
     },
 
@@ -121,6 +172,91 @@ Component(createCalculatorComponent({
         costPrice: originalCost,
         shares: originalShares,
         amount: safeMultiply(originalCost, originalShares)
+      };
+    },
+
+    buildBasePositionCard(basePosition) {
+      const amount = safeNumber(basePosition.amount);
+      const cashFlow = -amount;
+      return {
+        title: "原持仓",
+        tag: "已锁定",
+        theme: "buy",
+        mainItems: [
+          { label: "原成本价", value: " " + formatPrice(basePosition.costPrice, this.data.form.originalCost) },
+          { label: "原持仓数量", value: formatNumber(basePosition.shares, 0) + "股" }
+        ],
+        detailItems: [
+          { label: "持仓成本", value: " " + formatMoney(amount) },
+          { label: "手续费", value: " 0.00" },
+          { label: "初始资金流", value: formatSignedMoney(cashFlow), className: resultClass(cashFlow) }
+        ]
+      };
+    },
+
+    getCurrentPosition() {
+      const basePosition = this.data.basePosition || this.getBasePosition(
+        safeNumber(this.data.form.originalCost),
+        safeNumber(this.data.form.originalShares)
+      );
+      const records = this.data.records || [];
+      if (!records.length) {
+        return {
+          amount: safeNumber(basePosition.amount),
+          shares: safeNumber(basePosition.shares),
+          cost: safeNumber(basePosition.costPrice)
+        };
+      }
+
+      const lastRecord = records[records.length - 1];
+      return {
+        amount: safeNumber(lastRecord.afterAmount),
+        shares: safeNumber(lastRecord.afterShares),
+        cost: safeNumber(lastRecord.afterCost)
+      };
+    },
+
+    buildPreview() {
+      if (!this.data.form.baseInitialized) return null;
+      const buyPrice = safeNumber(this.data.form.buyPrice);
+      const buyShares = safeNumber(this.data.form.buyShares);
+      if (!buyPrice || !buyShares) return null;
+
+      const currentPosition = this.getCurrentPosition();
+      if (!currentPosition.shares) return null;
+
+      const buyAmount = safeMultiply(buyPrice, buyShares);
+      const fee = calcTradeFee({
+        amount: buyAmount,
+        direction: "BUY",
+        feeSettings: this.data.feeSettings,
+        includeFee: this.data.form.includeFee
+      });
+      const buyTotalCost = safeAdd(buyAmount, fee.totalFee);
+      const nextAmount = safeAdd(currentPosition.amount, buyTotalCost);
+      const nextShares = safeAdd(currentPosition.shares, buyShares);
+      const nextCost = safeDivide(nextAmount, nextShares);
+      const reduceAmount = safeSubtract(currentPosition.cost, nextCost);
+      const reduceRate = safeMultiply(safeDivide(reduceAmount, currentPosition.cost), 100);
+      const cashFlow = -buyTotalCost;
+
+      return {
+        title: "本次预览",
+        tag: "补仓后",
+        theme: "buy",
+        mainItems: [
+          { label: "补仓后成本价", value: " " + formatPrice(nextCost) },
+          { label: "补仓后总股数", value: formatNumber(nextShares, 0) + "股" }
+        ],
+        detailItems: [
+          { label: "补仓价", value: " " + formatPrice(buyPrice, this.data.form.buyPrice) },
+          { label: "补仓数量", value: formatNumber(buyShares, 0) + "股" },
+          { label: "补仓金额", value: " " + formatMoney(buyAmount) },
+          { label: "手续费", value: " " + formatMoney(fee.totalFee) },
+          { label: "本次资金流", value: formatSignedMoney(cashFlow), className: resultClass(cashFlow) },
+          { label: "成本降低金额", value: " " + formatMoney(reduceAmount), className: resultClass(reduceAmount) },
+          { label: "成本降低比例", value: formatRate(reduceRate), className: resultClass(reduceRate) }
+        ]
       };
     },
 
@@ -152,6 +288,7 @@ Component(createCalculatorComponent({
         const nextCost = safeDivide(nextAmount, nextShares);
         const reduceAmount = safeSubtract(currentCost, nextCost);
         const reduceRate = safeMultiply(safeDivide(reduceAmount, currentCost), 100);
+        const cashFlow = -buyTotalCost;
 
         totalBuyCost = safeAdd(totalBuyCost, buyTotalCost);
         totalFee = {
@@ -170,6 +307,7 @@ Component(createCalculatorComponent({
           includeFee: record.includeFee,
           buyAmount,
           buyTotalCost,
+          cashFlow,
           afterAmount: nextAmount,
           afterShares: nextShares,
           afterCost: nextCost,
@@ -178,14 +316,31 @@ Component(createCalculatorComponent({
           result: {
             fee: decorateFee(fee),
             rows: [
-              { label: "补仓金额", value: "¥" + formatMoney(buyAmount) },
-              { label: "补仓总成本", value: "¥" + formatMoney(buyTotalCost) },
+              { label: "补仓金额", value: " " + formatMoney(buyAmount) },
+              { label: "补仓总成本", value: " " + formatMoney(buyTotalCost) },
               { label: "补仓后股数", value: formatNumber(nextShares, 0) + " 股" },
-              { label: "补仓后成本价", value: "¥" + formatNumber(nextCost, 4) },
-              { label: "本笔降低金额", value: "¥" + formatNumber(reduceAmount, 4), className: resultClass(reduceAmount) },
+              { label: "补仓后成本价", value: " " + formatPrice(nextCost) },
+              { label: "本笔降低金额", value: " " + formatMoney(reduceAmount), className: resultClass(reduceAmount) },
               { label: "本笔降低比例", value: formatRate(reduceRate), className: resultClass(reduceRate) }
             ]
-          }
+          },
+          resultTitle: "第 " + (index + 1) + " 笔",
+          resultTimeText: record.timeText,
+          resultTagText: "补仓",
+          resultTheme: "buy",
+          mainItems: [
+            { label: "补仓后成本价", value: " " + formatPrice(nextCost) },
+            { label: "补仓后总股数", value: formatNumber(nextShares, 0) + "股" }
+          ],
+          detailItems: [
+            { label: "补仓价", value: " " + formatPrice(buyPrice, record.buyPrice || this.data.form.buyPrice) },
+            { label: "补仓数量", value: formatNumber(buyShares, 0) + "股" },
+            { label: "补仓金额", value: " " + formatMoney(buyAmount) },
+            { label: "手续费", value: " " + formatMoney(fee.totalFee) },
+            { label: "本次资金流", value: formatSignedMoney(cashFlow), className: resultClass(cashFlow) },
+            { label: "成本降低金额", value: " " + formatMoney(reduceAmount), className: resultClass(reduceAmount) },
+            { label: "成本降低比例", value: formatRate(reduceRate), className: resultClass(reduceRate) }
+          ]
         });
       });
     },
@@ -199,11 +354,11 @@ Component(createCalculatorComponent({
       return {
         fee: decorateFee(lastRecord.totalFee),
         rows: [
-          { label: "原持仓成本", value: "¥" + formatMoney(basePosition.amount) },
-          { label: "累计补仓成本", value: "¥" + formatMoney(lastRecord.totalBuyCost) },
+          { label: "原持仓成本", value: " " + formatMoney(basePosition.amount) },
+          { label: "累计补仓成本", value: " " + formatMoney(lastRecord.totalBuyCost) },
           { label: "补仓后总股数", value: formatNumber(lastRecord.afterShares, 0) + " 股" },
-          { label: "最新成本价", value: "¥" + formatNumber(lastRecord.afterCost, 4) },
-          { label: "累计降低金额", value: "¥" + formatNumber(reduceAmount, 4), className: resultClass(reduceAmount) },
+          { label: "最新成本价", value: " " + formatPrice(lastRecord.afterCost) },
+          { label: "累计降低金额", value: " " + formatMoney(reduceAmount), className: resultClass(reduceAmount) },
           { label: "累计降低比例", value: formatRate(reduceRate), className: resultClass(reduceRate) }
         ]
       };
@@ -213,8 +368,12 @@ Component(createCalculatorComponent({
       this.setData({
         records: [],
         result: null,
-        basePosition: null
-      });
+        basePosition: null,
+        basePositionCard: null,
+        showAmountPanel: false,
+        "form.baseInitialized": false
+      }, () => this.refreshPreview());
+      this.persistForm();
     },
 
     removeRecord(event) {
@@ -238,19 +397,25 @@ Component(createCalculatorComponent({
           this.setData({
             records,
             result: this.buildCumulativeResult(records, basePosition),
-            basePosition: records.length ? basePosition : null
-          });
+            basePosition,
+            basePositionCard: this.buildBasePositionCard(basePosition)
+          }, () => this.refreshPreview());
+          this.persistForm();
+          wx.showToast({ title: "已撤销本笔并重新计算", icon: "none" });
         }
       });
     }
   },
   onFormChange(key) {
-    if (key !== "buyAmount" && key !== "buyPrice" && key !== "convertUnit") return;
+    if (key !== "buyAmount" && key !== "buyPrice" && key !== "buyShares" && key !== "convertUnit" && key !== "includeFee") return;
     const buyAmount = safeNumber(this.data.form.buyAmount);
     const buyPrice = safeNumber(this.data.form.buyPrice);
-    if (!buyAmount || !buyPrice) return;
-    this.setData({
-      "form.buyShares": String(calcSharesByAmount(buyAmount, buyPrice, getConvertUnit(this.data.form)))
-    });
+    if (buyAmount && buyPrice && key !== "buyShares") {
+      this.setData({
+        "form.buyShares": String(calcSharesByAmount(buyAmount, buyPrice, getConvertUnit(this.data.form)))
+      }, () => this.refreshPreview());
+      return;
+    }
+    this.refreshPreview();
   }
 }));

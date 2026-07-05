@@ -40,6 +40,38 @@ function formatNumber(value, digits = 4) {
   return roundTo(value, digits).toFixed(digits);
 }
 
+function getDecimalLength(value) {
+  const text = String(value === undefined || value === null ? "" : value).trim();
+  if (!text) return 0;
+  const normalized = text.toLowerCase();
+  if (normalized.indexOf("e") !== -1) {
+    const numberText = Number(text).toFixed(8).replace(/0+$/, "");
+    const dotIndex = numberText.indexOf(".");
+    return dotIndex === -1 ? 0 : numberText.length - dotIndex - 1;
+  }
+  const dotIndex = text.indexOf(".");
+  return dotIndex === -1 ? 0 : text.length - dotIndex - 1;
+}
+
+function clampPriceDigits(digits) {
+  return Math.min(4, Math.max(2, digits));
+}
+
+function truncateTo(value, digits = 4) {
+  const factor = Math.pow(10, digits);
+  const num = safeNumber(value);
+  return (num < 0 ? Math.ceil(num * factor) : Math.floor(num * factor)) / factor;
+}
+
+function formatPrice(value, referenceValue) {
+  const hasReference = referenceValue !== undefined && referenceValue !== null && String(referenceValue).trim() !== "";
+  const truncated = truncateTo(value, 4);
+  const digits = hasReference
+    ? clampPriceDigits(getDecimalLength(referenceValue))
+    : clampPriceDigits(getDecimalLength(formatNumber(truncated, 4).replace(/0+$/, "").replace(/\.$/, "")));
+  return truncated.toFixed(digits);
+}
+
 module.exports = {
   MONEY_PRECISION,
   safeNumber,
@@ -50,5 +82,6 @@ module.exports = {
   roundTo,
   formatMoney,
   formatRate,
-  formatNumber
+  formatNumber,
+  formatPrice
 };

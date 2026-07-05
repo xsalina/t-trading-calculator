@@ -1,3 +1,6 @@
+const DEFAULT_CALCULATOR_TYPE_KEY = "defaultCalculatorType";
+const SYSTEM_DEFAULT_CALCULATOR_TYPE = "t-profit";
+
 Component({
   properties: {
     title: {
@@ -19,16 +22,72 @@ Component({
     home: {
       type: Boolean,
       value: false
+    },
+    showDefault: {
+      type: Boolean,
+      value: false
+    },
+    isDefault: {
+      type: Boolean,
+      value: false
+    },
+    calculatorType: {
+      type: String,
+      value: ""
+    },
+    managedDefault: {
+      type: Boolean,
+      value: false
+    }
+  },
+
+  data: {
+    localIsDefault: false
+  },
+
+  lifetimes: {
+    attached() {
+      this.refreshDefaultStatus();
+    }
+  },
+
+  pageLifetimes: {
+    show() {
+      this.refreshDefaultStatus();
     }
   },
 
   methods: {
+    refreshDefaultStatus() {
+      if (!this.data.calculatorType || this.data.managedDefault) return;
+      const defaultType = wx.getStorageSync(DEFAULT_CALCULATOR_TYPE_KEY) || SYSTEM_DEFAULT_CALCULATOR_TYPE;
+      this.setData({
+        localIsDefault: defaultType === this.data.calculatorType
+      });
+    },
+
     onRememberChange(event) {
       this.triggerEvent("rememberchange", { value: event.detail.value });
     },
 
     onFeeChange(event) {
       this.triggerEvent("feechange", { key: "includeFee", value: event.detail.value });
+    },
+
+    onDefaultTap() {
+      const isDefault = this.data.managedDefault ? this.data.isDefault : this.data.localIsDefault;
+      if (isDefault) return;
+      if (this.data.calculatorType) {
+        wx.setStorageSync(DEFAULT_CALCULATOR_TYPE_KEY, this.data.calculatorType);
+        this.setData({ localIsDefault: true });
+      }
+      this.triggerEvent("defaulttap");
+      if (!this.data.managedDefault) {
+        wx.showToast({
+          title: "已设为首页默认",
+          icon: "success"
+        });
+      }
     }
   }
 });

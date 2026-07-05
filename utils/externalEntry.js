@@ -39,30 +39,56 @@ function buildQueryString(query) {
 }
 
 function getPageByType(type) {
-  const normalizedType = normalizeType(type);
   const map = {
     "t-profit": "/pages/t-profit/t-profit",
-    "tprofit": "/pages/t-profit/t-profit",
-    "t": "/pages/t-profit/t-profit",
-    "dot": "/pages/t-profit/t-profit",
-    "do-t": "/pages/t-profit/t-profit",
-    "trade": "/pages/t-profit/t-profit",
     "break-even": "/pages/break-even/break-even",
-    "breakeven": "/pages/break-even/break-even",
     "reverse-t": "/pages/reverse-t/reverse-t",
-    "reverse": "/pages/reverse-t/reverse-t",
     "take-profit": "/pages/take-profit/take-profit",
-    "takeprofit": "/pages/take-profit/take-profit",
     "average-down": "/pages/average-down/average-down",
-    "averagedown": "/pages/average-down/average-down",
     "sell-estimate": "/pages/sell-estimate/sell-estimate",
-    "sellestimate": "/pages/sell-estimate/sell-estimate",
     "grid": "/pages/grid/grid",
-    "price-projection": "/pages/price-projection/price-projection",
-    "priceprojection": "/pages/price-projection/price-projection"
+    "price-projection": "/pages/price-projection/price-projection"
+  };
+
+  return map[getCalculatorTypeByType(type)] || "";
+}
+
+function getCalculatorTypeByType(type) {
+  const normalizedType = normalizeType(type);
+  const map = {
+    "t-profit": "t-profit",
+    "tprofit": "t-profit",
+    "t": "t-profit",
+    "dot": "t-profit",
+    "do-t": "t-profit",
+    "trade": "t-profit",
+    "break-even": "break-even",
+    "breakeven": "break-even",
+    "reverse-t": "reverse-t",
+    "reverse": "reverse-t",
+    "take-profit": "take-profit",
+    "takeprofit": "take-profit",
+    "average-down": "average-down",
+    "averagedown": "average-down",
+    "sell-estimate": "sell-estimate",
+    "sellestimate": "sell-estimate",
+    "grid": "grid",
+    "price-projection": "price-projection",
+    "priceprojection": "price-projection"
   };
 
   return map[normalizedType] || "";
+}
+
+function getEntryCalculatorType(query) {
+  const data = normalizeQuery(query);
+  if (!isExternalEntry(data)) return "";
+  if (data.source === "account" && !hasValue(data.avgCost) && !hasValue(data.currentPrice) && !hasValue(data.type)) return "";
+
+  const type = getCalculatorTypeByType(data.type);
+  if (type) return type;
+
+  return data.direction === "REVERSE_T" ? "reverse-t" : "t-profit";
 }
 
 function getEntryRedirectUrl(query) {
@@ -150,6 +176,7 @@ function applyExternalFormPreset(pageKey, baseForm, query) {
 
 module.exports = {
   applyExternalFormPreset,
+  getEntryCalculatorType,
   getEntryRedirectUrl,
   isExternalEntry,
   normalizeQuery

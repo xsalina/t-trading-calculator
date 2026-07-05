@@ -8,7 +8,8 @@ const {
   safeMultiply,
   safeDivide,
   formatMoney,
-  formatNumber
+  formatNumber,
+  formatPrice
 } = require("../../../utils/math");
 const { appendSource, rowMap } = require("../../../utils/resultCopy");
 
@@ -36,6 +37,13 @@ function resultClass(value) {
   return "";
 }
 
+function formatSignedMoney(value) {
+  const num = safeNumber(value);
+  if (num > 0) return "+ " + formatMoney(num);
+  if (num < 0) return "- " + formatMoney(Math.abs(num));
+  return " 0.00";
+}
+
 Component(createCalculatorComponent({
   pageKey: "reverse-t",
   defaultForm: {
@@ -44,9 +52,23 @@ Component(createCalculatorComponent({
     coverPrice: "",
     shares: "",
     convertUnit: "100",
-    roundLot: true
+    roundLot: true,
+    baseInitialized: false,
+    basePendingShares: ""
   },
   calculate: calcReverseT,
+  afterInit() {
+    if (!this.data.form.baseInitialized) return;
+    const basePendingShares = this.getBasePendingShares(safeNumber(this.data.form.shares));
+    if (!basePendingShares) {
+      this.setData({ "form.baseInitialized": false });
+      return;
+    }
+    this.setData({
+      basePendingShares,
+      baseSellCard: this.buildBaseSellCard(basePendingShares)
+    }, () => this.refreshPreview());
+  },
   buildCopy() {
     if (!this.data.result) return "";
     const rows = rowMap(this.data.result);
@@ -60,6 +82,14 @@ Component(createCalculatorComponent({
     ]);
   },
   methods: {
+    toggleAmountPanel() {
+      this.setData({ showAmountPanel: !this.data.showAmountPanel });
+    },
+
+    refreshPreview() {
+      this.setData({ preview: this.buildPreview() });
+    },
+
     setConvertUnit(event) {
       const convertUnit = String(event.currentTarget.dataset.unit || "100");
       this.setData({ "form.convertUnit": convertUnit });
@@ -68,15 +98,20 @@ Component(createCalculatorComponent({
     },
 
     calculate() {
+      if (!this.data.form.baseInitialized) {
+        this.initializeSell();
+        return;
+      }
+
       const sellPrice = safeNumber(this.data.form.sellPrice);
       const coverPrice = safeNumber(this.data.form.coverPrice);
       const shares = safeNumber(this.data.form.shares);
       if (!sellPrice || !coverPrice || !shares) {
-        wx.showToast({ title: "请填写价格和股数", icon: "none" });
+        wx.showToast({ title: "请填写回补价和回补股数", icon: "none" });
         return;
       }
 
-      const basePendingShares = this.getBasePendingShares(shares);
+      const basePendingShares = this.getBasePendingShares();
       const record = {
         id: Date.now() + "-" + this.data.records.length,
         timeText: makeTimeText(),
@@ -89,20 +124,123 @@ Component(createCalculatorComponent({
         basePendingShares,
         records,
         result: this.buildCumulativeResult(records, basePendingShares)
-      });
+      }, () => this.refreshPreview());
+      this.persistForm();
+    },
+
+    initializeSell() {
+      const sellPrice = safeNumber(this.data.form.sellPrice);
+      const pendingShares = safeNumber(this.data.form.shares);
+      if (!sellPrice || !pendingShares) {
+        wx.showToast({ title: "请填写卖出价和待回补股数", icon: "none" });
+        return;
+      }
+
+      this.setData({
+        basePendingShares: pendingShares,
+        baseSellCard: this.buildBaseSellCard(pendingShares),
+        "form.baseInitialized": true,
+        "form.basePendingShares": String(pendingShares),
+        "form.shares": "",
+        "form.coverAmount": ""
+      }, () => this.refreshPreview());
       this.persistForm();
     },
 
     getBasePendingShares(currentShares) {
       const existingBase = safeNumber(this.data.basePendingShares);
       if (existingBase) return existingBase;
+      const formBase = safeNumber(this.data.form.basePendingShares);
+      if (formBase) return formBase;
       const entryShares = safeNumber((this.data.entryQuery || {}).quantity);
       return entryShares || currentShares;
     },
 
+    buildBaseSellCard(basePendingShares) {
+      const sellPrice = safeNumber(this.data.form.sellPrice);
+      const sellAmount = safeMultiply(sellPrice, basePendingShares);
+      const sellFee = calcTradeFee({
+        amount: sellAmount,
+        direction: "SELL",
+        feeSettings: this.data.feeSettings,
+        includeFee: this.data.form.includeFee
+      });
+      const initialCashFlow = safeSubtract(sellAmount, sellFee.totalFee);
+
+      return {
+        title: "初始化卖出",
+        tag: "已锁定",
+        theme: "sell",
+        mainItems: [
+          { label: "卖出价", value: " " + formatPrice(sellPrice, this.data.form.sellPrice) },
+          { label: "待回补股数", value: formatNumber(basePendingShares, 0) + "股" }
+        ],
+        detailItems: [
+          { label: "卖出金额", value: " " + formatMoney(sellAmount) },
+          { label: "手续费", value: " " + formatMoney(sellFee.totalFee) },
+          { label: "初始资金流", value: formatSignedMoney(initialCashFlow), className: resultClass(initialCashFlow) }
+        ]
+      };
+    },
+
+    getCoveredShares(records) {
+      return (records || []).reduce((sum, record) => safeAdd(sum, safeNumber(record.shares)), 0);
+    },
+
+    buildPreview() {
+      if (!this.data.form.baseInitialized) return null;
+      const sellPrice = safeNumber(this.data.form.sellPrice);
+      const coverPrice = safeNumber(this.data.form.coverPrice);
+      const shares = safeNumber(this.data.form.shares);
+      const basePendingShares = this.getBasePendingShares();
+      if (!sellPrice || !coverPrice || !shares || !basePendingShares) return null;
+
+      const coverAmount = safeMultiply(coverPrice, shares);
+      const sellAmount = safeMultiply(sellPrice, shares);
+      const sellFee = calcTradeFee({
+        amount: sellAmount,
+        direction: "SELL",
+        feeSettings: this.data.feeSettings,
+        includeFee: this.data.form.includeFee
+      });
+      const coverFee = calcTradeFee({
+        amount: coverAmount,
+        direction: "BUY",
+        feeSettings: this.data.feeSettings,
+        includeFee: this.data.form.includeFee
+      });
+      const feeTotal = safeAdd(sellFee.totalFee, coverFee.totalFee);
+      const spreadProfit = safeMultiply(safeSubtract(sellPrice, coverPrice), shares);
+      const netProfit = safeSubtract(spreadProfit, feeTotal);
+      const cashFlow = -safeAdd(coverAmount, coverFee.totalFee);
+      const coverSpace = safeSubtract(sellPrice, coverPrice);
+      const remainingShares = Math.max(0, safeSubtract(
+        basePendingShares,
+        safeAdd(this.getCoveredShares(this.data.records), shares)
+      ));
+
+      return {
+        title: "本次预览",
+        tag: "回补后",
+        theme: "buy",
+        mainItems: [
+          { label: "回补价", value: " " + formatPrice(coverPrice, this.data.form.coverPrice) },
+          { label: "回补股数", value: formatNumber(shares, 0) + "股" }
+        ],
+        detailItems: [
+          { label: "剩余待回补", value: formatNumber(remainingShares, 0) + "股" },
+          { label: "本次回补收益", value: formatSignedMoney(netProfit), className: resultClass(netProfit) },
+          { label: "回补金额", value: " " + formatMoney(coverAmount) },
+          { label: "手续费", value: " " + formatMoney(feeTotal) },
+          { label: "本次资金流", value: formatSignedMoney(cashFlow), className: resultClass(cashFlow) },
+          { label: "回补空间", value: " " + formatMoney(coverSpace), className: resultClass(coverSpace) }
+        ]
+      };
+    },
+
     rebuildCoverRecords(records, basePendingShares) {
       let coveredShares = 0;
-      return records.map((record) => {
+      return records.map((record, index) => {
         const coverPrice = safeNumber(record.coverPrice);
         const shares = safeNumber(record.shares);
         const sellPrice = safeNumber(record.sellPrice || this.data.form.sellPrice);
@@ -123,6 +261,8 @@ Component(createCalculatorComponent({
         const feeTotal = safeAdd(sellFee.totalFee, coverFee.totalFee);
         const spreadProfit = safeMultiply(safeSubtract(sellPrice, coverPrice), shares);
         const netProfit = safeSubtract(spreadProfit, feeTotal);
+        const cashFlow = -safeAdd(coverAmount, coverFee.totalFee);
+        const coverSpace = safeSubtract(sellPrice, coverPrice);
         coveredShares = safeAdd(coveredShares, shares);
         const remainingShares = Math.max(0, safeSubtract(basePendingShares, coveredShares));
 
@@ -133,14 +273,32 @@ Component(createCalculatorComponent({
           coverAmount,
           feeTotal,
           netProfit,
+          cashFlow,
+          coverSpace,
           title: "回补 " + formatNumber(shares, 0) + " 股",
-          coverPriceText: "¥" + formatNumber(coverPrice, 4),
+          coverPriceText: " " + formatPrice(coverPrice, record.coverPrice || this.data.form.coverPrice),
           sharesText: formatNumber(shares, 0) + " 股",
-          coverAmountText: "¥" + formatMoney(coverAmount),
-          feeText: "¥" + formatMoney(feeTotal),
-          netProfitText: "¥" + formatMoney(netProfit),
+          coverAmountText: " " + formatMoney(coverAmount),
+          feeText: " " + formatMoney(feeTotal),
+          netProfitText: " " + formatMoney(netProfit),
           netProfitClass: resultClass(netProfit),
-          remainingSharesText: formatNumber(remainingShares, 0) + " 股"
+          remainingSharesText: formatNumber(remainingShares, 0) + " 股",
+          resultTitle: "第 " + (index + 1) + " 笔",
+          resultTimeText: record.timeText,
+          resultTagText: "回补",
+          resultTheme: "buy",
+          mainItems: [
+            { label: "剩余待回补", value: formatNumber(remainingShares, 0) + "股" },
+            { label: "本次回补收益", value: formatSignedMoney(netProfit), className: resultClass(netProfit) }
+          ],
+          detailItems: [
+            { label: "回补价", value: " " + formatPrice(coverPrice, record.coverPrice || this.data.form.coverPrice) },
+            { label: "回补股数", value: formatNumber(shares, 0) + "股" },
+            { label: "回补金额", value: " " + formatMoney(coverAmount) },
+            { label: "手续费", value: " " + formatMoney(feeTotal) },
+            { label: "本次资金流", value: formatSignedMoney(cashFlow), className: resultClass(cashFlow) },
+            { label: "回补空间", value: " " + formatMoney(coverSpace), className: resultClass(coverSpace) }
+          ]
         });
       });
     },
@@ -157,14 +315,14 @@ Component(createCalculatorComponent({
           { label: "初始待回补数量", value: formatNumber(basePendingShares, 0) + " 股" },
           { label: "累计回补数量", value: formatNumber(totalShares, 0) + " 股" },
           { label: "剩余待回补数量", value: formatNumber(remainingShares, 0) + " 股" },
-          { label: "平均回补价", value: avgCoverPrice ? "¥" + formatNumber(avgCoverPrice, 4) : "-" },
-          { label: "累计反T收益", value: "¥" + formatMoney(totalProfit), className: resultClass(totalProfit) }
+          { label: "平均回补价", value: avgCoverPrice ? " " + formatPrice(avgCoverPrice) : "-" },
+          { label: "累计反T收益", value: " " + formatMoney(totalProfit), className: resultClass(totalProfit) }
         ]
       };
     },
 
     undoCoverRecord(event) {
-      const id = event.currentTarget.dataset.id;
+      const id = (event.detail && event.detail.id) || event.currentTarget.dataset.id;
       wx.showModal({
         title: "确认撤销这笔回补？",
         content: "撤销后会重新计算剩余待回补数量和反T收益。",
@@ -179,8 +337,9 @@ Component(createCalculatorComponent({
             basePendingShares,
             records,
             result: records.length ? this.buildCumulativeResult(records, basePendingShares) : this.buildCumulativeResult([], basePendingShares)
-          });
+          }, () => this.refreshPreview());
           this.persistForm();
+          wx.showToast({ title: "已撤销本笔并重新计算", icon: "none" });
         }
       });
     },
@@ -189,17 +348,25 @@ Component(createCalculatorComponent({
       this.setData({
         records: [],
         result: null,
-        basePendingShares: 0
-      });
+        basePendingShares: 0,
+        baseSellCard: null,
+        showAmountPanel: false,
+        "form.baseInitialized": false,
+        "form.basePendingShares": ""
+      }, () => this.refreshPreview());
+      this.persistForm();
     }
   },
   onFormChange(key) {
-    if (key !== "coverAmount" && key !== "coverPrice" && key !== "convertUnit") return;
+    if (key !== "coverAmount" && key !== "coverPrice" && key !== "convertUnit" && key !== "shares" && key !== "includeFee") return;
     const coverAmount = safeNumber(this.data.form.coverAmount);
     const coverPrice = safeNumber(this.data.form.coverPrice);
-    if (!coverAmount || !coverPrice) return;
-    this.setData({
-      "form.shares": String(calcSharesByAmount(coverAmount, coverPrice, getConvertUnit(this.data.form)))
-    });
+    if (coverAmount && coverPrice && key !== "shares") {
+      this.setData({
+        "form.shares": String(calcSharesByAmount(coverAmount, coverPrice, getConvertUnit(this.data.form)))
+      }, () => this.refreshPreview());
+      return;
+    }
+    this.refreshPreview();
   }
 }));

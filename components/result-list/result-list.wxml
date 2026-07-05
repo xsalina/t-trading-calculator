@@ -28,10 +28,10 @@
 
       <view class="section-subtitle">费用明细</view>
       <block wx:if="{{item.includeFee}}">
-        <view class="fee-row"><text>券商佣金</text><text>¥{{item.result.fee.commissionText}}</text></view>
-        <view class="fee-row"><text>过户费</text><text>¥{{item.result.fee.transferText}}</text></view>
-        <view class="fee-row"><text>印花税</text><text>¥{{item.result.fee.stampDutyText}}</text></view>
-        <view class="fee-row"><text>费用合计</text><text class="result-value">¥{{item.result.fee.totalText}}</text></view>
+        <view class="fee-row"><text>券商佣金</text><text> {{item.result.fee.commissionText}}</text></view>
+        <view class="fee-row"><text>过户费</text><text> {{item.result.fee.transferText}}</text></view>
+        <view class="fee-row"><text>印花税</text><text> {{item.result.fee.stampDutyText}}</text></view>
+        <view class="fee-row"><text>费用合计</text><text class="result-value"> {{item.result.fee.totalText}}</text></view>
       </block>
       <view wx:else class="muted">已忽略手续费</view>
     </view>

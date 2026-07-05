@@ -1,6 +1,6 @@
 <view class="calculator-shell {{embedded ? 'embedded' : 'standalone'}} {{result && !embedded ? 'has-fixed-action' : ''}}">
   <view class="card">
-    <calculator-form-header title="涨跌幅推演计算器" remember-data="{{rememberData}}" bindrememberchange="onRememberSwitch" />
+    <calculator-form-header title="涨跌幅推演计算器" calculator-type="price-projection" remember-data="{{rememberData}}" show-default="{{true}}" managed-default="{{embedded}}" is-default="{{isDefaultCalculator}}" bindrememberchange="onRememberSwitch" binddefaulttap="onDefaultCalculatorTap" />
     <view class="field">
       <text class="label">起始价格</text>
       <view class="step-field"><button class="step-button" data-key="startPrice" data-step="-0.01" data-min="0" bindtap="adjustNumber">-</button><input class="input" type="digit" value="{{form.startPrice}}" data-key="startPrice" bindinput="onInput" /><button class="step-button" data-key="startPrice" data-step="0.01" data-min="0" bindtap="adjustNumber">+</button></view>
@@ -21,13 +21,19 @@
     <button wx:if="{{!embedded}}" class="button plain" bindtap="goBack">返回</button>
   </view>
 
-  <view wx:if="{{result}}" class="card" style="margin-top: 20rpx;">
-    <view class="section-title">{{resultTitle}}</view>
-    <block wx:for="{{result.rows}}" wx:key="label">
-      <view class="result-row">
-        <text>{{item.label}}</text>
-        <text class="result-value {{item.className}}">{{item.value}}</text>
-      </view>
+  <view wx:if="{{records.length}}" class="embedded-record-list">
+    <block wx:for="{{records}}" wx:key="id">
+      <calculator-result-card
+        title="{{item.resultTitle}}"
+        tag="{{item.resultTagText}}"
+        theme="{{item.resultTheme}}"
+        main-items="{{item.mainItems}}"
+        detail-items="{{item.detailItems}}"
+        removable="{{true}}"
+        remove-text="删除"
+        record-id="{{item.id}}"
+        bindremove="removeRecord"
+      />
     </block>
   </view>
 
@@ -54,9 +60,8 @@
   </view>
 
   <view wx:if="{{result && embedded}}" class="result-action-row">
-    <button class="button secondary result-copy-button" bindtap="copyResult">复制结果</button>
     <button class="button secondary result-share-button" open-type="share">分享给朋友</button>
-    <button class="button primary pro-record-button" bindtap="openTradeRecordMiniProgram">顺手记录到做T记录助手Pro ></button>
+    <button class="button secondary result-copy-button" bindtap="copyResult">复制结果</button>
   </view>
   <view wx:if="{{result && !embedded}}" class="result-action-bar">
     <button class="action-primary" bindtap="openTradeRecordMiniProgram">算完顺手记录这一笔</button>
