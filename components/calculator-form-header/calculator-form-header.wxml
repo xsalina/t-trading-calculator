@@ -1,0 +1,16 @@
+<view class="calculator-form-header {{home ? 'home' : ''}} {{showFee ? 'has-fee' : 'no-fee'}}">
+  <view class="calculator-form-title-row">
+    <text class="calculator-form-title">{{title}}</text>
+    <view class="calculator-form-remember">
+      <text>记住数据</text>
+      <switch color="#00b894" checked="{{rememberData}}" bindchange="onRememberChange" />
+    </view>
+  </view>
+  <view wx:if="{{showFee}}" class="calculator-form-fee-row">
+    <text>交易费率：{{includeFee ? (home ? '已计入估算' : '已计入') : '未计入'}}</text>
+    <view class="calculator-form-fee">
+      <navigator url="/pages/fee-settings/fee-settings">设置 ></navigator>
+      <switch color="#00b894" checked="{{includeFee}}" bindchange="onFeeChange" />
+    </view>
+  </view>
+</view>

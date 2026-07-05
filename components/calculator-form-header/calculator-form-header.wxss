@@ -1,0 +1,94 @@
+.calculator-form-header {
+  width: 100%;
+  display: block;
+  flex: 0 0 100%;
+  box-sizing: border-box;
+  margin: 2rpx 0 8rpx;
+}
+
+.calculator-form-title-row {
+  width: 100%;
+  box-sizing: border-box;
+  min-height: 42rpx;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16rpx;
+}
+
+.calculator-form-title {
+  flex-shrink: 0;
+  color: #1e293b;
+  font-size: 24rpx;
+  font-weight: 700;
+}
+
+.calculator-form-fee-row {
+  width: 100%;
+  min-height: 40rpx;
+  margin: -2rpx 0 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12rpx;
+  color: #8a97a8;
+  font-size: 20rpx;
+  font-weight: 500;
+  box-sizing: border-box;
+}
+
+.calculator-form-fee-row > text {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.calculator-form-fee {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  gap: 4rpx;
+  white-space: nowrap;
+}
+
+.calculator-form-fee navigator,
+.calculator-form-fee navigator {
+  flex-shrink: 0;
+  color: #008f73;
+  font-size: 20rpx;
+  font-weight: 700;
+}
+
+.calculator-form-remember {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  gap: 8rpx;
+  color: #8a97a8;
+  font-size: 20rpx;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.calculator-form-fee switch,
+.calculator-form-remember switch {
+  transform: scale(0.58);
+  transform-origin: center;
+}
+
+.calculator-form-header.home {
+  margin: 0 0 7rpx;
+}
+
+.calculator-form-header.home .calculator-form-title {
+  font-size: 23rpx;
+}
+
+.calculator-form-header.home .calculator-form-remember {
+  gap: 4rpx;
+}
+
+.calculator-form-header.home .calculator-form-remember switch {
+  transform: scale(0.58);
+}

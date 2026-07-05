@@ -1,17 +1,6 @@
 <view class="calculator-shell {{embedded ? 'embedded' : 'standalone'}} {{result && !embedded ? 'has-fixed-action' : ''}}">
   <view class="card">
-    <view class="section-head compact-head">
-      <view class="section-title">网格区间计算器</view>
-    </view>
-    <view class="compact-switch-row">
-      <view class="mini-switch"><text>记住数据</text><switch color="#00b894" checked="{{rememberData}}" bindchange="onRememberSwitch" /></view>
-      <view class="mini-switch"><text>计入手续费</text><switch color="#00b894" checked="{{form.includeFee}}" bindchange="onFeeSwitch" /></view>
-    </view>
-    <view class="fee-mini-hint">开启后自动估算交易手续费</view>
-    <view wx:if="{{!embedded}}" class="fee-inline-summary">
-      <text>{{feeSummary}}</text>
-      <navigator url="/pages/fee-settings/fee-settings">去设置 ></navigator>
-    </view>
+    <calculator-form-header title="网格区间计算器" remember-data="{{rememberData}}" show-fee="{{true}}" include-fee="{{form.includeFee}}" bindrememberchange="onRememberSwitch" bindfeechange="onFeeSwitch" />
     <view class="field"><text class="label">当前价</text><view class="step-field"><button class="step-button" data-key="currentPrice" data-step="-0.01" data-min="0" bindtap="adjustNumber">-</button><input class="input" type="digit" value="{{form.currentPrice}}" data-key="currentPrice" bindinput="onInput" /><button class="step-button" data-key="currentPrice" data-step="0.01" data-min="0" bindtap="adjustNumber">+</button></view></view>
     <view class="field"><text class="label">上涨间隔比例（%）</text><view class="step-field"><button class="step-button" data-key="upRate" data-step="-0.5" data-min="0" bindtap="adjustNumber">-</button><input class="input" type="digit" value="{{form.upRate}}" data-key="upRate" bindinput="onInput" /><button class="step-button" data-key="upRate" data-step="0.5" data-min="0" bindtap="adjustNumber">+</button></view></view>
     <view class="field"><text class="label">下跌间隔比例（%）</text><view class="step-field"><button class="step-button" data-key="downRate" data-step="-0.5" data-min="0" bindtap="adjustNumber">-</button><input class="input" type="digit" value="{{form.downRate}}" data-key="downRate" bindinput="onInput" /><button class="step-button" data-key="downRate" data-step="0.5" data-min="0" bindtap="adjustNumber">+</button></view></view>
@@ -41,9 +30,9 @@
     </view>
   </view>
   <view wx:if="{{result && embedded}}" class="result-action-row">
-    <button class="button primary pro-record-button" bindtap="openTradeRecordMiniProgram">算完顺手记录这一笔</button>
-    <button class="button secondary result-share-button" open-type="share">分享给朋友</button>
     <button class="button secondary result-copy-button" bindtap="copyResult">复制结果</button>
+    <button class="button secondary result-share-button" open-type="share">分享给朋友</button>
+    <button class="button primary pro-record-button" bindtap="openTradeRecordMiniProgram">顺手记录到做T记录助手Pro ></button>
   </view>
   <view wx:if="{{result && !embedded}}" class="result-action-bar">
     <button class="action-primary" bindtap="openTradeRecordMiniProgram">算完顺手记录这一笔</button>

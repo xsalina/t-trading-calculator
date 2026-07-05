@@ -91,6 +91,7 @@ button {
   margin-bottom: 10rpx;
   color: #465567;
   font-size: 26rpx;
+  text-align: center;
 }
 
 .field-tip {

@@ -4,8 +4,6 @@ const SYSTEM_DEFAULT_CALCULATOR_TYPE = "t-profit";
 const { getShareMessage, getShareTimelineMessage } = require("../../utils/share");
 const { ARTICLE_URL } = require("../../utils/article");
 const { getEntryRedirectUrl } = require("../../utils/externalEntry");
-const { getFeeSettings } = require("../../utils/fee");
-const { formatMoney, roundTo } = require("../../utils/math");
 
 const CALCULATORS = [
   {
@@ -66,19 +64,23 @@ const CALCULATORS = [
   }
 ];
 
-function formatFeeRate(rate) {
-  const value = roundTo(Number(rate || 0) * 100, 3);
-  return value.toFixed(3).replace(/0+$/, "").replace(/\.$/, "") + "%";
+const FEATURED_CALCULATOR_TYPES = ["t-profit", "break-even", "average-down"];
+
+function getFeaturedCalculators() {
+  return FEATURED_CALCULATOR_TYPES
+    .map((type) => CALCULATORS.find((item) => item.type === type))
+    .filter(Boolean);
 }
 
 Page({
   data: {
     calculators: CALCULATORS,
+    featuredCalculators: getFeaturedCalculators(),
+    showAllCalculators: false,
     defaultCalculatorType: SYSTEM_DEFAULT_CALCULATOR_TYPE,
     defaultCalculator: CALCULATORS[0],
     activeCalculatorType: SYSTEM_DEFAULT_CALCULATOR_TYPE,
     activeCalculator: CALCULATORS[0],
-    feeSummary: null,
     showDefaultPicker: false
   },
 
@@ -89,27 +91,12 @@ Page({
       return;
     }
 
+    this.hasActiveCalculatorChanged = false;
     this.initDefaultCalculator();
-    this.initFeeSummary();
   },
 
   onShow() {
     this.initDefaultCalculator();
-    this.initFeeSummary();
-  },
-
-  initFeeSummary() {
-    const settings = getFeeSettings();
-    this.setData({
-      feeSummary: {
-        useFeeText: settings.useFee ? "已开启" : "已关闭",
-        commissionText: settings.commissionEnabled ? formatFeeRate(settings.commissionRate) : "关闭",
-        commissionMinText: settings.commissionMinEnabled ? "¥" + formatMoney(settings.commissionMinAmount) : "无最低",
-        transferText: settings.transferFeeEnabled ? formatFeeRate(settings.transferFeeRate) : "关闭",
-        stampDutyText: settings.stampDutyEnabled ? formatFeeRate(settings.stampDutyRate) : "关闭",
-        stampDutyScopeText: settings.stampDutyOnlySell ? "卖出收" : "买卖都收"
-      }
-    });
   },
 
   initDefaultCalculator() {
@@ -126,10 +113,15 @@ Page({
 
     this.setData({
       defaultCalculatorType: calculator.type,
-      defaultCalculator: calculator,
-      activeCalculatorType: calculator.type,
-      activeCalculator: calculator
+      defaultCalculator: calculator
     });
+
+    if (!this.hasActiveCalculatorChanged) {
+      this.setData({
+        activeCalculatorType: calculator.type,
+        activeCalculator: calculator
+      });
+    }
   },
 
   goDefaultCalculator() {
@@ -145,7 +137,6 @@ Page({
 
   switchHomeCalculator(event) {
     this.setActiveCalculator(event.currentTarget.dataset.type);
-    this.scrollToHomeCalculator();
   },
 
   setActiveCalculator(type) {
@@ -165,23 +156,25 @@ Page({
     this.hasActiveCalculatorChanged = true;
   },
 
-  scrollToHomeCalculator() {
-    wx.nextTick(() => {
-      wx.createSelectorQuery()
-        .select("#homeCalculator")
-        .boundingClientRect()
-        .selectViewport()
-        .scrollOffset()
-        .exec((res) => {
-          const rect = res && res[0];
-          const viewport = res && res[1];
-          if (!rect || !viewport) return;
+  setCurrentAsDefault() {
+    const calculator = this.data.activeCalculator;
+    if (!calculator) return;
+    if (calculator.type === this.data.defaultCalculatorType) return;
 
-          wx.pageScrollTo({
-            scrollTop: Math.max(0, viewport.scrollTop + rect.top - 16),
-            duration: 220
-          });
-        });
+    wx.setStorageSync(DEFAULT_CALCULATOR_TYPE_KEY, calculator.type);
+    this.setData({
+      defaultCalculatorType: calculator.type,
+      defaultCalculator: calculator
+    });
+    wx.showToast({
+      title: "已设为默认",
+      icon: "success"
+    });
+  },
+
+  toggleAllCalculators() {
+    this.setData({
+      showAllCalculators: !this.data.showAllCalculators
     });
   },
 

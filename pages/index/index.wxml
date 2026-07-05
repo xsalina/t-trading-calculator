@@ -1,32 +1,18 @@
 <view class="page">
-  <view class="topbar">
-    <view class="topbar-content">
-      <view class="title">做T交易计算器</view>
-      <view class="subtitle">做T收益、回本补仓、止盈卖出，一页测算</view>
-    </view>
-    <view class="article-bulb" bindtap="openArticle">💡</view>
-  </view>
-
-  <view class="miniapp-card compact-pro-card" bindtap="openTradeRecordMiniProgram" hover-class="miniapp-card-hover">
-    <view class="miniapp-content">
-      <view class="miniapp-icon">📱</view>
-      <view>
-        <view class="miniapp-title">做T记录助手Pro</view>
-        <view class="miniapp-desc">股友好评的做T记录神器</view>
-      </view>
-    </view>
-    <view class="arrow-white">去记录 ></view>
-  </view>
-
-  <view class="default-status" wx:if="{{defaultCalculator}}">
-    <view class="default-status-copy">
-      <text class="default-status-label">默认展示：</text>
-      <text class="default-status-name">{{defaultCalculator.name}}</text>
-    </view>
-    <view class="change-default" bindtap="openDefaultPicker">更换</view>
-  </view>
-
   <view id="homeCalculator" class="home-calculator-card" wx:if="{{activeCalculator}}">
+    <view class="workbench-head">
+      <scroll-view scroll-x class="calculator-tab-scroll" show-scrollbar="{{false}}">
+        <view class="calculator-tab-list">
+          <block wx:for="{{calculators}}" wx:key="type">
+            <view
+              class="calculator-tab {{item.type === activeCalculatorType ? 'active' : ''}}"
+              data-type="{{item.type}}"
+              bindtap="switchHomeCalculator"
+            >{{item.shortName}}</view>
+          </block>
+        </view>
+      </scroll-view>
+    </view>
     <t-profit-calculator wx:if="{{activeCalculatorType === 't-profit'}}" embedded="{{true}}"></t-profit-calculator>
     <break-even-calculator wx:elif="{{activeCalculatorType === 'break-even'}}" embedded="{{true}}"></break-even-calculator>
     <reverse-t-calculator wx:elif="{{activeCalculatorType === 'reverse-t'}}" embedded="{{true}}"></reverse-t-calculator>
@@ -37,41 +23,15 @@
     <price-projection-calculator wx:elif="{{activeCalculatorType === 'price-projection'}}" embedded="{{true}}"></price-projection-calculator>
   </view>
 
-  <navigator class="fee-summary-card" url="/pages/fee-settings/fee-settings" hover-class="fee-summary-hover" wx:if="{{feeSummary}}">
-    <view class="fee-summary-head">
-      <view class="fee-summary-title">💸 手续费设置</view>
-      <view class="fee-summary-action">去设置 ›</view>
-    </view>
-    <view class="fee-summary-tip">当前{{feeSummary.useFeeText}}，点击可修改佣金、最低佣金、过户费和印花税</view>
-    <view class="fee-summary-grid">
-      <view class="fee-summary-item"><text>佣金率</text><text>{{feeSummary.commissionText}}</text></view>
-      <view class="fee-summary-item"><text>最低</text><text>{{feeSummary.commissionMinText}}</text></view>
-      <view class="fee-summary-item"><text>过户费</text><text>{{feeSummary.transferText}}</text></view>
-      <view class="fee-summary-item"><text>印花税</text><text>{{feeSummary.stampDutyText}} · {{feeSummary.stampDutyScopeText}}</text></view>
-    </view>
-  </navigator>
-
-  <view class="quick-section">
-    <view class="section-title">切换计算器</view>
-    <scroll-view scroll-x class="quick-scroll" show-scrollbar="{{false}}">
-      <view class="quick-list">
-        <block wx:for="{{calculators}}" wx:key="type">
-          <view
-            class="quick-item {{item.type === activeCalculatorType ? 'quick-item-active' : ''}}"
-            data-type="{{item.type}}"
-            bindtap="switchHomeCalculator"
-          >
-            <view>{{item.shortName}}</view>
-            <view wx:if="{{item.type === defaultCalculatorType}}" class="quick-default-tag">默认</view>
-          </view>
-        </block>
+  <view class="card calculator-card compact-calculator-card">
+    <view class="independent-head">
+      <view>
+        <view class="independent-title">需要连续测算？</view>
+        <view class="independent-desc">进入独立计算器页面，支持多次计算和完整记录</view>
       </view>
-    </scroll-view>
-  </view>
-
-  <view class="card calculator-card">
-    <view class="section-title list-section-title">🧮 全部计算器</view>
-    <block wx:for="{{calculators}}" wx:key="type">
+      <view class="independent-toggle" bindtap="toggleAllCalculators">{{showAllCalculators ? '收起' : '查看全部 8 个 >'}}</view>
+    </view>
+    <block wx:for="{{showAllCalculators ? calculators : featuredCalculators}}" wx:key="type">
       <view class="list-item" data-url="{{item.url}}" bindtap="goCalculatorPage" hover-class="list-item-hover">
         <view class="list-item-left">
           <view class="list-icon">{{item.shortName}}</view>
@@ -88,7 +48,6 @@
     </block>
   </view>
 
-  <view class="common-title">常用功能</view>
   <view class="share-area">
     <button class="button primary share-button" open-type="share" hover-class="share-btn-hover">分享小程序</button>
     <view class="share-copy">感谢您的分享支持，祝您投资顺利！</view>
@@ -102,9 +61,8 @@
       send-message-path="/pages/index/index"
       hover-class="btn-hover"
     >在线客服 / 反馈建议</button>
+    <button class="button secondary contact-button" bindtap="openArticle" hover-class="btn-hover">使用说明 / 文章教程</button>
   </view>
-
-  
 
   <view class="notice">本工具仅用于盈亏测算，不构成任何投资建议。</view>
 

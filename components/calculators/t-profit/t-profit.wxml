@@ -1,104 +1,268 @@
 <view class="calculator-shell {{embedded ? 'embedded' : 'standalone'}} {{operations.length && !embedded ? 'has-fixed-action' : ''}}">
-  <view class="card">
-    <view class="section-head compact-head">
-      <view class="section-title">做T计算器</view>
+  <view class="card t-home-form-card">
+    <calculator-form-header title="做T计算器" remember-data="{{rememberData}}" show-fee="{{true}}" include-fee="{{form.includeFee}}" home="{{true}}" bindrememberchange="onRememberSwitch" bindfeechange="onSwitchChange" />
+    <view wx:if="{{!form.baseInitialized}}" class="field">
+      <text class="label">初始持仓价格</text>
+      <view class="step-field">
+        <button class="step-button" data-key="initialPrice" data-step="-0.01" data-min="0" bindtap="adjustNumber">
+          -
+        </button>
+        <input class="input" type="digit" value="{{form.initialPrice}}" data-key="initialPrice" bindinput="onInput" />
+        <button class="step-button" data-key="initialPrice" data-step="0.01" data-min="0" bindtap="adjustNumber">
+          +
+        </button>
+      </view>
     </view>
-    <view class="compact-switch-row">
-      <view class="mini-switch"><text>记住数据</text><switch color="#00b894" checked="{{rememberData}}" bindchange="onRememberSwitch" /></view>
-      <view class="mini-switch"><text>计入手续费</text><switch color="#00b894" checked="{{form.includeFee}}" data-key="includeFee" bindchange="onSwitchChange" /></view>
+    <view wx:if="{{!form.baseInitialized}}" class="field">
+      <text class="label">初始持仓数量</text>
+      <view class="step-field">
+        <button class="step-button" data-key="initialShares" data-step="-100" data-min="0" bindtap="adjustNumber">
+          -
+        </button>
+        <input class="input" type="number" value="{{form.initialShares}}" data-key="initialShares" bindinput="onInput" />
+        <button class="step-button" data-key="initialShares" data-step="100" data-min="0" bindtap="adjustNumber">
+          +
+        </button>
+      </view>
     </view>
-    <view class="fee-mini-hint">开启后自动估算交易手续费</view>
-    <view wx:if="{{!embedded}}" class="fee-inline-summary">
-      <text>{{feeSummary}}</text>
-      <navigator url="/pages/fee-settings/fee-settings">去设置 ></navigator>
+    <view wx:if="{{form.baseInitialized && baseInfo}}" class="base-position-card">
+      <view class="base-position-head">
+        <text>初始化底仓</text>
+        <text class="base-position-cash {{baseInfo.cashFlowClass}}">{{baseInfo.cashFlowText}}</text>
+      </view>
+      <view class="base-position-grid">
+        <view>
+          <text>成本价</text>
+          <text>{{baseInfo.priceText}}</text>
+        </view>
+        <view>
+          <text>数量</text>
+          <text>{{baseInfo.sharesText}}</text>
+        </view>
+      </view>
+      <view class="base-detail-toggle" bindtap="toggleBaseDetail">
+        <text>{{showBaseDetail ? '收起底仓明细' : '查看底仓明细'}}</text>
+        <text>{{showBaseDetail ? '⌃' : '⌄'}}</text>
+      </view>
+      <view wx:if="{{showBaseDetail}}" class="base-position-grid base-detail-grid">
+        <view>
+          <text>持仓成本</text>
+          <text>{{baseInfo.totalCostText}}</text>
+        </view>
+        <view>
+          <text>手续费</text>
+          <text>{{baseInfo.feeText}}</text>
+        </view>
+        <view>
+          <text>初始资金流</text>
+          <text class="{{baseInfo.cashFlowClass}}">{{baseInfo.cashFlowText}}</text>
+        </view>
+      </view>
     </view>
-    <view class="field"><text class="label">初始持仓价格</text><view class="step-field"><button class="step-button" data-key="initialPrice" data-step="-0.01" data-min="0" bindtap="adjustNumber">-</button><input class="input" type="digit" value="{{form.initialPrice}}" data-key="initialPrice" bindinput="onInput" /><button class="step-button" data-key="initialPrice" data-step="0.01" data-min="0" bindtap="adjustNumber">+</button></view></view>
-    <view class="field"><text class="label">初始持仓数量</text><view class="step-field"><button class="step-button" data-key="initialShares" data-step="-100" data-min="0" bindtap="adjustNumber">-</button><input class="input" type="number" value="{{form.initialShares}}" data-key="initialShares" bindinput="onInput" /><button class="step-button" data-key="initialShares" data-step="100" data-min="0" bindtap="adjustNumber">+</button></view></view>
-  </view>
-
-  <view class="card">
-    <view class="section-title">添加操作</view>
-    <view class="segmented">
-      <view class="segment {{form.direction === 'SELL' ? 'active' : ''}}" data-direction="SELL" bindtap="setDirection">卖出</view>
-      <view class="segment {{form.direction === 'BUY' ? 'active' : ''}}" data-direction="BUY" bindtap="setDirection">买入</view>
+    <view wx:if="{{form.baseInitialized}}" class="form-subtitle form-subtitle-row operation-title-row">
+      <text>新交易方向</text>
+      <view class="mini-direction-switch">
+        <view class="mini-direction-item {{form.direction === 'SELL' ? 'active' : ''}}" data-direction="SELL" bindtap="setDirection">
+          卖出
+        </view>
+        <view class="mini-direction-item {{form.direction === 'BUY' ? 'active' : ''}}" data-direction="BUY" bindtap="setDirection">
+          买入
+        </view>
+      </view>
     </view>
-
-    <view class="field"><text class="label">{{form.direction === "BUY" ? "买入价格" : "卖出价格"}}</text><view class="step-field"><button class="step-button" data-key="tradePrice" data-step="-0.01" data-min="0" bindtap="adjustNumber">-</button><input class="input" type="digit" value="{{form.tradePrice}}" data-key="tradePrice" bindinput="onInput" /><button class="step-button" data-key="tradePrice" data-step="0.01" data-min="0" bindtap="adjustNumber">+</button></view></view>
-
-    <view class="field"><text class="label">{{form.direction === "BUY" ? "买入数量" : "卖出数量"}}</text><view class="step-field"><button class="step-button" data-key="tradeShares" data-step="-100" data-min="0" bindtap="adjustNumber">-</button><input class="input" type="number" value="{{form.tradeShares}}" data-key="tradeShares" bindinput="onInput" /><button class="step-button" data-key="tradeShares" data-step="100" data-min="0" bindtap="adjustNumber">+</button></view></view>
-
-    <view wx:if="{{form.direction === 'BUY'}}" class="field full-field">
+    <view wx:if="{{form.baseInitialized}}" class="field">
+      <text class="label">{{form.direction === 'SELL' ? '卖出' : '买入'}}价格</text>
+      <view class="step-field">
+        <button class="step-button" data-key="tradePrice" data-step="-0.01" data-min="0" bindtap="adjustNumber">
+          -
+        </button>
+        <input class="input" type="digit" value="{{form.tradePrice}}" data-key="tradePrice" bindinput="onInput" />
+        <button class="step-button" data-key="tradePrice" data-step="0.01" data-min="0" bindtap="adjustNumber">
+          +
+        </button>
+      </view>
+    </view>
+    <view wx:if="{{form.baseInitialized}}" class="field">
+      <text class="label">{{form.direction === 'SELL' ? '卖出' : '买入'}}数量</text>
+      <view class="step-field">
+        <button class="step-button" data-key="tradeShares" data-step="-100" data-min="0" bindtap="adjustNumber">
+          -
+        </button>
+        <input class="input" type="number" value="{{form.tradeShares}}" data-key="tradeShares" bindinput="onInput" />
+        <button class="step-button" data-key="tradeShares" data-step="100" data-min="0" bindtap="adjustNumber">
+          +
+        </button>
+      </view>
+    </view>
+    <view wx:if="{{form.baseInitialized && form.direction === 'BUY'}}" class="amount-toggle" bindtap="toggleEmbeddedAmountPanel">
+      <text>按金额换算股数</text>
+      <text>{{showEmbeddedAmountPanel ? '收起' : '>'}}</text>
+    </view>
+    <view wx:if="{{form.baseInitialized && form.direction === 'BUY' && showEmbeddedAmountPanel}}" class="field full-field">
       <text class="label">买入金额（可选）</text>
-      <view class="step-field"><button class="step-button" data-key="tradeAmount" data-step="-1000" data-min="0" bindtap="adjustNumber">-</button><input class="input" type="digit" value="{{form.tradeAmount}}" data-key="tradeAmount" bindinput="onInput" placeholder="填金额（可选）" /><button class="step-button" data-key="tradeAmount" data-step="1000" data-min="0" bindtap="adjustNumber">+</button></view>
+      <view class="step-field">
+        <button class="step-button" data-key="tradeAmount" data-step="-1000" data-min="0" bindtap="adjustNumber">
+          -
+        </button>
+        <input class="input" type="digit" value="{{form.tradeAmount}}" data-key="tradeAmount" bindinput="onInput" placeholder="填金额（可选）" />
+        <button class="step-button" data-key="tradeAmount" data-step="1000" data-min="0" bindtap="adjustNumber">
+          +
+        </button>
+      </view>
       <view class="field-tip">填写金额后，按买入价格自动换算数量</view>
     </view>
-
-    <view wx:if="{{form.direction === 'BUY'}}" class="field full-field">
+    <view wx:if="{{form.baseInitialized && form.direction === 'BUY' && showEmbeddedAmountPanel}}" class="field full-field">
       <text class="label">换算单位</text>
       <view class="choice-row">
-        <view class="choice-item {{form.convertUnit === '100' ? 'active' : ''}}" data-unit="100" bindtap="setConvertUnit">100股</view>
-        <view class="choice-item {{form.convertUnit === '200' ? 'active' : ''}}" data-unit="200" bindtap="setConvertUnit">200股</view>
-        <view class="choice-item {{form.convertUnit === '1' ? 'active' : ''}}" data-unit="1" bindtap="setConvertUnit">1股</view>
+        <view class="choice-item {{form.convertUnit === '100' ? 'active' : ''}}" data-unit="100" bindtap="setConvertUnit">
+          100股
+        </view>
+        <view class="choice-item {{form.convertUnit === '200' ? 'active' : ''}}" data-unit="200" bindtap="setConvertUnit">
+          200股
+        </view>
+        <view class="choice-item {{form.convertUnit === '1' ? 'active' : ''}}" data-unit="1" bindtap="setConvertUnit">
+          1股
+        </view>
       </view>
       <view class="field-tip">填写金额后，将按所选单位自动换算股数</view>
     </view>
-
     <view class="button-row">
-      <button class="button primary" bindtap="saveOperation">保存操作</button>
+      <button class="button primary" bindtap="saveOperation">
+        {{form.baseInitialized ? '保存操作' : '初始化底仓'}}
+      </button>
       <button class="button plain" bindtap="clearAll">全部清除</button>
     </view>
   </view>
-
-  <view wx:if="{{preview}}" class="card">
-    <view class="section-title">本次预览</view>
-    <block wx:for="{{preview.rows}}" wx:key="label">
-      <view class="result-row"><text>{{item.label}}</text><text class="result-value {{item.className}}">{{item.value}}</text></view>
-    </block>
+  <view wx:if="{{preview && preview.view && form.baseInitialized}}" class="card preview-card">
+  <view class="preview-head">
+    <view class="section-title preview-title">本次预览</view>
+    <view class="preview-action-tag">{{preview.view.actionText}}</view>
   </view>
 
-  <view wx:if="{{summary}}" class="card">
-    <view class="section-title">当前持仓</view>
-    <block wx:for="{{summary.rows}}" wx:key="label">
-      <view class="result-row"><text>{{item.label}}</text><text class="result-value {{item.className}}">{{item.value}}</text></view>
-    </block>
+  <view class="preview-state-grid">
+    <view class="preview-state-box">
+      <text class="preview-state-label">{{preview.view.afterSharesLabel}}</text>
+      <text class="preview-state-value">{{preview.view.afterSharesText}}</text>
+    </view>
+
+    <view class="preview-state-box">
+      <text class="preview-state-label">{{preview.view.afterAvgCostLabel}}</text>
+      <text class="preview-state-value">{{preview.view.afterAvgCostText}}</text>
+    </view>
   </view>
 
-  <view wx:if="{{operations.length}}" class="card">
-    <view class="section-title">操作记录</view>
+  <view class="preview-main-grid preview-profit-grid">
+    <view class="preview-main-box preview-profit-box">
+      <text class="preview-box-label">本次收益</text>
+      <text class="preview-box-value {{preview.view.profitClass}}">
+        {{preview.view.profitText}}
+      </text>
+    </view>
+  </view>
+
+  <view class="preview-detail-list">
+    <view class="preview-detail-row">
+      <text>本次资金</text>
+      <text class="{{preview.view.cashFlowClass}}">{{preview.view.cashFlowText}}</text>
+    </view>
+
+    <view class="preview-detail-row">
+      <text>成交金额</text>
+      <text>{{preview.view.amountText}}</text>
+    </view>
+
+    <view class="preview-detail-row">
+      <text>预计手续费</text>
+      <text>{{preview.view.feeText}}</text>
+    </view>
+
+    <view class="preview-detail-row">
+      <text>{{preview.view.afterCostLabel}}</text>
+      <text>{{preview.view.afterCostText}}</text>
+    </view>
+  </view>
+</view>
+  <view wx:if="{{summary && form.baseInitialized}}" class="card summary-card compact-summary-card">
+    <view class="summary-title">当前持仓</view>
+    <view class="summary-main">
+      <view class="summary-main-label">{{summary.main.label}}</view>
+      <view class="summary-main-value {{summary.main.className}}">{{summary.main.value}}</view>
+    </view>
+    <view class="summary-grid">
+      <block wx:for="{{summary.details}}" wx:key="label">
+        <view class="summary-grid-item {{index < 2 ? 'highlight' : ''}}">
+          <text>{{item.label}}</text>
+          <text class="result-value {{item.className}}">{{item.value}}</text>
+        </view>
+      </block>
+    </view>
+  </view>
+  <view wx:if="{{operations.length}}" class="embedded-record-list">
+    <view class="section-title embedded-record-title">操作记录</view>
     <block wx:for="{{operations}}" wx:key="id">
-      <view class="trade-record">
-        <view class="trade-head">
-          <text class="{{item.direction === 'BUY' ? 'negative' : 'positive'}}">{{item.directionText}}</text>
-          <view class="trade-actions">
-            <text class="muted">{{item.timeText}}</text>
-            <button class="undo-button" data-id="{{item.id}}" bindtap="undoOperation">撤销本笔</button>
+      <view class="trade-record-card {{item.direction === 'BUY' ? 'buy' : 'sell'}}">
+        <view class="trade-card-head">
+          <view class="trade-card-direction {{item.direction === 'BUY' ? 'negative' : 'positive'}}">
+            {{item.directionText}}
+          </view>
+          <view class="trade-card-time">{{item.timeText}}</view>
+          <button class="undo-button" data-id="{{item.id}}" bindtap="undoOperation">撤销本笔</button>
+        </view>
+        <view class="trade-card-highlights">
+          <view>
+            <text>交易后持仓</text>
+            <text>{{item.afterSharesText}}</text>
+          </view>
+          <view>
+            <text>交易后成本价</text>
+            <text>{{item.afterAvgCostText}}</text>
           </view>
         </view>
-        <view class="trade-line"><text>价格</text><text>¥{{item.priceText}}</text></view>
-        <view class="trade-line"><text>数量</text><text>{{item.sharesText}} 股</text></view>
-        <view class="trade-line"><text>成交金额</text><text>¥{{item.amountText}}</text></view>
-        <view class="trade-line"><text>手续费</text><text>¥{{item.feeText}}</text></view>
-        <view class="trade-line"><text>本次资金</text><text class="{{item.cashClass}}">{{item.cashText}}</text></view>
-        <view class="trade-line"><text>本次收益</text><text class="{{item.profitClass}}">{{item.profitText}}</text></view>
-        <view class="trade-line"><text>操作后持仓</text><text>{{item.afterSharesText}}</text></view>
-        <view class="trade-line"><text>操作后成本价</text><text>{{item.afterAvgCostText}}</text></view>
-        <view class="trade-line"><text>操作后持仓成本</text><text>{{item.afterTotalCostText}}</text></view>
+        <view class="trade-card-detail">
+          <view>
+            <text>成交价</text>
+            <text>¥{{item.priceText}}</text>
+          </view>
+          <view>
+            <text>成交数量</text>
+            <text>{{item.sharesText}} 股</text>
+          </view>
+          <view>
+            <text>成交金额</text>
+            <text>¥{{item.amountText}}</text>
+          </view>
+          <view>
+            <text>手续费</text>
+            <text>¥{{item.feeText}}</text>
+          </view>
+          <view>
+            <text>资金流</text>
+            <text class="{{item.cashClass}}">{{item.cashDisplayText}}</text>
+          </view>
+          <view wx:if="{{item.direction === 'SELL'}}">
+            <text>本次收益</text>
+            <text class="{{item.profitClass}}">{{item.profitDisplayText}}</text>
+          </view>
+          <view wx:else>
+            <text>本次收益</text>
+            <text>买入不计算收益</text>
+          </view>
+        </view>
       </view>
     </block>
   </view>
-
   <view wx:if="{{operations.length && embedded}}" class="result-action-row">
-    <button class="button primary pro-record-button" bindtap="openTradeRecordMiniProgram">算完顺手记录这一笔</button>
-    <button class="button secondary result-share-button" open-type="share">分享给朋友</button>
     <button class="button secondary result-copy-button" bindtap="copyResult">复制结果</button>
+    <button class="button secondary result-share-button" open-type="share">分享给朋友</button>
+    <button class="button primary pro-record-button" bindtap="openTradeRecordMiniProgram">
+      顺手记录到做T记录助手Pro >
+    </button>
   </view>
   <view wx:if="{{operations.length && !embedded}}" class="result-action-bar">
     <button class="action-primary" bindtap="openTradeRecordMiniProgram">算完顺手记录这一笔</button>
     <button class="action-secondary" open-type="share">分享给朋友</button>
     <button class="action-secondary" bindtap="copyResult">复制结果</button>
   </view>
-
   <button wx:if="{{!embedded}}" class="button plain action-row" bindtap="goBack">返回</button>
-
   <view class="notice" style="margin-top: 20rpx;">本工具仅用于做T流水和持仓成本测算，不构成任何投资建议。</view>
 </view>
