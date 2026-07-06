@@ -309,6 +309,7 @@ button {
   background: #fff7df;
   border: 1rpx solid #f2dfaa;
   border-radius: 8rpx;
+  margin-top:40rpx;
   padding: 20rpx;
   line-height: 1.5;
   font-size: 24rpx;

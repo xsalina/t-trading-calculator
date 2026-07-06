@@ -246,7 +246,7 @@
 }
 
 .compact-pro-card {
-  margin: 200rpx 0 30rpx 0;
+  margin: 100rpx 0 30rpx 0;
 }
 
 .miniapp-card-hover {
