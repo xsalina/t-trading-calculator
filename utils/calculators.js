@@ -116,7 +116,7 @@ function calcTakeProfit(input, feeSettings) {
     rows: [
       { label: "持仓成本", value: " " + formatMoney(costAmount) },
       { label: "目标收益", value: " " + formatMoney(targetProfit), className: resultClass(targetProfit) },
-      { label: "目标卖出价", value: " " + formatPrice(targetPrice), className: resultClass(targetProfit) },
+      { label: "目标卖出价", value: " " + formatPrice(targetPrice, input.costPrice), className: resultClass(targetProfit) },
       { label: "预计卖出金额", value: " " + formatMoney(finalSellAmount) }
     ]
   };
@@ -143,7 +143,7 @@ function calcAverageDown(input, feeSettings) {
     rows: [
       { label: "原持仓成本", value: " " + formatMoney(originalAmount) },
       { label: "补仓总成本", value: " " + formatMoney(buyTotalCost) },
-      { label: "补仓后成本价", value: " " + formatPrice(newCost) },
+      { label: "补仓后成本价", value: " " + formatPrice(newCost, input.originalCost) },
       { label: "成本降低金额", value: " " + formatMoney(reduceAmount), className: resultClass(reduceAmount) },
       { label: "成本降低比例", value: formatRate(reduceRate), className: resultClass(reduceRate) }
     ]
@@ -199,8 +199,8 @@ function calcGrid(input, feeSettings) {
     feeTotal = sumFees([feeTotal, levelFee]);
     rows.push({
       level: i,
-      buyPrice: " " + formatPrice(downPrice),
-      sellPrice: " " + formatPrice(upPrice),
+      buyPrice: " " + formatPrice(downPrice, input.currentPrice),
+      sellPrice: " " + formatPrice(upPrice, input.currentPrice),
       netProfit: " " + formatMoney(netProfit),
       className: resultClass(netProfit)
     });
@@ -237,7 +237,7 @@ function calcPriceProjection(input) {
     rows.push({
       day,
       dateText: `${currentDate.getMonth() + 1}/${currentDate.getDate()}`,
-      price: " " + formatPrice(price),
+      price: " " + formatPrice(price, input.startPrice),
       marketValue: " " + formatMoney(marketValue),
       profit: " " + formatMoney(profit),
       changeRate: formatRate(totalChangeRate),

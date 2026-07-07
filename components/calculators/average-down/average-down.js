@@ -58,6 +58,20 @@ function decorateFee(fee) {
   };
 }
 
+function buildCoreResultRows({ nextCost, reduceAmount, reduceRate, nextShares, buyTotalCost, priceReference }) {
+  return [
+    { label: "补仓后成本价", value: " " + formatPrice(nextCost, priceReference), highlight: true },
+    {
+      label: "成本降低金额/比例",
+      value: " " + formatMoney(reduceAmount) + " / " + formatRate(reduceRate),
+      className: resultClass(reduceAmount),
+      highlight: true
+    },
+    { label: "补仓后总股数", value: formatNumber(nextShares, 0) + " 股", highlight: true },
+    { label: "本次投入金额", value: " " + formatMoney(buyTotalCost), highlight: true }
+  ];
+}
+
 Component(createCalculatorComponent({
   pageKey: "average-down",
   defaultForm: {
@@ -92,10 +106,10 @@ Component(createCalculatorComponent({
       this.data.form.originalCost ? `原成本价：${this.data.form.originalCost}` : "",
       this.data.form.originalShares ? `原股数：${this.data.form.originalShares}股` : "",
       lastRecord ? `累计补仓：${formatNumber(safeSubtract(lastRecord.afterShares, this.data.basePosition.shares), 0)}股` : "",
-      rows["最新成本价"] ? `最新成本价：${rows["最新成本价"]}` : rows["补仓后成本价"] ? `补仓后成本价：${rows["补仓后成本价"]}` : "",
-      rows["累计降低金额"] ? `成本降低：${rows["累计降低金额"]}` : rows["成本降低金额"] ? `成本降低：${rows["成本降低金额"]}` : "",
-      rows["累计降低比例"] ? `降低比例：${rows["累计降低比例"]}` : rows["成本降低比例"] ? `降低比例：${rows["成本降低比例"]}` : "",
-      rows["补仓后总股数"] ? `当前总股数：${rows["补仓后总股数"]}` : ""
+      rows["补仓后成本价"] ? `补仓后成本价：${rows["补仓后成本价"]}` : "",
+      rows["成本降低金额/比例"] ? `成本降低：${rows["成本降低金额/比例"]}` : "",
+      rows["补仓后总股数"] ? `当前总股数：${rows["补仓后总股数"]}` : "",
+      rows["本次投入金额"] ? `本次投入：${rows["本次投入金额"]}` : ""
     ]);
   },
   methods: {
@@ -104,7 +118,15 @@ Component(createCalculatorComponent({
     },
 
     refreshPreview() {
-      this.setData({ preview: this.buildPreview() });
+      const preview = this.buildPreview();
+      const basePosition = this.data.basePosition || this.getBasePosition(
+        safeNumber(this.data.form.originalCost),
+        safeNumber(this.data.form.originalShares)
+      );
+      const result = preview && preview.resultRows
+        ? { rows: preview.resultRows }
+        : this.buildCumulativeResult(this.data.records || [], basePosition);
+      this.setData({ preview, result });
     },
 
     setConvertUnit(event) {
@@ -142,7 +164,10 @@ Component(createCalculatorComponent({
       this.setData({
         basePosition,
         records,
-        result: this.buildCumulativeResult(records, basePosition)
+        result: this.buildCumulativeResult(records, basePosition),
+        "form.buyPrice": "",
+        "form.buyShares": "",
+        "form.buyAmount": ""
       }, () => this.refreshPreview());
       this.persistForm();
     },
@@ -239,24 +264,33 @@ Component(createCalculatorComponent({
       const reduceAmount = safeSubtract(currentPosition.cost, nextCost);
       const reduceRate = safeMultiply(safeDivide(reduceAmount, currentPosition.cost), 100);
       const cashFlow = -buyTotalCost;
+      const resultRows = buildCoreResultRows({
+        nextCost,
+        reduceAmount,
+        reduceRate,
+        nextShares,
+        buyTotalCost,
+        priceReference: this.data.form.originalCost
+      });
 
       return {
         title: "本次预览",
         tag: "补仓后",
         theme: "buy",
         mainItems: [
-          { label: "补仓后成本价", value: " " + formatPrice(nextCost) },
-          { label: "补仓后总股数", value: formatNumber(nextShares, 0) + "股" }
+          { label: "补仓后成本价", value: " " + formatPrice(nextCost, this.data.form.originalCost) },
+          { label: "成本降低", value: " " + formatMoney(reduceAmount) + " / " + formatRate(reduceRate), className: resultClass(reduceAmount) }
         ],
         detailItems: [
+          { label: "补仓后总股数", value: formatNumber(nextShares, 0) + "股" },
+          { label: "本次投入金额", value: " " + formatMoney(buyTotalCost) },
           { label: "补仓价", value: " " + formatPrice(buyPrice, this.data.form.buyPrice) },
           { label: "补仓数量", value: formatNumber(buyShares, 0) + "股" },
           { label: "补仓金额", value: " " + formatMoney(buyAmount) },
           { label: "手续费", value: " " + formatMoney(fee.totalFee) },
-          { label: "本次资金流", value: formatSignedMoney(cashFlow), className: resultClass(cashFlow) },
-          { label: "成本降低金额", value: " " + formatMoney(reduceAmount), className: resultClass(reduceAmount) },
-          { label: "成本降低比例", value: formatRate(reduceRate), className: resultClass(reduceRate) }
-        ]
+          { label: "本次资金流", value: formatSignedMoney(cashFlow), className: resultClass(cashFlow) }
+        ],
+        resultRows
       };
     },
 
@@ -315,31 +349,34 @@ Component(createCalculatorComponent({
           totalFee,
           result: {
             fee: decorateFee(fee),
-            rows: [
+            rows: buildCoreResultRows({
+              nextCost,
+              reduceAmount,
+              reduceRate,
+              nextShares,
+              buyTotalCost,
+              priceReference: this.data.form.originalCost
+            }).concat([
               { label: "补仓金额", value: " " + formatMoney(buyAmount) },
-              { label: "补仓总成本", value: " " + formatMoney(buyTotalCost) },
-              { label: "补仓后股数", value: formatNumber(nextShares, 0) + " 股" },
-              { label: "补仓后成本价", value: " " + formatPrice(nextCost) },
-              { label: "本笔降低金额", value: " " + formatMoney(reduceAmount), className: resultClass(reduceAmount) },
-              { label: "本笔降低比例", value: formatRate(reduceRate), className: resultClass(reduceRate) }
-            ]
+              { label: "手续费", value: " " + formatMoney(fee.totalFee) }
+            ])
           },
           resultTitle: "第 " + (index + 1) + " 笔",
           resultTimeText: record.timeText,
           resultTagText: "补仓",
           resultTheme: "buy",
           mainItems: [
-            { label: "补仓后成本价", value: " " + formatPrice(nextCost) },
-            { label: "补仓后总股数", value: formatNumber(nextShares, 0) + "股" }
+            { label: "补仓后成本价", value: " " + formatPrice(nextCost, this.data.form.originalCost) },
+            { label: "成本降低", value: " " + formatMoney(reduceAmount) + " / " + formatRate(reduceRate), className: resultClass(reduceAmount) }
           ],
           detailItems: [
+            { label: "补仓后总股数", value: formatNumber(nextShares, 0) + "股" },
+            { label: "本次投入金额", value: " " + formatMoney(buyTotalCost) },
             { label: "补仓价", value: " " + formatPrice(buyPrice, record.buyPrice || this.data.form.buyPrice) },
             { label: "补仓数量", value: formatNumber(buyShares, 0) + "股" },
             { label: "补仓金额", value: " " + formatMoney(buyAmount) },
             { label: "手续费", value: " " + formatMoney(fee.totalFee) },
-            { label: "本次资金流", value: formatSignedMoney(cashFlow), className: resultClass(cashFlow) },
-            { label: "成本降低金额", value: " " + formatMoney(reduceAmount), className: resultClass(reduceAmount) },
-            { label: "成本降低比例", value: formatRate(reduceRate), className: resultClass(reduceRate) }
+            { label: "本次资金流", value: formatSignedMoney(cashFlow), className: resultClass(cashFlow) }
           ]
         });
       });
@@ -353,27 +390,43 @@ Component(createCalculatorComponent({
 
       return {
         fee: decorateFee(lastRecord.totalFee),
-        rows: [
+        rows: buildCoreResultRows({
+          nextCost: safeNumber(lastRecord.afterCost),
+          reduceAmount,
+          reduceRate,
+          nextShares: safeNumber(lastRecord.afterShares),
+          buyTotalCost: safeNumber(lastRecord.buyTotalCost),
+          priceReference: this.data.form.originalCost
+        }).concat([
           { label: "原持仓成本", value: " " + formatMoney(basePosition.amount) },
-          { label: "累计补仓成本", value: " " + formatMoney(lastRecord.totalBuyCost) },
-          { label: "补仓后总股数", value: formatNumber(lastRecord.afterShares, 0) + " 股" },
-          { label: "最新成本价", value: " " + formatPrice(lastRecord.afterCost) },
-          { label: "累计降低金额", value: " " + formatMoney(reduceAmount), className: resultClass(reduceAmount) },
-          { label: "累计降低比例", value: formatRate(reduceRate), className: resultClass(reduceRate) }
-        ]
+          { label: "累计补仓投入", value: " " + formatMoney(lastRecord.totalBuyCost) }
+        ])
       };
     },
 
     clearRecords() {
       this.setData({
+        form: {
+          originalCost: "",
+          originalShares: "",
+          buyAmount: "",
+          buyPrice: "",
+          buyShares: "",
+          convertUnit: "100",
+          roundLot: true,
+          baseInitialized: false,
+          includeFee: this.data.feeSettings.useFee
+        },
         records: [],
         result: null,
+        preview: null,
         basePosition: null,
         basePositionCard: null,
-        showAmountPanel: false,
-        "form.baseInitialized": false
-      }, () => this.refreshPreview());
-      this.persistForm();
+        showAmountPanel: false
+      }, () => {
+        this.refreshPreview();
+        this.persistForm();
+      });
     },
 
     removeRecord(event) {

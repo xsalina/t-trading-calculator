@@ -1,4 +1,14 @@
 <view class="page">
+  <view wx:if="{{showFavoriteGuide}}" class="favorite-guide" style="{{favoriteGuideStyle}}" catchtap="noop">
+    <view class="favorite-guide-body">
+      <view class="favorite-guide-copy">
+        <view class="favorite-guide-title">添加到我的小程序</view>
+        <view class="favorite-guide-desc">点右上角 ···，下次打开更方便</view>
+      </view>
+      <view class="favorite-guide-close" bindtap="closeFavoriteGuide">×</view>
+    </view>
+  </view>
+
   <view id="homeCalculator" class="home-calculator-card" wx:if="{{activeCalculator}}">
     <view class="workbench-head">
       <scroll-view scroll-x class="calculator-tab-scroll" show-scrollbar="{{false}}">
@@ -13,6 +23,7 @@
         </view>
       </scroll-view>
     </view>
+    <view class="calculator-container">
     <t-profit-calculator wx:if="{{activeCalculatorType === 't-profit'}}" embedded="{{true}}" entry-query="{{entryQuery}}" is-default-calculator="{{activeCalculatorType === defaultCalculatorType}}" bindsetdefaultcalculator="setCurrentAsDefault"></t-profit-calculator>
     <break-even-calculator wx:elif="{{activeCalculatorType === 'break-even'}}" embedded="{{true}}" entry-query="{{entryQuery}}" is-default-calculator="{{activeCalculatorType === defaultCalculatorType}}" bindsetdefaultcalculator="setCurrentAsDefault"></break-even-calculator>
     <reverse-t-calculator wx:elif="{{activeCalculatorType === 'reverse-t'}}" embedded="{{true}}" entry-query="{{entryQuery}}" is-default-calculator="{{activeCalculatorType === defaultCalculatorType}}" bindsetdefaultcalculator="setCurrentAsDefault"></reverse-t-calculator>
@@ -21,6 +32,7 @@
     <sell-estimate-calculator wx:elif="{{activeCalculatorType === 'sell-estimate'}}" embedded="{{true}}" entry-query="{{entryQuery}}" is-default-calculator="{{activeCalculatorType === defaultCalculatorType}}" bindsetdefaultcalculator="setCurrentAsDefault"></sell-estimate-calculator>
     <grid-calculator wx:elif="{{activeCalculatorType === 'grid'}}" embedded="{{true}}" entry-query="{{entryQuery}}" is-default-calculator="{{activeCalculatorType === defaultCalculatorType}}" bindsetdefaultcalculator="setCurrentAsDefault"></grid-calculator>
     <price-projection-calculator wx:elif="{{activeCalculatorType === 'price-projection'}}" embedded="{{true}}" entry-query="{{entryQuery}}" is-default-calculator="{{activeCalculatorType === defaultCalculatorType}}" bindsetdefaultcalculator="setCurrentAsDefault"></price-projection-calculator>
+  </view>
   </view>
 
   <view class="miniapp-card compact-pro-card" bindtap="openTradeRecordMiniProgram" hover-class="miniapp-card-hover">

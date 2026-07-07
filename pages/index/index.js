@@ -1,5 +1,6 @@
 const TRADE_RECORD_MINI_PROGRAM_APP_ID = "wx253309efe732b547";
 const DEFAULT_CALCULATOR_TYPE_KEY = "defaultCalculatorType";
+const FAVORITE_GUIDE_DISMISSED_KEY = "favoriteGuideDismissed";
 const SYSTEM_DEFAULT_CALCULATOR_TYPE = "t-profit";
 const { getShareMessage, getShareTimelineMessage } = require("../../utils/share");
 const { getEntryCalculatorType, isExternalEntry } = require("../../utils/externalEntry");
@@ -72,17 +73,23 @@ Page({
     activeCalculatorType: SYSTEM_DEFAULT_CALCULATOR_TYPE,
     activeCalculator: CALCULATORS[0],
     entryQuery: {},
-    showDefaultPicker: false
+    showDefaultPicker: false,
+    showFavoriteGuide: false,
   },
 
   onLoad(options) {
     this.hasActiveCalculatorChanged = false;
     this.initDefaultCalculator();
     this.applyEntryQuery(options || {});
+    this.initFavoriteGuide();
   },
 
   onShow() {
     this.initDefaultCalculator();
+  },
+
+  onUnload() {
+    this.clearFavoriteGuideTimer();
   },
 
   initDefaultCalculator() {
@@ -123,6 +130,31 @@ Page({
 
   switchHomeCalculator(event) {
     this.setActiveCalculator(event.currentTarget.dataset.type);
+  },
+
+  initFavoriteGuide() {
+    if (wx.getStorageSync(FAVORITE_GUIDE_DISMISSED_KEY)) return;
+
+    this.setData({
+      showFavoriteGuide: true,
+    });
+
+    this.clearFavoriteGuideTimer();
+    this.favoriteGuideTimer = setTimeout(() => {
+      this.setData({ showFavoriteGuide: false });
+    }, 3000);
+  },
+
+  closeFavoriteGuide() {
+    wx.setStorageSync(FAVORITE_GUIDE_DISMISSED_KEY, true);
+    this.clearFavoriteGuideTimer();
+    this.setData({ showFavoriteGuide: false });
+  },
+
+  clearFavoriteGuideTimer() {
+    if (!this.favoriteGuideTimer) return;
+    clearTimeout(this.favoriteGuideTimer);
+    this.favoriteGuideTimer = null;
   },
 
   applyEntryQuery(query) {

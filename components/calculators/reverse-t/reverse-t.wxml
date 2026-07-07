@@ -49,11 +49,10 @@
         <input class="input" type="number" value="{{form.shares}}" data-key="shares" bindinput="onInput" />
         <button class="step-button" data-key="shares" data-step="100" data-min="0" bindtap="adjustNumber">+</button>
       </view>
-    </view>
-
-    <view wx:if="{{form.baseInitialized}}" class="amount-toggle" bindtap="toggleAmountPanel">
-      <text>按金额换算股数</text>
-      <text>{{showAmountPanel ? '收起' : '>'}}</text>
+      <view class="amount-toggle amount-toggle-under-shares" bindtap="toggleAmountPanel">
+        <text>按金额换算股数</text>
+        <text>{{showAmountPanel ? '收起' : '>'}}</text>
+      </view>
     </view>
 
     <view wx:if="{{form.baseInitialized && showAmountPanel}}" class="field full-field">
@@ -95,7 +94,7 @@
     <view class="summary-title">回补结果</view>
     <view class="summary-grid">
       <block wx:for="{{result.rows}}" wx:key="label">
-        <view class="summary-grid-item {{index < 2 ? 'highlight' : ''}}">
+        <view class="summary-grid-item {{item.highlight ? 'highlight' : ''}}">
           <text>{{item.label}}</text>
           <text class="result-value {{item.className}}">{{item.value}}</text>
         </view>

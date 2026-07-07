@@ -88,6 +88,20 @@ Component({
           icon: "success"
         });
       }
+    },
+
+    onDefaultHelpTap() {
+      wx.showToast({
+        title: "每次进来都会优先展示默认计算器，方便你的习惯计算",
+        icon: "none"
+      });
+    },
+
+    onRememberHelpTap() {
+      wx.showToast({
+        title: "下次打开会自动带出上次填写的数据，方便你继续计算",
+        icon: "none"
+      });
     }
   }
 });

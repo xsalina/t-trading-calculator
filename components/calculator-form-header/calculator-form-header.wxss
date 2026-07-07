@@ -62,6 +62,27 @@
   color: #00b894;
 }
 
+.calculator-form-default-help,
+.calculator-form-help {
+  flex-shrink: 0;
+  width: 30rpx;
+  height: 30rpx;
+  line-height: 30rpx;
+  border-radius: 999rpx;
+  background: #f1f5f9;
+  color: #94a3b8;
+  font-size: 20rpx;
+  font-weight: 700;
+  text-align: center;
+}
+
+.calculator-form-help {
+  width: 28rpx;
+  height: 28rpx;
+  line-height: 28rpx;
+  font-size: 19rpx;
+}
+
 .calculator-form-fee-row > text {
   min-width: 0;
   overflow: hidden;

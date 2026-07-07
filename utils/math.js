@@ -54,7 +54,7 @@ function getDecimalLength(value) {
 }
 
 function clampPriceDigits(digits) {
-  return Math.min(4, Math.max(2, digits));
+  return Math.min(4, Math.max(0, digits));
 }
 
 function truncateTo(value, digits = 4) {

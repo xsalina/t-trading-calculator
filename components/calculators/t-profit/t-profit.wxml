@@ -67,10 +67,10 @@
           +
         </button>
       </view>
-    </view>
-    <view wx:if="{{form.baseInitialized && form.direction === 'BUY'}}" class="amount-toggle" bindtap="toggleEmbeddedAmountPanel">
-      <text>按金额换算股数</text>
-      <text>{{showEmbeddedAmountPanel ? '收起' : '>'}}</text>
+      <view wx:if="{{form.direction === 'BUY'}}" class="amount-toggle amount-toggle-under-shares" bindtap="toggleEmbeddedAmountPanel">
+        <text>按金额换算股数</text>
+        <text>{{showEmbeddedAmountPanel ? '收起' : '>'}}</text>
+      </view>
     </view>
     <view wx:if="{{form.baseInitialized && form.direction === 'BUY' && showEmbeddedAmountPanel}}" class="field full-field">
       <text class="label">买入金额（可选）</text>

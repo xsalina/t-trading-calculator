@@ -44,6 +44,18 @@ function formatSignedMoney(value) {
   return " 0.00";
 }
 
+function calcAllocatedSellFee({ sellPrice, shares, basePendingShares, feeSettings, includeFee }) {
+  const totalSellAmount = safeMultiply(safeNumber(sellPrice), safeNumber(basePendingShares));
+  if (!totalSellAmount || !basePendingShares || !shares) return 0;
+  const totalSellFee = calcTradeFee({
+    amount: totalSellAmount,
+    direction: "SELL",
+    feeSettings,
+    includeFee
+  }).totalFee;
+  return safeMultiply(totalSellFee, safeDivide(shares, basePendingShares));
+}
+
 Component(createCalculatorComponent({
   pageKey: "reverse-t",
   defaultForm: {
@@ -196,10 +208,10 @@ Component(createCalculatorComponent({
       if (!sellPrice || !coverPrice || !shares || !basePendingShares) return null;
 
       const coverAmount = safeMultiply(coverPrice, shares);
-      const sellAmount = safeMultiply(sellPrice, shares);
-      const sellFee = calcTradeFee({
-        amount: sellAmount,
-        direction: "SELL",
+      const allocatedSellFee = calcAllocatedSellFee({
+        sellPrice,
+        shares,
+        basePendingShares,
         feeSettings: this.data.feeSettings,
         includeFee: this.data.form.includeFee
       });
@@ -209,7 +221,7 @@ Component(createCalculatorComponent({
         feeSettings: this.data.feeSettings,
         includeFee: this.data.form.includeFee
       });
-      const feeTotal = safeAdd(sellFee.totalFee, coverFee.totalFee);
+      const feeTotal = safeAdd(allocatedSellFee, coverFee.totalFee);
       const spreadProfit = safeMultiply(safeSubtract(sellPrice, coverPrice), shares);
       const netProfit = safeSubtract(spreadProfit, feeTotal);
       const cashFlow = -safeAdd(coverAmount, coverFee.totalFee);
@@ -231,7 +243,8 @@ Component(createCalculatorComponent({
           { label: "剩余待回补", value: formatNumber(remainingShares, 0) + "股" },
           { label: "本次回补收益", value: formatSignedMoney(netProfit), className: resultClass(netProfit) },
           { label: "回补金额", value: " " + formatMoney(coverAmount) },
-          { label: "手续费", value: " " + formatMoney(feeTotal) },
+          { label: "卖出手续费分摊", value: " " + formatMoney(allocatedSellFee) },
+          { label: "回补手续费", value: " " + formatMoney(coverFee.totalFee) },
           { label: "本次资金流", value: formatSignedMoney(cashFlow), className: resultClass(cashFlow) },
           { label: "回补空间", value: " " + formatMoney(coverSpace), className: resultClass(coverSpace) }
         ]
@@ -245,10 +258,10 @@ Component(createCalculatorComponent({
         const shares = safeNumber(record.shares);
         const sellPrice = safeNumber(record.sellPrice || this.data.form.sellPrice);
         const coverAmount = safeMultiply(coverPrice, shares);
-        const sellAmount = safeMultiply(sellPrice, shares);
-        const sellFee = calcTradeFee({
-          amount: sellAmount,
-          direction: "SELL",
+        const allocatedSellFee = calcAllocatedSellFee({
+          sellPrice,
+          shares,
+          basePendingShares,
           feeSettings: this.data.feeSettings,
           includeFee: this.data.form.includeFee
         });
@@ -258,7 +271,7 @@ Component(createCalculatorComponent({
           feeSettings: this.data.feeSettings,
           includeFee: this.data.form.includeFee
         });
-        const feeTotal = safeAdd(sellFee.totalFee, coverFee.totalFee);
+        const feeTotal = safeAdd(allocatedSellFee, coverFee.totalFee);
         const spreadProfit = safeMultiply(safeSubtract(sellPrice, coverPrice), shares);
         const netProfit = safeSubtract(spreadProfit, feeTotal);
         const cashFlow = -safeAdd(coverAmount, coverFee.totalFee);
@@ -272,6 +285,8 @@ Component(createCalculatorComponent({
           shares,
           coverAmount,
           feeTotal,
+          allocatedSellFee,
+          coverFeeTotal: coverFee.totalFee,
           netProfit,
           cashFlow,
           coverSpace,
@@ -295,7 +310,8 @@ Component(createCalculatorComponent({
             { label: "回补价", value: " " + formatPrice(coverPrice, record.coverPrice || this.data.form.coverPrice) },
             { label: "回补股数", value: formatNumber(shares, 0) + "股" },
             { label: "回补金额", value: " " + formatMoney(coverAmount) },
-            { label: "手续费", value: " " + formatMoney(feeTotal) },
+            { label: "卖出手续费分摊", value: " " + formatMoney(allocatedSellFee) },
+            { label: "回补手续费", value: " " + formatMoney(coverFee.totalFee) },
             { label: "本次资金流", value: formatSignedMoney(cashFlow), className: resultClass(cashFlow) },
             { label: "回补空间", value: " " + formatMoney(coverSpace), className: resultClass(coverSpace) }
           ]
@@ -312,11 +328,11 @@ Component(createCalculatorComponent({
 
       return {
         rows: [
+          { label: "剩余待回补数量", value: formatNumber(remainingShares, 0) + " 股", highlight: true },
+          { label: "平均回补价", value: avgCoverPrice ? " " + formatPrice(avgCoverPrice, this.data.form.sellPrice) : "-", highlight: true },
+          { label: "累计反T收益", value: formatSignedMoney(totalProfit), className: resultClass(totalProfit), highlight: true },
           { label: "初始待回补数量", value: formatNumber(basePendingShares, 0) + " 股" },
-          { label: "累计回补数量", value: formatNumber(totalShares, 0) + " 股" },
-          { label: "剩余待回补数量", value: formatNumber(remainingShares, 0) + " 股" },
-          { label: "平均回补价", value: avgCoverPrice ? " " + formatPrice(avgCoverPrice) : "-" },
-          { label: "累计反T收益", value: " " + formatMoney(totalProfit), className: resultClass(totalProfit) }
+          { label: "累计回补数量", value: formatNumber(totalShares, 0) + " 股" }
         ]
       };
     },
@@ -346,15 +362,27 @@ Component(createCalculatorComponent({
 
     clearRecords() {
       this.setData({
+        form: {
+          sellPrice: "",
+          coverAmount: "",
+          coverPrice: "",
+          shares: "",
+          convertUnit: "100",
+          roundLot: true,
+          baseInitialized: false,
+          basePendingShares: "",
+          includeFee: this.data.feeSettings.useFee
+        },
         records: [],
         result: null,
+        preview: null,
         basePendingShares: 0,
         baseSellCard: null,
-        showAmountPanel: false,
-        "form.baseInitialized": false,
-        "form.basePendingShares": ""
-      }, () => this.refreshPreview());
-      this.persistForm();
+        showAmountPanel: false
+      }, () => {
+        this.refreshPreview();
+        this.persistForm();
+      });
     }
   },
   onFormChange(key) {

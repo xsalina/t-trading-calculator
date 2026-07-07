@@ -33,6 +33,73 @@
   line-height: 1.4;
 }
 
+.favorite-guide {
+  position: fixed;
+  top: 20rpx;
+  right: 90rpx;
+  z-index: 90;
+  width: 360rpx;
+  max-width: 100%;
+  pointer-events: auto;
+}
+
+.favorite-guide::before {
+  content: "";
+  position: absolute;
+  top: -13rpx;
+  right: 42rpx;
+  width: 0;
+  height: 0;
+  border-left: 13rpx solid transparent;
+  border-right: 13rpx solid transparent;
+  border-bottom: 14rpx solid #ffffff;
+  filter: drop-shadow(0 -2rpx 3rpx rgba(15, 23, 42, 0.04));
+}
+
+.favorite-guide-body {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12rpx;
+  padding: 16rpx 16rpx 16rpx 20rpx;
+  border-radius: 18rpx;
+  background: #ffffff;
+  border: 1rpx solid rgba(0, 184, 148, 0.18);
+  box-shadow: 0 10rpx 28rpx rgba(15, 23, 42, 0.12);
+  box-sizing: border-box;
+}
+
+.favorite-guide-copy {
+  min-width: 0;
+}
+
+.favorite-guide-title {
+  color: #00b894;
+  font-size: 25rpx;
+  font-weight: 800;
+  line-height: 1.25;
+}
+
+.favorite-guide-desc {
+  margin-top: 4rpx;
+  color: #64748b;
+  font-size: 21rpx;
+  line-height: 1.35;
+}
+
+.favorite-guide-close {
+  flex-shrink: 0;
+  width: 40rpx;
+  height: 40rpx;
+  line-height: 38rpx;
+  border-radius: 999rpx;
+  background: #f1f5f9;
+  color: #94a3b8;
+  font-size: 30rpx;
+  text-align: center;
+  box-sizing: border-box;
+}
+
 .home-calculator-card {
   margin-bottom: 12rpx;
 }
@@ -49,26 +116,35 @@
 
 .calculator-tab-list {
   display: inline-flex;
-  gap: 10rpx;
-  padding-right: 24rpx;
+  gap: 16rpx;
+  padding: 8rpx; /* 增加一点内边距，让胶囊看起来不拥挤 */
 }
 
 .calculator-tab {
-  height: 50rpx;
-  line-height: 50rpx;
-  padding: 0 20rpx;
-  border-radius: 999rpx;
-  background: #eef2f7;
-  color: #536273;
-  font-size: 24rpx;
-  font-weight: 700;
-  box-sizing: border-box;
+  height: 60rpx;
+  line-height: 60rpx;
+  padding: 0 30rpx;
+  border-radius: 16rpx; /* 稍微柔和一点的圆角 */
+  background: #f1f5f9;  /* 非常浅的灰色，更高级 */
+  color: #64748b;
+  font-size: 26rpx;
+  font-weight: 500;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); /* 平滑过渡 */
+}
+/* --- 2. 计算区整体容器优化 (在 WXML 中建议给组件包一层) --- */
+.calculator-container {
+  background: #ffffff;
+  padding: 24rpx;
+  border-radius: 24rpx;
+  margin-bottom: 32rpx;
+  box-shadow: 0 4rpx 20rpx rgba(0, 0, 0, 0.03);
 }
 
 .calculator-tab.active {
   background: #00b894;
   color: #ffffff;
-  box-shadow: 0 6rpx 14rpx rgba(0, 184, 148, 0.18);
+  box-shadow: 0 4rpx 12rpx rgba(0, 184, 148, 0.3); /* 增加阴影，使其“浮”起来 */
+  transform: scale(1.05); /* 点击激活时微微放大，增加交互感 */
 }
 
 .workbench-current {
@@ -245,10 +321,14 @@
   border: 1rpx solid rgba(0, 184, 148, 0.14);
 }
 
+/* --- 3. Pro 工具区域优化 --- */
 .compact-pro-card {
-  margin: 100rpx 0 30rpx 0;
+  margin: 48rpx 0 48rpx 0; /* 调整了上下间距，使其呼吸感更好 */
+  background: #ffffff;
+  padding: 32rpx 24rpx;    /* 增加卡片内边距 */
+  border-radius: 20rpx;
+  border: 1rpx solid rgba(0, 184, 148, 0.2);
 }
-
 .miniapp-card-hover {
   opacity: 0.9;
 }
@@ -264,9 +344,10 @@
 }
 
 .miniapp-title {
-  font-size: 26rpx;
-  font-weight: 700;
+  font-size: 28rpx;
+  font-weight: 800;
   color: #1e293b;
+  margin-bottom: 4rpx;
 }
 
 .miniapp-desc {

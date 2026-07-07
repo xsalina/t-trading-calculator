@@ -285,6 +285,7 @@ Component({
         includeFee: this.data.form.includeFee,
       });
       const cashFlow = -safeAdd(amount, fee.totalFee);
+      const totalCost = safeAdd(amount, fee.totalFee);
 
       return {
         title: "初始化底仓",
@@ -295,7 +296,7 @@ Component({
           { label: "数量", value: formatNumber(initialShares, 0) + " 股" },
         ],
         detailItems: [
-          { label: "持仓成本", value: " " + formatMoney(amount) },
+          { label: "持仓成本", value: " " + formatMoney(totalCost) },
           { label: "手续费", value: " " + formatMoney(fee.totalFee) },
           {
             label: "初始资金流",
@@ -305,7 +306,7 @@ Component({
         ],
         priceText: " " + formatPrice(initialPrice, this.data.form.initialPrice),
         sharesText: formatNumber(initialShares, 0) + " 股",
-        totalCostText: " " + formatMoney(amount),
+        totalCostText: " " + formatMoney(totalCost),
         feeText: " " + formatMoney(fee.totalFee),
         cashFlowText: formatSignedMoney(cashFlow),
         cashFlowClass: "negative",
@@ -316,7 +317,14 @@ Component({
     buildBaseState() {
       const initialPrice = safeNumber(this.data.form.initialPrice);
       const initialShares = safeNumber(this.data.form.initialShares);
-      const initialCost = safeMultiply(initialPrice, initialShares);
+      const amount = safeMultiply(initialPrice, initialShares);
+      const fee = calcTradeFee({
+        amount,
+        direction: "BUY",
+        feeSettings: this.data.feeSettings,
+        includeFee: this.data.form.includeFee,
+      });
+      const initialCost = safeAdd(amount, fee.totalFee);
       return {
         shares: initialShares,
         totalCost: initialCost,
@@ -350,7 +358,7 @@ Component({
       const profit = safeSubtract(sellIncome, soldCost);
       const nextShares = Math.max(0, safeSubtract(state.shares, shares));
       const nextTotalCost = nextShares
-        ? safeSubtract(state.totalCost, soldCost)
+        ? safeSubtract(state.totalCost, sellIncome)
         : 0;
 
       return {
@@ -423,14 +431,14 @@ Component({
         profitDisplayText: isBuy ? "买入不计算收益" : formatSignedMoney(profit),
       profitClass: isBuy ? "" : resultClass(profit),
       afterSharesText: formatNumber(afterState.shares, 0) + " 股",
-      afterAvgCostText: " " + formatPrice(afterState.avgCost),
+      afterAvgCostText: " " + formatPrice(afterState.avgCost, this.data.form.initialPrice),
       afterTotalCostText: " " + formatMoney(afterState.totalCost),
       resultTitle: "第 " + ((index || 0) + 1) + " 笔",
       resultTimeText: operation.timeText,
       resultTagText: isBuy ? "买入" : "卖出",
       resultTheme: isBuy ? "buy" : "sell",
       mainItems: [
-        { label: "交易后成本价", value: " " + formatPrice(afterState.avgCost) },
+        { label: "交易后成本价", value: " " + formatPrice(afterState.avgCost, this.data.form.initialPrice) },
         { label: "交易后持仓", value: formatNumber(afterState.shares, 0) + " 股" }
       ],
       detailItems: [
@@ -459,7 +467,7 @@ Component({
           value: " " + formatMoney(state.realizedProfit),
           className: resultClass(state.realizedProfit),
         },
-        { label: "最新成本价", value: " " + formatPrice(state.avgCost) },
+        { label: "最新成本价", value: " " + formatPrice(state.avgCost, this.data.form.initialPrice) },
         { label: "剩余持仓", value: formatNumber(state.shares, 0) + " 股" },
         { label: "持仓成本", value: " " + formatMoney(state.totalCost) },
         {
@@ -516,7 +524,7 @@ Component({
           },
           {
             label: "买入后成本价",
-            value: " " + formatPrice(afterState.avgCost),
+            value: " " + formatPrice(afterState.avgCost, this.data.form.initialPrice),
           },
           {
             label: "买入后持仓成本",
@@ -530,7 +538,7 @@ Component({
             actionText: "买入后",
             theme: "buy",
             mainItems: [
-              { label: "操作后成本价", value: " " + formatPrice(afterState.avgCost) },
+              { label: "操作后成本价", value: " " + formatPrice(afterState.avgCost, this.data.form.initialPrice) },
               { label: "操作后股数", value: formatNumber(afterState.shares, 0) + " 股" }
             ],
             detailItems: [
@@ -551,7 +559,7 @@ Component({
             afterSharesText: formatNumber(afterState.shares, 0) + " 股",
 
             afterAvgCostLabel: "买入后成本价",
-            afterAvgCostText: " " + formatPrice(afterState.avgCost),
+            afterAvgCostText: " " + formatPrice(afterState.avgCost, this.data.form.initialPrice),
 
             amountText: " " + formatMoney(amount),
             feeText: " " + formatMoney(fee.totalFee),
@@ -585,7 +593,7 @@ Component({
         },
         {
           label: "卖出后成本价",
-          value: " " + formatPrice(afterState.avgCost),
+          value: " " + formatPrice(afterState.avgCost, this.data.form.initialPrice),
         },
         {
           label: "卖出后持仓成本",
@@ -599,7 +607,7 @@ Component({
           actionText: "卖出后",
           theme: "sell",
           mainItems: [
-            { label: "操作后成本价", value: " " + formatPrice(afterState.avgCost) },
+            { label: "操作后成本价", value: " " + formatPrice(afterState.avgCost, this.data.form.initialPrice) },
             { label: "操作后股数", value: formatNumber(afterState.shares, 0) + " 股" }
           ],
           detailItems: [
@@ -620,7 +628,7 @@ Component({
           afterSharesText: formatNumber(afterState.shares, 0) + " 股",
 
           afterAvgCostLabel: "卖出后成本价",
-          afterAvgCostText: " " + formatPrice(afterState.avgCost),
+          afterAvgCostText: " " + formatPrice(afterState.avgCost, this.data.form.initialPrice),
 
           amountText: " " + formatMoney(amount),
           feeText: " " + formatMoney(fee.totalFee),
@@ -725,9 +733,13 @@ Component({
         operations: [],
         showEmbeddedAmountPanel: false,
         showBaseDetail: false,
+        summary: null,
+        preview: null,
+        baseInfo: null,
+      }, () => {
+        this.refreshAll();
+        this.persistState();
       });
-      this.refreshAll();
-      this.persistState();
     },
 
     persistState() {

@@ -28,31 +28,31 @@
 }
 
 .calculator-shell.embedded .field {
-  margin-bottom: 7rpx;
+  margin-bottom: 22rpx;
 }
 
 .calculator-shell.embedded .label {
-  margin-bottom: 5rpx;
-  font-size: 22rpx;
+  margin-bottom: 10rpx;
+  font-size: 26rpx;
 }
 
 .calculator-shell.embedded .input {
-  height: 52rpx;
-  font-size: 25rpx;
+  height: 64rpx;
+  font-size: 28rpx;
 }
 
 .calculator-shell.embedded .step-field {
-  grid-template-columns: 42rpx minmax(0, 1fr) 42rpx;
-  gap: 5rpx;
+  grid-template-columns: 54rpx minmax(0, 1fr) 54rpx;
+  gap: 8rpx;
 }
 
 .calculator-shell.embedded .step-button {
-  width: 42rpx;
-  min-width: 42rpx;
-  max-width: 42rpx;
-  height: 42rpx;
-  line-height: 42rpx;
-  font-size: 25rpx;
+  width: 54rpx;
+  min-width: 54rpx;
+  max-width: 54rpx;
+  height: 54rpx;
+  line-height: 54rpx;
+  font-size: 30rpx;
 }
 
 .calculator-shell.embedded .segmented {
@@ -61,21 +61,21 @@
 }
 
 .calculator-shell.embedded .segment {
-  height: 48rpx;
-  line-height: 48rpx;
-  font-size: 23rpx;
+  height: 64rpx;
+  line-height: 64rpx;
+  font-size: 28rpx;
 }
 
 .calculator-shell.embedded .button-row {
-  gap: 10rpx;
+  gap: 16rpx;
   margin-top: 20rpx;
 }
 
 .calculator-shell.embedded .button-row .button {
-  height: 58rpx;
-  line-height: 58rpx;
-  min-height: 58rpx;
-  font-size: 25rpx;
+  height: 78rpx;
+  line-height: 78rpx;
+  min-height: 78rpx;
+  font-size: 30rpx;
 }
 
 .calculator-shell.embedded .notice {
@@ -168,6 +168,15 @@ calculator-form-header {
   font-size: 22rpx;
   font-weight: 700;
   box-sizing: border-box;
+}
+
+.amount-toggle-under-shares {
+  min-height: 38rpx;
+  margin: 8rpx 0 0;
+  padding-left: 0;
+  justify-content: flex-end;
+  gap: 8rpx;
+  font-size: 21rpx;
 }
 
 .base-position-card {
