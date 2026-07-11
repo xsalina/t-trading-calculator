@@ -156,6 +156,9 @@ function applyExternalFormPreset(pageKey, baseForm, query) {
     withValue(form, "coverPrice", currentPrice);
     withValue(form, "shares", quantity);
     withValue(form, "coverAmount", getAmount(currentPrice, quantity));
+    if (direction === "REVERSE_T") {
+      withValue(form, "externalSellFee", pick(data, ["fee"]));
+    }
     applied = true;
   } else if (pageKey === "break-even") {
     withValue(form, "costPrice", avgCost);

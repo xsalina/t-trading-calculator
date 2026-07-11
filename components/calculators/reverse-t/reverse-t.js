@@ -24,6 +24,10 @@ function calcSharesByAmount(amount, price, convertUnit) {
   return Math.max(0, Math.floor(rawShares / unit) * unit);
 }
 
+function hasExternalFee(value) {
+  return value !== undefined && value !== null && String(value).trim() !== "";
+}
+
 function makeTimeText() {
   const date = new Date();
   const pad = (value) => String(value).padStart(2, "0");
@@ -44,7 +48,12 @@ function formatSignedMoney(value) {
   return " 0.00";
 }
 
-function calcAllocatedSellFee({ sellPrice, shares, basePendingShares, feeSettings, includeFee }) {
+function calcAllocatedSellFee({ sellPrice, shares, basePendingShares, feeSettings, includeFee, externalSellFee }) {
+  if (hasExternalFee(externalSellFee)) {
+    if (!basePendingShares || !shares) return 0;
+    return safeMultiply(safeNumber(externalSellFee), safeDivide(shares, basePendingShares));
+  }
+
   const totalSellAmount = safeMultiply(safeNumber(sellPrice), safeNumber(basePendingShares));
   if (!totalSellAmount || !basePendingShares || !shares) return 0;
   const totalSellFee = calcTradeFee({
@@ -66,7 +75,8 @@ Component(createCalculatorComponent({
     convertUnit: "100",
     roundLot: true,
     baseInitialized: false,
-    basePendingShares: ""
+    basePendingShares: "",
+    externalSellFee: ""
   },
   calculate: calcReverseT,
   afterInit() {
@@ -171,13 +181,16 @@ Component(createCalculatorComponent({
     buildBaseSellCard(basePendingShares) {
       const sellPrice = safeNumber(this.data.form.sellPrice);
       const sellAmount = safeMultiply(sellPrice, basePendingShares);
-      const sellFee = calcTradeFee({
-        amount: sellAmount,
-        direction: "SELL",
-        feeSettings: this.data.feeSettings,
-        includeFee: this.data.form.includeFee
-      });
-      const initialCashFlow = safeSubtract(sellAmount, sellFee.totalFee);
+      const externalFeeUsed = hasExternalFee(this.data.form.externalSellFee);
+      const sellFeeTotal = externalFeeUsed
+        ? safeNumber(this.data.form.externalSellFee)
+        : calcTradeFee({
+          amount: sellAmount,
+          direction: "SELL",
+          feeSettings: this.data.feeSettings,
+          includeFee: this.data.form.includeFee
+        }).totalFee;
+      const initialCashFlow = safeSubtract(sellAmount, sellFeeTotal);
 
       return {
         title: "初始化卖出",
@@ -189,7 +202,7 @@ Component(createCalculatorComponent({
         ],
         detailItems: [
           { label: "卖出金额", value: " " + formatMoney(sellAmount) },
-          { label: "手续费", value: " " + formatMoney(sellFee.totalFee) },
+          { label: externalFeeUsed ? "外部卖出手续费" : "卖出手续费", value: " " + formatMoney(sellFeeTotal) },
           { label: "初始资金流", value: formatSignedMoney(initialCashFlow), className: resultClass(initialCashFlow) }
         ]
       };
@@ -213,7 +226,8 @@ Component(createCalculatorComponent({
         shares,
         basePendingShares,
         feeSettings: this.data.feeSettings,
-        includeFee: this.data.form.includeFee
+        includeFee: this.data.form.includeFee,
+        externalSellFee: this.data.form.externalSellFee
       });
       const coverFee = calcTradeFee({
         amount: coverAmount,
@@ -263,7 +277,8 @@ Component(createCalculatorComponent({
           shares,
           basePendingShares,
           feeSettings: this.data.feeSettings,
-          includeFee: this.data.form.includeFee
+          includeFee: this.data.form.includeFee,
+          externalSellFee: this.data.form.externalSellFee
         });
         const coverFee = calcTradeFee({
           amount: coverAmount,
@@ -371,6 +386,7 @@ Component(createCalculatorComponent({
           roundLot: true,
           baseInitialized: false,
           basePendingShares: "",
+          externalSellFee: "",
           includeFee: this.data.feeSettings.useFee
         },
         records: [],
