@@ -14,18 +14,18 @@ const CALCULATORS = [
     url: "/pages/t-profit/t-profit"
   },
   {
+    type: "average-down",
+    shortName: "补仓",
+    name: "补仓降本计算器",
+    desc: "测算补仓后的新成本价",
+    url: "/pages/average-down/average-down"
+  },
+  {
     type: "break-even",
     shortName: "回本",
     name: "回本计算器",
     desc: "测算当前价回到成本价需要涨多少",
     url: "/pages/break-even/break-even"
-  },
-  {
-    type: "reverse-t",
-    shortName: "反T",
-    name: "反T回补计算器",
-    desc: "测算先卖后买的回补空间和净收益",
-    url: "/pages/reverse-t/reverse-t"
   },
   {
     type: "take-profit",
@@ -34,12 +34,13 @@ const CALCULATORS = [
     desc: "按目标收益反推卖出价",
     url: "/pages/take-profit/take-profit"
   },
+
   {
-    type: "average-down",
-    shortName: "补仓",
-    name: "补仓降本计算器",
-    desc: "测算补仓后的新成本价",
-    url: "/pages/average-down/average-down"
+    type: "reverse-t",
+    shortName: "反T",
+    name: "反T回补计算器",
+    desc: "测算先卖后买的回补空间和净收益",
+    url: "/pages/reverse-t/reverse-t"
   },
   {
     type: "sell-estimate",
@@ -67,6 +68,7 @@ const CALCULATORS = [
 Page({
   data: {
     calculators: CALCULATORS,
+    bottomCalculators: CALCULATORS.slice().reverse(),
     showAllCalculators: false,
     defaultCalculatorType: SYSTEM_DEFAULT_CALCULATOR_TYPE,
     defaultCalculator: CALCULATORS[0],

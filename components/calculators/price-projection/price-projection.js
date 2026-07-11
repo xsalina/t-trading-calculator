@@ -1,7 +1,7 @@
 const { calcPriceProjection } = require("../../../utils/calculators");
 const { getSavedState, saveState } = require("../../../utils/pageState");
 const { safeNumber, safeMultiply, roundTo, formatMoney, formatNumber, formatPrice } = require("../../../utils/math");
-const { applyExternalFormPreset } = require("../../../utils/externalEntry");
+const { applyExternalFormPreset, isExternalEntry } = require("../../../utils/externalEntry");
 const { appendSource, copyText, rowMap } = require("../../../utils/resultCopy");
 
 const PAGE_KEY = "price-projection";
@@ -57,13 +57,18 @@ Component({
     initCalculator() {
       const saved = getSavedState(PAGE_KEY);
       const rememberData = saved.rememberData !== false;
-      const savedForm = rememberData ? Object.assign({}, DEFAULT_FORM, saved.form || {}) : this.data.form;
-      const externalPreset = applyExternalFormPreset(PAGE_KEY, savedForm, this.data.entryQuery || {});
+      const entryQuery = this.data.entryQuery || {};
+      const savedForm = isExternalEntry(entryQuery)
+        ? Object.assign({}, DEFAULT_FORM)
+        : rememberData ? Object.assign({}, DEFAULT_FORM, saved.form || {}) : this.data.form;
+      const externalPreset = applyExternalFormPreset(PAGE_KEY, savedForm, entryQuery);
       const form = externalPreset.form;
 
       this.setData({
         rememberData,
-        form
+        form,
+        records: isExternalEntry(entryQuery) ? [] : this.data.records,
+        result: isExternalEntry(entryQuery) ? null : this.data.result
       }, () => {
         if (externalPreset.applied) {
           this.persistForm();
@@ -113,13 +118,16 @@ Component({
 
     calculate() {
       const result = calcPriceProjection(this.data.form);
-      const finalRow = ((result && result.projectionRows) || [])[49] || {};
+      const projectionRows = (result && result.projectionRows) || [];
+      const finalRow = projectionRows[projectionRows.length - 1] || {};
       const startPrice = safeNumber(this.data.form.startPrice);
       const shares = safeNumber(this.data.form.shares);
       const startMarketValue = safeMultiply(startPrice, shares);
       const record = {
         id: Date.now() + "-" + this.data.records.length,
         result,
+        projectionRows: result.projectionRows || [],
+        showDetails: true,
         resultTitle: "推演结果",
         resultTagText: "第50天",
         resultTheme: safeNumber(this.data.form.changeRate) >= 0 ? "sell" : "buy",
@@ -150,6 +158,17 @@ Component({
         records,
         result: records.length ? records[0].result : null
       });
+    },
+
+    toggleProjectionDetail(event) {
+      const id = event.currentTarget.dataset.id;
+      const records = this.data.records.map((record) => {
+        if (record.id !== id) return record;
+        return Object.assign({}, record, {
+          showDetails: !record.showDetails
+        });
+      });
+      this.setData({ records });
     },
 
     goBack() {

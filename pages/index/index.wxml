@@ -71,7 +71,7 @@
   </view>
 
   <view wx:if="{{showAllCalculators}}" class="card calculator-card compact-calculator-card bottom-calculator-list">
-    <block wx:for="{{calculators}}" wx:key="type">
+    <block wx:for="{{bottomCalculators}}" wx:key="type">
       <view class="list-item" data-url="{{item.url}}" bindtap="goCalculatorPage" hover-class="list-item-hover">
         <view class="list-item-left">
           <view class="list-icon">{{item.shortName}}</view>

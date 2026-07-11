@@ -80,24 +80,40 @@ function getCalculatorTypeByType(type) {
   return map[normalizedType] || "";
 }
 
+function getCalculatorTypeByPosition(data) {
+  if (data.direction === "REVERSE_T") return "reverse-t";
+
+  const avgCost = Number(pick(data, ["avgCost"]));
+  const currentPrice = Number(pick(data, ["currentPrice", "price"]));
+  if (!Number.isFinite(avgCost) || !Number.isFinite(currentPrice) || !avgCost || !currentPrice) {
+    return "";
+  }
+
+  if (avgCost > currentPrice) return "average-down";
+  if (avgCost < currentPrice) return "take-profit";
+  return "break-even";
+}
+
 function getEntryCalculatorType(query) {
   const data = normalizeQuery(query);
   if (!isExternalEntry(data)) return "";
   if (data.source === "account" && !hasValue(data.avgCost) && !hasValue(data.currentPrice) && !hasValue(data.type)) return "";
 
+  const positionType = getCalculatorTypeByPosition(data);
+  if (positionType) return positionType;
+
   const type = getCalculatorTypeByType(data.type);
   if (type) return type;
 
-  return data.direction === "REVERSE_T" ? "reverse-t" : "t-profit";
+  return "t-profit";
 }
 
 function getEntryRedirectUrl(query) {
   const data = normalizeQuery(query);
   if (!isExternalEntry(data) || data.source === "account") return "";
 
-  const page = getPageByType(data.type) || (data.direction === "REVERSE_T"
-    ? "/pages/reverse-t/reverse-t"
-    : "/pages/t-profit/t-profit");
+  const calculatorType = getEntryCalculatorType(data);
+  const page = getPageByType(calculatorType) || "/pages/t-profit/t-profit";
   const queryString = buildQueryString(data);
   return queryString ? page + "?" + queryString : page;
 }

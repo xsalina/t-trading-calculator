@@ -64,7 +64,7 @@
   padding: 16rpx 16rpx 16rpx 20rpx;
   border-radius: 18rpx;
   background: #ffffff;
-  border: 1rpx solid rgba(0, 184, 148, 0.18);
+  border: 1rpx solid rgba(49, 87, 200, 0.18);
   box-shadow: 0 10rpx 28rpx rgba(15, 23, 42, 0.12);
   box-sizing: border-box;
 }
@@ -74,7 +74,7 @@
 }
 
 .favorite-guide-title {
-  color: #00b894;
+  color: #3157C8;
   font-size: 25rpx;
   font-weight: 800;
   line-height: 1.25;
@@ -141,9 +141,9 @@
 }
 
 .calculator-tab.active {
-  background: #00b894;
+  background: #3157C8;
   color: #ffffff;
-  box-shadow: 0 4rpx 12rpx rgba(0, 184, 148, 0.3); /* 增加阴影，使其“浮”起来 */
+  box-shadow: 0 4rpx 12rpx rgba(49, 87, 200, 0.3); /* 增加阴影，使其“浮”起来 */
   transform: scale(1.05); /* 点击激活时微微放大，增加交互感 */
 }
 
@@ -174,8 +174,8 @@
   line-height: 40rpx;
   padding: 0 14rpx;
   border-radius: 999rpx;
-  background: rgba(0, 184, 148, 0.1);
-  color: #008f73;
+  background: rgba(49, 87, 200, 0.1);
+  color: #2446A8;
   font-size: 22rpx;
   font-weight: 700;
   text-align: center;
@@ -224,7 +224,7 @@
 
 .independent-toggle {
   flex-shrink: 0;
-  color: #008f73;
+  color: #2446A8;
   font-size: 23rpx;
   font-weight: 700;
   padding: 8rpx 0;
@@ -261,14 +261,14 @@
 .list-icon {
   width: 58rpx;
   height: 58rpx;
-  background-color: #f0fdf9;
+  background-color: #f3f6ff;
   border-radius: 16rpx;
   display: flex;
   justify-content: center;
   align-items: center;
   font-size: 22rpx;
   font-weight: 700;
-  color: #00b894;
+  color: #3157C8;
   margin-right: 14rpx;
   flex-shrink: 0;
 }
@@ -290,8 +290,8 @@
   flex-shrink: 0;
   padding: 4rpx 10rpx;
   border-radius: 999rpx;
-  background: #e8fff8;
-  color: #00b894;
+  background: #eef3ff;
+  color: #3157C8;
   font-size: 20rpx;
   font-weight: 600;
 }
@@ -318,7 +318,7 @@
   align-items: center;
   margin-bottom: 14rpx;
   box-shadow: 0 4rpx 12rpx rgba(0, 0, 0, 0.018);
-  border: 1rpx solid rgba(0, 184, 148, 0.14);
+  border: 1rpx solid rgba(49, 87, 200, 0.14);
 }
 
 /* --- 3. Pro 工具区域优化 --- */
@@ -327,7 +327,7 @@
   background: #ffffff;
   padding: 32rpx 24rpx;    /* 增加卡片内边距 */
   border-radius: 20rpx;
-  border: 1rpx solid rgba(0, 184, 148, 0.2);
+  border: 1rpx solid rgba(49, 87, 200, 0.2);
 }
 .miniapp-card-hover {
   opacity: 0.9;
@@ -363,9 +363,9 @@
   line-height: 56rpx;
   padding: 0 20rpx;
   border-radius: 999rpx;
-  background: #e8fff8;
-  border: 1rpx solid rgba(0, 184, 148, 0.22);
-  color: #008f73;
+  background: #eef3ff;
+  border: 1rpx solid rgba(49, 87, 200, 0.22);
+  color: #2446A8;
   font-size: 24rpx;
   font-weight: 700;
   text-align: center;
@@ -430,7 +430,7 @@
 
 .all-calculators-action {
   flex-shrink: 0;
-  color: #008f73;
+  color: #2446A8;
   font-size: 23rpx;
   font-weight: 700;
 }
@@ -470,13 +470,13 @@
 }
 
 .button.primary.share-button {
-  background-color: #00b894;
+  background-color: #3157C8;
   color: #ffffff;
   min-height: 78rpx;
   padding: 18rpx 0;
   font-size: 30rpx;
   font-weight: 600;
-  box-shadow: 0 8rpx 20rpx rgba(0, 184, 148, 0.2);
+  box-shadow: 0 8rpx 20rpx rgba(49, 87, 200, 0.2);
   width: 100% !important;
 }
 
@@ -600,8 +600,8 @@
   flex-shrink: 0;
   padding: 8rpx 16rpx;
   border-radius: 999rpx;
-  color: #00b894;
-  background: #e8fff8;
+  color: #3157C8;
+  background: #eef3ff;
   font-size: 22rpx;
   font-weight: 600;
 }
@@ -610,8 +610,8 @@
   margin: 14rpx 0 8rpx;
   padding: 14rpx 18rpx;
   border-radius: 14rpx;
-  background: #f0fdf9;
+  background: #f3f6ff;
   font-size: 22rpx;
-  color: #5f7f77;
+  color: #5f6f9a;
   line-height: 1.55;
 }

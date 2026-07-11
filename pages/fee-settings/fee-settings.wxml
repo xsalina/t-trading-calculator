@@ -6,7 +6,7 @@
         <view>默认计入手续费</view>
         <view class="hint">计算器打开时会默认使用这个选择</view>
       </view>
-      <switch color="#00b894" checked="{{form.useFee}}" data-key="useFee" bindchange="onSwitchChange" />
+      <switch color="#3157C8" checked="{{form.useFee}}" data-key="useFee" bindchange="onSwitchChange" />
     </view>
   </view>
 
@@ -15,7 +15,7 @@
     <view class="field">
       <view class="switch-row">
         <view>启用券商佣金</view>
-        <switch color="#00b894" checked="{{form.commissionEnabled}}" data-key="commissionEnabled" bindchange="onSwitchChange" />
+        <switch color="#3157C8" checked="{{form.commissionEnabled}}" data-key="commissionEnabled" bindchange="onSwitchChange" />
       </view>
     </view>
     <view class="field">
@@ -26,7 +26,7 @@
     <view class="field">
       <view class="switch-row">
         <view>启用最低佣金</view>
-        <switch color="#00b894" checked="{{form.commissionMinEnabled}}" data-key="commissionMinEnabled" bindchange="onSwitchChange" />
+        <switch color="#3157C8" checked="{{form.commissionMinEnabled}}" data-key="commissionMinEnabled" bindchange="onSwitchChange" />
       </view>
     </view>
     <view class="field">
@@ -40,7 +40,7 @@
     <view class="field">
       <view class="switch-row">
         <view>启用过户费</view>
-        <switch color="#00b894" checked="{{form.transferFeeEnabled}}" data-key="transferFeeEnabled" bindchange="onSwitchChange" />
+        <switch color="#3157C8" checked="{{form.transferFeeEnabled}}" data-key="transferFeeEnabled" bindchange="onSwitchChange" />
       </view>
     </view>
     <view class="field">
@@ -55,7 +55,7 @@
     <view class="field">
       <view class="switch-row">
         <view>启用印花税</view>
-        <switch color="#00b894" checked="{{form.stampDutyEnabled}}" data-key="stampDutyEnabled" bindchange="onSwitchChange" />
+        <switch color="#3157C8" checked="{{form.stampDutyEnabled}}" data-key="stampDutyEnabled" bindchange="onSwitchChange" />
       </view>
     </view>
     <view class="field">
@@ -66,7 +66,7 @@
     <view class="field">
       <view class="switch-row">
         <view>仅卖出收取</view>
-        <switch color="#00b894" checked="{{form.stampDutyOnlySell}}" data-key="stampDutyOnlySell" bindchange="onSwitchChange" />
+        <switch color="#3157C8" checked="{{form.stampDutyOnlySell}}" data-key="stampDutyOnlySell" bindchange="onSwitchChange" />
       </view>
     </view>
   </view>

@@ -6,7 +6,7 @@ const {
   makeTimeText
 } = require("./pageState");
 const { safeNumber, roundTo } = require("./math");
-const { applyExternalFormPreset } = require("./externalEntry");
+const { applyExternalFormPreset, isExternalEntry } = require("./externalEntry");
 const { buildGenericResultCopy, copyText } = require("./resultCopy");
 const { buildFeeSummary } = require("./feeSummary");
 
@@ -61,19 +61,25 @@ function createCalculatorComponent(options) {
         const saved = getSavedState(options.pageKey);
         const rememberData = saved.rememberData !== false;
         const savedForm = saved.form || {};
-        let form = rememberData
+        const entryQuery = this.data.entryQuery || {};
+        const hasExternalEntry = isExternalEntry(entryQuery);
+        let form = hasExternalEntry
+          ? Object.assign({}, defaultForm, { includeFee: feeSettings.useFee })
+          : rememberData
           ? Object.assign({}, defaultForm, savedForm, {
             includeFee: typeof savedForm.includeFee === "boolean" ? savedForm.includeFee : feeSettings.useFee
           })
           : Object.assign({}, this.data.form, { includeFee: feeSettings.useFee });
-        const externalPreset = applyExternalFormPreset(options.pageKey, form, this.data.entryQuery || {});
+        const externalPreset = applyExternalFormPreset(options.pageKey, form, entryQuery);
         form = externalPreset.form;
 
         this.setData({
           feeSettings,
           feeSummary: buildFeeSummary(feeSettings, form.includeFee),
           rememberData,
-          form
+          form,
+          records: hasExternalEntry ? [] : this.data.records,
+          result: hasExternalEntry ? null : this.data.result
         }, () => {
           if (typeof options.afterInit === "function") {
             options.afterInit.call(this, externalPreset);

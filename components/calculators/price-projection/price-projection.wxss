@@ -1,1 +1,59 @@
 @import "../calculator-common.wxss";
+
+.projection-detail-card {
+  width: 100%;
+  margin: -8rpx 0 18rpx;
+  padding: 0 16rpx 14rpx;
+  border-radius: 0 0 16rpx 16rpx;
+  background: #ffffff;
+  border-top: 1rpx solid #eef2f7;
+  box-sizing: border-box;
+}
+
+.projection-detail-toggle {
+  min-height: 64rpx;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  color: #2446A8;
+  font-size: 24rpx;
+  font-weight: 700;
+}
+
+.projection-table {
+  overflow: hidden;
+  border-radius: 12rpx;
+  border: 1rpx solid #e8eef5;
+}
+
+.projection-head,
+.projection-line {
+  display: grid;
+  grid-template-columns: 1.05fr 1.15fr 1.4fr 1.35fr 1.25fr;
+  align-items: center;
+  gap: 8rpx;
+  padding: 12rpx 10rpx;
+  box-sizing: border-box;
+}
+
+.projection-head {
+  background: #f8fafc;
+  color: #64748b;
+  font-size: 20rpx;
+  font-weight: 700;
+}
+
+.projection-line {
+  min-height: 58rpx;
+  color: #334155;
+  font-size: 20rpx;
+  border-top: 1rpx solid #eef2f7;
+}
+
+.projection-line text,
+.projection-head text {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}

@@ -58,8 +58,8 @@
 }
 
 .calculator-form-default-pill.can-set {
-  background: #e8fff8;
-  color: #00b894;
+  background: #eef3ff;
+  color: #3157C8;
 }
 
 .calculator-form-default-help,
@@ -101,7 +101,7 @@
 .calculator-form-fee navigator,
 .calculator-form-fee navigator {
   flex-shrink: 0;
-  color: #008f73;
+  color: #2446A8;
   font-size: 20rpx;
   font-weight: 700;
 }

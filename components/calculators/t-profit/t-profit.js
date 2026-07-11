@@ -20,7 +20,7 @@ const {
   getShareMessage,
   getShareTimelineMessage,
 } = require("../../../utils/share");
-const { applyExternalFormPreset } = require("../../../utils/externalEntry");
+const { applyExternalFormPreset, isExternalEntry } = require("../../../utils/externalEntry");
 const { appendSource, copyText, rowMap } = require("../../../utils/resultCopy");
 const { buildFeeSummary } = require("../../../utils/feeSummary");
 
@@ -113,7 +113,11 @@ Component({
       const feeSettings = getFeeSettings();
       const saved = getSavedState(PAGE_KEY);
       const rememberData = saved.rememberData !== false;
-      let form = rememberData
+      const entryQuery = this.data.entryQuery || {};
+      const hasExternalEntry = isExternalEntry(entryQuery);
+      let form = hasExternalEntry
+        ? Object.assign({}, DEFAULT_FORM, { includeFee: feeSettings.useFee })
+        : rememberData
         ? Object.assign({}, DEFAULT_FORM, saved.form || {}, {
             includeFee:
               typeof (saved.form || {}).includeFee === "boolean"
@@ -122,12 +126,12 @@ Component({
           })
         : Object.assign({}, this.data.form, { includeFee: feeSettings.useFee });
       form.convertUnit = String(getConvertUnit(form));
-      const operations = rememberData ? saved.operations || [] : [];
+      const operations = hasExternalEntry ? [] : rememberData ? saved.operations || [] : [];
       form.baseInitialized = Boolean(form.baseInitialized || operations.length);
       const externalPreset = applyExternalFormPreset(
         PAGE_KEY,
         form,
-        this.data.entryQuery || {},
+        entryQuery,
       );
       form = externalPreset.form;
 
@@ -138,6 +142,8 @@ Component({
           rememberData,
           form,
           operations,
+          showEmbeddedAmountPanel: hasExternalEntry ? false : this.data.showEmbeddedAmountPanel,
+          showBaseDetail: hasExternalEntry ? false : this.data.showBaseDetail,
         },
         () => {
           if (operations.length) {
@@ -699,7 +705,7 @@ Component({
         title: "确认撤销这笔操作？",
         content: "撤销后会重新计算后续持仓、成本和收益。",
         confirmText: "撤销",
-        confirmColor: "#00b894",
+        confirmColor: "#3157C8",
         success: (res) => {
           if (!res.confirm) return;
           const remainingOperations = this.data.operations.filter(

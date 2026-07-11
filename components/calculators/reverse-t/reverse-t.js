@@ -343,7 +343,7 @@ Component(createCalculatorComponent({
         title: "确认撤销这笔回补？",
         content: "撤销后会重新计算剩余待回补数量和反T收益。",
         confirmText: "撤销",
-        confirmColor: "#00b894",
+        confirmColor: "#3157C8",
         success: (res) => {
           if (!res.confirm) return;
           const basePendingShares = this.getBasePendingShares(safeNumber(this.data.form.shares));

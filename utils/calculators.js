@@ -223,7 +223,18 @@ function calcPriceProjection(input) {
   const changeRate = safeDivide(safeNumber(input.changeRate), 100);
   const days = 50;
   const startDate = new Date();
-  const rows = [];
+  const startMarketValue = safeMultiply(startPrice, shares);
+  const rows = [
+    {
+      day: 0,
+      dateText: "初始",
+      price: " " + formatPrice(startPrice, input.startPrice),
+      marketValue: " " + formatMoney(startMarketValue),
+      profit: " " + formatMoney(0),
+      changeRate: formatRate(0),
+      className: ""
+    }
+  ];
 
   for (let day = 1; day <= days; day += 1) {
     const currentDate = new Date(startDate.getTime());
@@ -246,7 +257,6 @@ function calcPriceProjection(input) {
   }
 
   const finalRow = rows[rows.length - 1] || {};
-  const startMarketValue = safeMultiply(startPrice, shares);
   const finalPrice = safeMultiply(startPrice, Math.pow(1 + changeRate, days));
   const finalMarketValue = safeMultiply(finalPrice, shares);
   const marketValueChange = safeSubtract(finalMarketValue, startMarketValue);
