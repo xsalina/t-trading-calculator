@@ -1,1 +1,5 @@
-<grid-calculator entry-query="{{entryQuery}}"></grid-calculator>
+<grid-calculator embedded="{{false}}" calculator-key="grid" entry-query="{{entryQuery}}"></grid-calculator>
+<view class="back-to-top {{showBackToTop ? 'visible' : ''}}" bindtap="backToTop">
+  <text class="back-to-top-icon">↑</text>
+  <text class="back-to-top-text">顶部</text>
+</view>

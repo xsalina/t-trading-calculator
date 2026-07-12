@@ -101,8 +101,8 @@
       <view class="field-tip">填写金额后，将按所选单位自动换算股数</view>
     </view>
     <view class="button-row">
-      <button class="button primary" bindtap="saveOperation">
-        {{form.baseInitialized ? '保存操作' : '初始化底仓'}}
+      <button class="button primary" bindtap="saveOperation" disabled="{{submitting}}">
+        {{submitting ? '保存中…' : (form.baseInitialized ? '保存操作' : '初始化底仓')}}
       </button>
       <button class="button plain" bindtap="clearAll">全部清除</button>
     </view>
@@ -115,7 +115,7 @@
     main-items="{{preview.view.mainItems}}"
     detail-items="{{preview.view.detailItems}}"
   />
-  <view wx:if="{{summary && form.baseInitialized}}" class="card summary-card compact-summary-card">
+  <view wx:if="{{summary && form.baseInitialized}}" id="{{calculatorKey}}-first-result-card" class="card summary-card compact-summary-card">
     <view class="summary-title">当前持仓</view>
     <view class="summary-main">
       <view class="summary-main-label">{{summary.main.label}}</view>
@@ -130,20 +130,28 @@
       </block>
     </view>
   </view>
+  <view wx:if="{{operations.length > 1}}" class="operation-sort-row">
+    <view class="operation-sort-control">
+      <text class="operation-sort-label">最新操作在前</text>
+      <switch checked="{{latestFirst}}" color="#3157C8" bindchange="onOperationSortChange" />
+    </view>
+  </view>
   <view wx:if="{{operations.length}}" class="embedded-record-list">
-    <block wx:for="{{operations}}" wx:key="id">
-      <calculator-result-card
-        title="{{item.resultTitle}}"
-        tag="{{item.resultTagText}}"
-        time-text="{{item.resultTimeText}}"
-        theme="{{item.resultTheme}}"
-        main-items="{{item.mainItems}}"
-        detail-items="{{item.detailItems}}"
-        removable="{{true}}"
-        remove-text="撤销本笔"
-        record-id="{{item.id}}"
-        bindremove="undoOperation"
-      />
+    <block wx:for="{{displayOperations}}" wx:key="id">
+      <view id="{{calculatorKey}}-operation-{{item.id}}">
+        <calculator-result-card
+          title="{{item.resultTitle}}"
+          tag="{{item.resultTagText}}"
+          time-text="{{item.resultTimeText}}"
+          theme="{{item.resultTheme}}"
+          main-items="{{item.mainItems}}"
+          detail-items="{{item.detailItems}}"
+          removable="{{true}}"
+          remove-text="撤销本笔"
+          record-id="{{item.id}}"
+          bindremove="undoOperation"
+        />
+      </view>
     </block>
   </view>
   <view wx:if="{{operations.length && embedded}}" class="result-action-row">

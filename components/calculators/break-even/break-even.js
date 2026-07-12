@@ -22,22 +22,30 @@ Component(createCalculatorComponent({
   calculate: calcBreakEven,
   decorateRecord({ result, form }) {
     const shares = safeNumber(form.shares);
+    const status = findRow(result, "状态").value || "未回本";
+    const isRecovered = status === "已回本";
     return {
       resultTitle: "回本结果",
-      resultTagText: "目标回本",
-      resultTheme: "neutral",
+      resultTagText: status,
+      resultTheme: isRecovered ? "sell" : "buy",
       mainItems: [
         { label: "回本目标价", value: findRow(result, "回本目标价").value || "-" },
-        { label: "还需上涨比例", value: findRow(result, "需上涨比例").value || "-", className: findRow(result, "需上涨比例").className || "" }
+        isRecovered
+          ? { label: "当前盈利比例", value: findRow(result, "当前盈利比例").value || "-", className: findRow(result, "当前盈利比例").className || "" }
+          : { label: "还需上涨比例", value: findRow(result, "还需上涨比例").value || "-", className: findRow(result, "还需上涨比例").className || "" }
       ],
-      detailItems: [
-        { label: "当前盈亏", value: findRow(result, "当前盈亏").value || "-", className: findRow(result, "当前盈亏").className || "" },
-        { label: "需上涨金额", value: findRow(result, "需上涨金额").value || "-", className: findRow(result, "需上涨金额").className || "" },
+      detailItems: (isRecovered ? [
+        { label: "每股高于回本价", value: findRow(result, "每股高于回本价").value || "-", className: findRow(result, "每股高于回本价").className || "" },
+        { label: "当前盈利", value: findRow(result, "当前盈利").value || "-", className: findRow(result, "当前盈利").className || "" }
+      ] : [
+        { label: "每股还需上涨", value: findRow(result, "每股还需上涨").value || "-", className: findRow(result, "每股还需上涨").className || "" },
+        { label: "当前亏损", value: findRow(result, "当前亏损").value || "-", className: findRow(result, "当前亏损").className || "" }
+      ]).concat([
         { label: "持仓成本", value: findRow(result, "持仓成本").value || "-" },
         { label: "当前市值", value: findRow(result, "当前市值").value || "-" },
         { label: "回本目标市值", value: findRow(result, "回本目标市值").value || "-" },
         { label: "持仓股数", value: formatNumber(shares, 0) + "股" }
-      ]
+      ])
     };
   }
 }));

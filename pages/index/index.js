@@ -1,4 +1,5 @@
 const TRADE_RECORD_MINI_PROGRAM_APP_ID = "wx253309efe732b547";
+const ARTICLE_URL = "https://mp.weixin.qq.com/s/u23rAa1l3od1e3Tuu-j__w";
 const DEFAULT_CALCULATOR_TYPE_KEY = "defaultCalculatorType";
 const FAVORITE_GUIDE_DISMISSED_KEY = "favoriteGuideDismissed";
 const SYSTEM_DEFAULT_CALCULATOR_TYPE = "t-profit";
@@ -77,6 +78,7 @@ Page({
     entryQuery: {},
     showDefaultPicker: false,
     showFavoriteGuide: false,
+    showBackToTop: false,
   },
 
   onLoad(options) {
@@ -131,7 +133,10 @@ Page({
   },
 
   switchHomeCalculator(event) {
-    this.setActiveCalculator(event.currentTarget.dataset.type);
+    const type = event.currentTarget.dataset.type;
+    if (type === this.data.activeCalculatorType) return;
+    this.setActiveCalculator(type);
+    this.scrollHomeCalculatorAfterSwitch(type);
   },
 
   initFavoriteGuide() {
@@ -184,6 +189,56 @@ Page({
       activeCalculator: calculator
     });
     this.hasActiveCalculatorChanged = true;
+  },
+
+  scrollHomeCalculatorAfterSwitch(type) {
+    const resultSelector = "#" + type + "-first-result-card";
+    wx.nextTick(() => {
+      wx.createSelectorQuery()
+        .select(resultSelector)
+        .boundingClientRect((rect) => {
+          wx.pageScrollTo({
+            selector: rect ? resultSelector : "#homeCalculator",
+            duration: 300,
+            offsetTop: rect ? -16 : 0
+          });
+        })
+        .exec();
+    });
+  },
+
+  onCalculatorResultReady(event) {
+    const detail = event.detail || {};
+    if (detail.calculatorKey !== this.data.activeCalculatorType) return;
+
+    wx.nextTick(() => {
+      if (typeof detail.scrollTop === "number") {
+        wx.pageScrollTo({
+          scrollTop: detail.scrollTop,
+          duration: 300
+        });
+        return;
+      }
+      wx.pageScrollTo({
+        selector: detail.selector,
+        duration: 300,
+        offsetTop: -16
+      });
+    });
+  },
+
+  onPageScroll(event) {
+    const shouldShow = event.scrollTop > 500;
+    if (shouldShow === this.data.showBackToTop) return;
+    this.setData({ showBackToTop: shouldShow });
+  },
+
+  backToTop() {
+    wx.pageScrollTo({
+      scrollTop: 0,
+      duration: 300
+    });
+    this.setData({ showBackToTop: false });
   },
 
   setCurrentAsDefault() {
@@ -264,9 +319,8 @@ Page({
   },
 
   openArticle() {
-    wx.showToast({
-      title: "使用说明更新中",
-      icon: "none"
+    wx.navigateTo({
+      url: "/pages/article-webview/article-webview?url=" + encodeURIComponent(ARTICLE_URL)
     });
   },
 

@@ -17,54 +17,56 @@
   </view>
 
   <view class="button-row action-row">
-    <button class="button primary" bindtap="calculate">计算50天</button>
+    <button class="button primary" bindtap="calculate" disabled="{{submitting}}">{{submitting ? '生成中…' : '计算50天'}}</button>
     <button wx:if="{{!embedded}}" class="button plain" bindtap="goBack">返回</button>
   </view>
 
-  <view wx:if="{{records.length}}" class="embedded-record-list">
+  <view wx:if="{{records.length}}" class="embedded-record-list result-section">
     <block wx:for="{{records}}" wx:key="id">
-      <calculator-result-card
-        title="{{item.resultTitle}}"
-        tag="{{item.resultTagText}}"
-        theme="{{item.resultTheme}}"
-        main-items="{{item.mainItems}}"
-        detail-items="{{item.detailItems}}"
-        removable="{{true}}"
-        remove-text="删除"
-        record-id="{{item.id}}"
-        bindremove="removeRecord"
-      />
-      <view class="projection-detail-card">
-        <view class="projection-detail-toggle" data-id="{{item.id}}" bindtap="toggleProjectionDetail">
-          <text>近50天明细</text>
-          <text>{{item.showDetails ? '收起' : '展开 >'}}</text>
+      <view id="{{index === 0 ? calculatorKey + '-first-result-card' : calculatorKey + '-record-' + item.id}}">
+        <calculator-result-card
+          title="{{item.resultTitle}}"
+          tag="{{item.resultTagText}}"
+          theme="{{item.resultTheme}}"
+          main-items="{{item.mainItems}}"
+          detail-items="{{item.detailItems}}"
+          removable="{{true}}"
+          remove-text="删除"
+          record-id="{{item.id}}"
+          bindremove="removeRecord"
+        />
+        <view class="result-action-row record-result-action-row">
+          <button class="button secondary result-share-button" data-id="{{item.id}}" bindtap="setShareRecord" open-type="share">分享给朋友</button>
+          <button class="button secondary result-copy-button" data-id="{{item.id}}" bindtap="copyResult">复制结果</button>
         </view>
-        <view wx:if="{{item.showDetails}}" class="projection-table">
-          <view class="projection-head">
-            <text>天数/日期</text>
-            <text>价格</text>
-            <text>市值</text>
-            <text>盈亏</text>
-            <text>累计涨跌</text>
+        <view class="projection-detail-card">
+          <view class="projection-detail-toggle" data-id="{{item.id}}" bindtap="toggleProjectionDetail">
+            <text>近50天明细</text>
+            <text>{{item.showDetails ? '收起' : '展开 >'}}</text>
           </view>
-          <block wx:for="{{item.projectionRows}}" wx:for-item="row" wx:key="day">
-            <view class="projection-line">
-              <text>{{row.dateText}}</text>
-              <text>{{row.price}}</text>
-              <text>{{row.marketValue}}</text>
-              <text class="{{row.className}}">{{row.profit}}</text>
-              <text class="{{row.className}}">{{row.changeRate}}</text>
+          <view wx:if="{{item.showDetails}}" class="projection-table">
+            <view class="projection-head">
+              <text>天数/日期</text>
+              <text>价格</text>
+              <text>市值</text>
+              <text>盈亏</text>
+              <text>累计涨跌</text>
             </view>
-          </block>
+            <block wx:for="{{item.projectionRows}}" wx:for-item="row" wx:key="day">
+              <view class="projection-line">
+                <text>{{row.dateText}}</text>
+                <text>{{row.price}}</text>
+                <text>{{row.marketValue}}</text>
+                <text class="{{row.className}}">{{row.profit}}</text>
+                <text class="{{row.className}}">{{row.changeRate}}</text>
+              </view>
+            </block>
+          </view>
         </view>
       </view>
     </block>
   </view>
 
-  <view wx:if="{{result && embedded}}" class="result-action-row">
-    <button class="button secondary result-share-button" open-type="share">分享给朋友</button>
-    <button class="button secondary result-copy-button" bindtap="copyResult">复制结果</button>
-  </view>
   <view wx:if="{{result && !embedded}}" class="result-action-bar">
     <button class="action-primary" bindtap="openTradeRecordMiniProgram">算完顺手记录这一笔</button>
     <button class="action-secondary" open-type="share">分享给朋友</button>

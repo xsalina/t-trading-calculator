@@ -1,1 +1,24 @@
 @import "../calculator-common.wxss";
+
+calculator-result-card .result-card-main-item:first-child {
+  background: #F7F8FA;
+  border-color: #E6EAF2;
+}
+
+calculator-result-card .result-card-main-item:first-child text:last-child {
+  color: #173B8F;
+  background: transparent;
+  padding: 0;
+  font-size: 42rpx;
+  font-weight: 800;
+}
+
+calculator-result-card .result-card-main-item:nth-child(2) {
+  background: #FFF4F1;
+  border-color: #FAD8CF;
+}
+
+calculator-result-card .result-card-main-item:nth-child(2) text:last-child {
+  font-size: 38rpx;
+  font-weight: 800;
+}

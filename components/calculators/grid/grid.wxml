@@ -8,37 +8,41 @@
     <view class="field"><text class="label">每档股数</text><view class="step-field"><button class="step-button" data-key="shares" data-step="-100" data-min="0" bindtap="adjustNumber">-</button><input class="input" type="number" value="{{form.shares}}" data-key="shares" bindinput="onInput" /><button class="step-button" data-key="shares" data-step="100" data-min="0" bindtap="adjustNumber">+</button></view></view>
   </view>
   <view class="button-row action-row">
-    <button class="button primary" bindtap="calculate">计算</button>
+    <button class="button primary" bindtap="calculate" disabled="{{submitting}}">{{submitting ? '生成中…' : '计算'}}</button>
     <button wx:if="{{!embedded}}" class="button plain" bindtap="goBack">返回</button>
   </view>
-  <view wx:if="{{records.length}}" class="embedded-record-list">
+  <view wx:if="{{records.length}}" class="embedded-record-list result-section">
     <block wx:for="{{records}}" wx:key="id">
-      <calculator-result-card
-        title="{{item.resultTitle}}"
-        tag="{{item.resultTagText}}"
-        theme="{{item.resultTheme}}"
-        main-items="{{item.mainItems}}"
-        detail-items="{{item.detailItems}}"
-        removable="{{true}}"
-        remove-text="删除"
-        record-id="{{item.id}}"
-        bindremove="removeRecord"
-      />
+      <view id="{{index === 0 ? calculatorKey + '-first-result-card' : calculatorKey + '-record-' + item.id}}">
+        <calculator-result-card
+          title="{{item.resultTitle}}"
+          tag="{{item.resultTagText}}"
+          theme="{{item.resultTheme}}"
+          main-items="{{item.mainItems}}"
+          detail-items="{{item.detailItems}}"
+          removable="{{true}}"
+          remove-text="删除"
+          record-id="{{item.id}}"
+          bindremove="removeRecord"
+        />
+        <view class="result-action-row record-result-action-row">
+          <button class="button secondary result-share-button" data-id="{{item.id}}" bindtap="setShareRecord" open-type="share">分享给朋友</button>
+          <button class="button secondary result-copy-button" data-id="{{item.id}}" bindtap="copyResult">复制结果</button>
+        </view>
+        <view class="grid-detail-card">
+          <view class="grid-detail-toggle" data-id="{{item.id}}" bindtap="toggleGridDetail">
+            <text>网格明细</text>
+            <text>{{item.showDetails ? '收起' : '展开 >'}}</text>
+          </view>
+          <view wx:if="{{item.showDetails}}" class="grid-table">
+            <view class="grid-head"><text>档位</text><text>买入价</text><text>卖出价</text><text>单档净收益</text></view>
+            <block wx:for="{{item.gridRows}}" wx:for-item="row" wx:key="level">
+              <view class="grid-line"><text>{{row.level}}</text><text>{{row.buyPrice}}</text><text>{{row.sellPrice}}</text><text class="{{row.className}}">{{row.netProfit}}</text></view>
+            </block>
+          </view>
+        </view>
+      </view>
     </block>
-  </view>
-
-  <view wx:if="{{result}}" class="card">
-    <view class="section-title">网格明细</view>
-    <view class="grid-table">
-      <view class="grid-head"><text>档位</text><text>买入价</text><text>卖出价</text><text>单档净收益</text></view>
-      <block wx:for="{{result.gridRows}}" wx:key="level">
-        <view class="grid-line"><text>{{item.level}}</text><text>{{item.buyPrice}}</text><text>{{item.sellPrice}}</text><text class="{{item.className}}">{{item.netProfit}}</text></view>
-      </block>
-    </view>
-  </view>
-  <view wx:if="{{result && embedded}}" class="result-action-row">
-    <button class="button secondary result-share-button" open-type="share">分享给朋友</button>
-    <button class="button secondary result-copy-button" bindtap="copyResult">复制结果</button>
   </view>
   <view wx:if="{{result && !embedded}}" class="result-action-bar">
     <button class="action-primary" bindtap="openTradeRecordMiniProgram">算完顺手记录这一笔</button>

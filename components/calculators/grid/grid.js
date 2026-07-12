@@ -24,6 +24,7 @@ Component(createCalculatorComponent({
     { key: "shares", label: "每档股数", suffix: "股" }
   ],
   calculate: calcGrid,
+  successToast: "网格明细已生成",
   decorateRecord({ result, form }) {
     const gridRows = (result && result.gridRows) || [];
     const firstRow = gridRows[0] || {};
@@ -34,6 +35,8 @@ Component(createCalculatorComponent({
       resultTitle: "网格结果",
       resultTagText: "网格区间",
       resultTheme: "neutral",
+      gridRows,
+      showDetails: true,
       mainItems: [
         { label: "单档净收益", value: firstRow.netProfit || "-", className: firstRow.className || "" },
         { label: "网格区间范围", value: lowPrice + " - " + highPrice }
@@ -48,5 +51,17 @@ Component(createCalculatorComponent({
         { label: "每档股数", value: formatNumber(safeNumber(form.shares), 0) + "股" }
       ]
     };
+  },
+  methods: {
+    toggleGridDetail(event) {
+      const id = event.currentTarget.dataset.id;
+      const records = this.data.records.map((record) => {
+        if (record.id !== id) return record;
+        return Object.assign({}, record, {
+          showDetails: !record.showDetails
+        });
+      });
+      this.setData({ records });
+    }
   }
 }));

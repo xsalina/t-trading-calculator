@@ -104,6 +104,19 @@ Component(createCalculatorComponent({
     ]);
   },
   methods: {
+    getDisplayRecords(records) {
+      const list = records || [];
+      return this.data.latestFirst ? list.slice().reverse() : list;
+    },
+
+    onOperationSortChange(event) {
+      const latestFirst = event.detail.value;
+      this.setData({
+        latestFirst,
+        displayRecords: latestFirst ? this.data.records.slice().reverse() : this.data.records
+      });
+    },
+
     toggleAmountPanel() {
       this.setData({ showAmountPanel: !this.data.showAmountPanel });
     },
@@ -120,6 +133,7 @@ Component(createCalculatorComponent({
     },
 
     calculate() {
+      if (this.data.submitting) return;
       if (!this.data.form.baseInitialized) {
         this.initializeSell();
         return;
@@ -142,12 +156,18 @@ Component(createCalculatorComponent({
         shares
       };
       const records = this.rebuildCoverRecords(this.data.records.concat(record), basePendingShares);
+      this.setData({ submitting: true });
       this.setData({
         basePendingShares,
         records,
-        result: this.buildCumulativeResult(records, basePendingShares)
-      }, () => this.refreshPreview());
-      this.persistForm();
+        displayRecords: this.getDisplayRecords(records),
+        result: this.buildCumulativeResult(records, basePendingShares),
+        submitting: false
+      }, () => {
+        this.refreshPreview();
+        this.persistForm();
+        this.handleResultPosition("回补结果已生成");
+      });
     },
 
     initializeSell() {
@@ -158,15 +178,20 @@ Component(createCalculatorComponent({
         return;
       }
 
+      this.setData({ submitting: true });
       this.setData({
         basePendingShares: pendingShares,
         baseSellCard: this.buildBaseSellCard(pendingShares),
         "form.baseInitialized": true,
         "form.basePendingShares": String(pendingShares),
         "form.shares": "",
-        "form.coverAmount": ""
-      }, () => this.refreshPreview());
-      this.persistForm();
+        "form.coverAmount": "",
+        submitting: false
+      }, () => {
+        this.refreshPreview();
+        this.persistForm();
+        wx.showToast({ title: "初始化完成", icon: "none", duration: 1200 });
+      });
     },
 
     getBasePendingShares(currentShares) {
@@ -176,6 +201,41 @@ Component(createCalculatorComponent({
       if (formBase) return formBase;
       const entryShares = safeNumber((this.data.entryQuery || {}).quantity);
       return entryShares || currentShares;
+    },
+
+    handleResultPosition(toastText) {
+      const selector = "#" + this.data.calculatorKey + "-first-result-card";
+      wx.showToast({ title: toastText, icon: "none", duration: 1200 });
+      wx.nextTick(() => {
+        this.scrollToResultSelector(selector);
+      });
+    },
+
+    scrollToResultSelector(selector) {
+      this.createSelectorQuery()
+        .select(selector)
+        .boundingClientRect((rect) => {
+          if (!rect) return;
+          wx.createSelectorQuery()
+            .selectViewport()
+            .scrollOffset((viewport) => {
+              const scrollTop = Math.max(0, (viewport.scrollTop || 0) + rect.top - 16);
+              if (this.data.embedded) {
+                this.triggerEvent("resultready", {
+                  calculatorKey: this.data.calculatorKey,
+                  selector,
+                  scrollTop
+                });
+                return;
+              }
+              wx.pageScrollTo({
+                scrollTop,
+                duration: 300
+              });
+            })
+            .exec();
+        })
+        .exec();
     },
 
     buildBaseSellCard(basePendingShares) {
@@ -367,6 +427,7 @@ Component(createCalculatorComponent({
           this.setData({
             basePendingShares,
             records,
+            displayRecords: this.getDisplayRecords(records),
             result: records.length ? this.buildCumulativeResult(records, basePendingShares) : this.buildCumulativeResult([], basePendingShares)
           }, () => this.refreshPreview());
           this.persistForm();
@@ -390,6 +451,7 @@ Component(createCalculatorComponent({
           includeFee: this.data.feeSettings.useFee
         },
         records: [],
+        displayRecords: [],
         result: null,
         preview: null,
         basePendingShares: 0,

@@ -28,6 +28,10 @@ function createCalculatorComponent(options) {
         type: Boolean,
         value: false
       },
+      calculatorKey: {
+        type: String,
+        value: options.pageKey || ""
+      },
       isDefaultCalculator: {
         type: Boolean,
         value: false
@@ -40,7 +44,10 @@ function createCalculatorComponent(options) {
       feeSummary: "",
       rememberData: true,
       records: [],
-      result: null
+      displayRecords: [],
+      latestFirst: true,
+      result: null,
+      submitting: false
     },
 
     lifetimes: {
@@ -157,29 +164,45 @@ function createCalculatorComponent(options) {
       },
 
       calculate() {
-        const result = options.calculate(this.data.form, this.data.feeSettings);
-        const nextCount = this.data.records.length + 1;
-        let record = {
-          id: Date.now() + "-" + nextCount,
-          title: "测算 " + nextCount,
-          timeText: makeTimeText(),
-          includeFee: this.data.form.includeFee,
-          result
-        };
-        if (typeof options.decorateRecord === "function") {
-          record = Object.assign(record, options.decorateRecord.call(this, {
-            result,
-            form: this.data.form,
-            record,
-            count: nextCount
-          }));
-        }
+        if (this.data.submitting) return;
+        this.setData({ submitting: true }, () => {
+          const result = options.calculate(this.data.form, this.data.feeSettings);
+          const nextCount = this.data.records.length + 1;
+          const formSnapshot = clone(this.data.form);
+          let record = {
+            id: Date.now() + "-" + nextCount,
+            title: "测算 " + nextCount,
+            timeText: makeTimeText(),
+            includeFee: formSnapshot.includeFee,
+            result
+          };
+          if (typeof options.decorateRecord === "function") {
+            record = Object.assign(record, options.decorateRecord.call(this, {
+              result,
+              form: formSnapshot,
+              record,
+              count: nextCount
+            }));
+          }
+          record.copyValue = buildGenericResultCopy({
+            title: options.copyTitle || "做T交易计算器",
+            form: formSnapshot,
+            inputs: options.copyInputs || [],
+            result
+          });
 
-        this.setData({
-          result,
-          records: [record].concat(this.data.records)
+          this.setData({
+            result,
+            records: [record].concat(this.data.records),
+            submitting: false
+          }, () => {
+            this.persistForm();
+            this.handleResultPosition({
+              selector: "#" + this.data.calculatorKey + "-first-result-card",
+              toastText: options.successToast || "计算完成，结果已更新"
+            });
+          });
         });
-        this.persistForm();
       },
 
       goBack() {
@@ -201,7 +224,62 @@ function createCalculatorComponent(options) {
         this.triggerEvent("setdefaultcalculator");
       },
 
-      copyResult() {
+      handleResultPosition({ selector, toastText }) {
+        wx.showToast({
+          title: toastText,
+          icon: "none",
+          duration: 1200
+        });
+        if (this.data.embedded) {
+          this.triggerEvent("resultready", {
+            calculatorKey: this.data.calculatorKey,
+            selector
+          });
+          return;
+        }
+        wx.nextTick(() => {
+          wx.pageScrollTo({
+            selector,
+            duration: 300,
+            offsetTop: -16
+          });
+        });
+      },
+
+      setShareRecord(event) {
+        const id = event.currentTarget.dataset.id || "";
+        const index = event.currentTarget.dataset.index;
+        this.setData({
+          currentShareRecordId: id,
+          currentShareRecordIndex: index === undefined ? "" : String(index)
+        });
+      },
+
+      getRecordFromEvent(event) {
+        const dataset = (event && event.currentTarget && event.currentTarget.dataset) || {};
+        const id = dataset.id;
+        const index = dataset.index;
+        if (id) {
+          return this.data.records.find((record) => record.id === id);
+        }
+        if (index !== undefined && index !== "") {
+          return this.data.records[Number(index)];
+        }
+        return null;
+      },
+
+      copyResult(event) {
+        const record = this.getRecordFromEvent(event);
+        if (record) {
+          copyText(record.copyValue || buildGenericResultCopy({
+            title: options.copyTitle || "做T交易计算器",
+            form: this.data.form,
+            inputs: options.copyInputs || [],
+            result: record.result
+          }));
+          return;
+        }
+
         if (!this.data.result) {
           wx.showToast({ title: "请先完成测算", icon: "none" });
           return;

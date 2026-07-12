@@ -7,7 +7,7 @@
 }
 
 .record {
-  border-top: 1rpx solid #eef1f5;
+  border-top: 1rpx solid #E6EAF2;
   padding-top: 22rpx;
   margin-top: 22rpx;
 }
@@ -21,13 +21,13 @@
 .record-title {
   font-size: 30rpx;
   font-weight: 700;
-  color: #16202a;
+  color: #1F2937;
 }
 
 .section-subtitle {
   margin-top: 22rpx;
   margin-bottom: 10rpx;
-  color: #465567;
+  color: #24324A;
   font-size: 26rpx;
   font-weight: 700;
 }
@@ -48,17 +48,17 @@
 }
 
 .small-button {
-  color: #64748b;
-  background: #f8fafc;
-  border: 1rpx solid #e2e8f0;
+  color: #667085;
+  background: #F7F8FA;
+  border: 1rpx solid #E6EAF2;
 }
 
 .text-button {
   min-width: 132rpx;
   max-width: none;
-  color: #ef4444;
-  background: #fff5f5;
-  border: 1rpx solid #fee2e2;
+  color: #E5483F;
+  background: #FFF5F5;
+  border: 1rpx solid #FBD6D3;
   white-space: nowrap;
 }
 

@@ -113,6 +113,19 @@ Component(createCalculatorComponent({
     ]);
   },
   methods: {
+    getDisplayRecords(records) {
+      const list = records || [];
+      return this.data.latestFirst ? list.slice().reverse() : list;
+    },
+
+    onOperationSortChange(event) {
+      const latestFirst = event.detail.value;
+      this.setData({
+        latestFirst,
+        displayRecords: latestFirst ? this.data.records.slice().reverse() : this.data.records
+      });
+    },
+
     toggleAmountPanel() {
       this.setData({ showAmountPanel: !this.data.showAmountPanel });
     },
@@ -137,6 +150,7 @@ Component(createCalculatorComponent({
     },
 
     calculate() {
+      if (this.data.submitting) return;
       if (!this.data.form.baseInitialized) {
         this.initializeBasePosition();
         return;
@@ -161,15 +175,21 @@ Component(createCalculatorComponent({
       };
       const records = this.rebuildAverageDownRecords(this.data.records.concat(operation), basePosition);
 
+      this.setData({ submitting: true });
       this.setData({
         basePosition,
         records,
+        displayRecords: this.getDisplayRecords(records),
         result: this.buildCumulativeResult(records, basePosition),
         "form.buyPrice": "",
         "form.buyShares": "",
-        "form.buyAmount": ""
-      }, () => this.refreshPreview());
-      this.persistForm();
+        "form.buyAmount": "",
+        submitting: false
+      }, () => {
+        this.refreshPreview();
+        this.persistForm();
+        this.handleResultPosition("补仓结果已生成");
+      });
     },
 
     initializeBasePosition() {
@@ -181,12 +201,52 @@ Component(createCalculatorComponent({
       }
 
       const basePosition = this.getBasePosition(originalCost, originalShares);
+      this.setData({ submitting: true });
       this.setData({
         basePosition,
         basePositionCard: this.buildBasePositionCard(basePosition),
-        "form.baseInitialized": true
-      }, () => this.refreshPreview());
-      this.persistForm();
+        "form.baseInitialized": true,
+        submitting: false
+      }, () => {
+        this.refreshPreview();
+        this.persistForm();
+        wx.showToast({ title: "初始化完成", icon: "none", duration: 1200 });
+      });
+    },
+
+    handleResultPosition(toastText) {
+      const selector = "#" + this.data.calculatorKey + "-first-result-card";
+      wx.showToast({ title: toastText, icon: "none", duration: 1200 });
+      wx.nextTick(() => {
+        this.scrollToResultSelector(selector);
+      });
+    },
+
+    scrollToResultSelector(selector) {
+      this.createSelectorQuery()
+        .select(selector)
+        .boundingClientRect((rect) => {
+          if (!rect) return;
+          wx.createSelectorQuery()
+            .selectViewport()
+            .scrollOffset((viewport) => {
+              const scrollTop = Math.max(0, (viewport.scrollTop || 0) + rect.top - 16);
+              if (this.data.embedded) {
+                this.triggerEvent("resultready", {
+                  calculatorKey: this.data.calculatorKey,
+                  selector,
+                  scrollTop
+                });
+                return;
+              }
+              wx.pageScrollTo({
+                scrollTop,
+                duration: 300
+              });
+            })
+            .exec();
+        })
+        .exec();
     },
 
     getBasePosition(originalCost, originalShares) {
@@ -418,6 +478,7 @@ Component(createCalculatorComponent({
           includeFee: this.data.feeSettings.useFee
         },
         records: [],
+        displayRecords: [],
         result: null,
         preview: null,
         basePosition: null,
@@ -449,6 +510,7 @@ Component(createCalculatorComponent({
 
           this.setData({
             records,
+            displayRecords: this.getDisplayRecords(records),
             result: this.buildCumulativeResult(records, basePosition),
             basePosition,
             basePositionCard: this.buildBasePositionCard(basePosition)

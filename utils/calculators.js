@@ -46,6 +46,37 @@ function resultClass(value) {
   return "";
 }
 
+function getDecimalLength(value) {
+  const text = String(value === undefined || value === null ? "" : value).trim();
+  if (!text) return 0;
+  const dotIndex = text.indexOf(".");
+  return dotIndex === -1 ? 0 : text.length - dotIndex - 1;
+}
+
+function getProjectionPriceDigits(value) {
+  return Math.min(Math.max(getDecimalLength(value), 2), 3);
+}
+
+function formatProjectionPrice(value, referenceValue) {
+  return roundTo(value, getProjectionPriceDigits(referenceValue)).toFixed(getProjectionPriceDigits(referenceValue));
+}
+
+function calcBreakEvenPrice({ costAmount, shares, feeSettings, includeFee }) {
+  if (!shares) return 0;
+  let targetPrice = safeDivide(costAmount, shares);
+  for (let i = 0; i < 3; i += 1) {
+    const targetAmount = safeMultiply(targetPrice, shares);
+    const sellFee = calcTradeFee({
+      amount: targetAmount,
+      direction: "SELL",
+      feeSettings,
+      includeFee
+    });
+    targetPrice = safeDivide(safeAdd(costAmount, sellFee.totalFee), shares);
+  }
+  return targetPrice;
+}
+
 function calcTProfit(input, feeSettings) {
   const buyPrice = safeNumber(input.buyPrice);
   const sellPrice = safeNumber(input.sellPrice);
@@ -221,6 +252,7 @@ function calcPriceProjection(input) {
   const startPrice = safeNumber(input.startPrice);
   const shares = safeNumber(input.shares);
   const changeRate = safeDivide(safeNumber(input.changeRate), 100);
+  const rateMultiplier = safeAdd(1, changeRate, 100000000);
   const days = 50;
   const startDate = new Date();
   const startMarketValue = safeMultiply(startPrice, shares);
@@ -228,7 +260,8 @@ function calcPriceProjection(input) {
     {
       day: 0,
       dateText: "初始",
-      price: " " + formatPrice(startPrice, input.startPrice),
+      rawPrice: startPrice,
+      price: " " + formatProjectionPrice(startPrice, input.startPrice),
       marketValue: " " + formatMoney(startMarketValue),
       profit: " " + formatMoney(0),
       changeRate: formatRate(0),
@@ -236,19 +269,21 @@ function calcPriceProjection(input) {
     }
   ];
 
+  let rawPrice = startPrice;
   for (let day = 1; day <= days; day += 1) {
     const currentDate = new Date(startDate.getTime());
     currentDate.setDate(startDate.getDate() + day);
-    const price = safeMultiply(startPrice, Math.pow(1 + changeRate, day));
-    const marketValue = safeMultiply(price, shares);
+    rawPrice = safeMultiply(rawPrice, rateMultiplier, 100000000);
+    const marketValue = safeMultiply(rawPrice, shares);
     const profit = safeSubtract(marketValue, safeMultiply(startPrice, shares));
-    const changeAmount = safeSubtract(price, startPrice);
+    const changeAmount = safeSubtract(rawPrice, startPrice);
     const totalChangeRate = safeMultiply(safeDivide(changeAmount, startPrice), 100);
 
     rows.push({
       day,
       dateText: `${currentDate.getMonth() + 1}/${currentDate.getDate()}`,
-      price: " " + formatPrice(price, input.startPrice),
+      rawPrice,
+      price: " " + formatProjectionPrice(rawPrice, input.startPrice),
       marketValue: " " + formatMoney(marketValue),
       profit: " " + formatMoney(profit),
       changeRate: formatRate(totalChangeRate),
@@ -257,16 +292,16 @@ function calcPriceProjection(input) {
   }
 
   const finalRow = rows[rows.length - 1] || {};
-  const finalPrice = safeMultiply(startPrice, Math.pow(1 + changeRate, days));
+  const finalPrice = safeNumber(finalRow.rawPrice);
   const finalMarketValue = safeMultiply(finalPrice, shares);
   const marketValueChange = safeSubtract(finalMarketValue, startMarketValue);
 
   return {
     rows: [
-      { label: "起始价格", value: " " + formatPrice(startPrice, input.startPrice) },
+      { label: "起始价格", value: " " + formatProjectionPrice(startPrice, input.startPrice) },
       { label: "股票数量", value: formatNumber(shares, 0) + " 股" },
       { label: "每日涨跌幅", value: formatRate(safeNumber(input.changeRate)), className: resultClass(input.changeRate) },
-      { label: "第50天价格", value: finalRow.price || " 0.0000", className: finalRow.className || "" },
+      { label: "第50天价格", value: finalRow.price || " 0.00", className: finalRow.className || "" },
       { label: "第50天市值", value: " " + formatMoney(finalMarketValue), className: resultClass(marketValueChange) },
       { label: "第50天盈亏", value: " " + formatMoney(marketValueChange), className: resultClass(marketValueChange) }
     ],
@@ -274,26 +309,52 @@ function calcPriceProjection(input) {
   };
 }
 
-function calcBreakEven(input) {
+function calcBreakEven(input, feeSettings) {
   const costPrice = safeNumber(input.costPrice);
   const currentPrice = safeNumber(input.currentPrice);
   const shares = safeNumber(input.shares);
+  const includeFee = input.includeFee;
   const costAmount = safeMultiply(costPrice, shares);
   const currentValue = safeMultiply(currentPrice, shares);
-  const profit = safeSubtract(currentValue, costAmount);
-  const needPriceAmount = safeSubtract(costPrice, currentPrice);
-  const needRate = safeMultiply(safeDivide(needPriceAmount, currentPrice), 100);
-  const breakEvenValue = safeMultiply(costPrice, shares);
+  const breakEvenPrice = calcBreakEvenPrice({
+    costAmount,
+    shares,
+    feeSettings,
+    includeFee
+  });
+  const breakEvenValue = safeMultiply(breakEvenPrice, shares);
+  const isRecovered = currentPrice >= breakEvenPrice;
+  const priceGap = safeSubtract(breakEvenPrice, currentPrice);
+  const riseRate = safeMultiply(safeDivide(priceGap, currentPrice), 100);
+  const aboveBreakEvenPrice = safeSubtract(currentPrice, breakEvenPrice);
+  const profitAmount = safeSubtract(currentValue, breakEvenValue);
+  const profitRate = safeMultiply(safeDivide(profitAmount, breakEvenValue), 100);
+
+  if (isRecovered) {
+    return {
+      rows: [
+        { label: "状态", value: "已回本", className: "positive" },
+        { label: "回本目标价", value: " " + formatPrice(breakEvenPrice, input.costPrice) },
+        { label: "每股高于回本价", value: " " + formatPrice(aboveBreakEvenPrice, input.costPrice), className: "positive" },
+        { label: "当前盈利比例", value: formatRate(profitRate), className: resultClass(profitRate) },
+        { label: "当前盈利", value: " " + formatMoney(profitAmount), className: resultClass(profitAmount) },
+        { label: "持仓成本", value: " " + formatMoney(costAmount) },
+        { label: "当前市值", value: " " + formatMoney(currentValue) },
+        { label: "回本目标市值", value: " " + formatMoney(breakEvenValue) }
+      ]
+    };
+  }
 
   return {
     rows: [
+      { label: "状态", value: "未回本", className: "negative" },
+      { label: "回本目标价", value: " " + formatPrice(breakEvenPrice, input.costPrice) },
+      { label: "每股还需上涨", value: " " + formatPrice(priceGap, input.costPrice), className: resultClass(priceGap) },
+      { label: "还需上涨比例", value: formatRate(riseRate), className: resultClass(riseRate) },
+      { label: "当前亏损", value: " " + formatMoney(profitAmount), className: resultClass(profitAmount) },
       { label: "持仓成本", value: " " + formatMoney(costAmount) },
       { label: "当前市值", value: " " + formatMoney(currentValue) },
-      { label: "当前盈亏", value: " " + formatMoney(profit), className: resultClass(profit) },
-      { label: "回本目标价", value: " " + formatPrice(costPrice, input.costPrice) },
-      { label: "回本目标市值", value: " " + formatMoney(breakEvenValue) },
-      { label: "需上涨金额", value: " " + formatMoney(needPriceAmount), className: resultClass(needPriceAmount) },
-      { label: "需上涨比例", value: formatRate(needRate), className: resultClass(needRate) }
+      { label: "回本目标市值", value: " " + formatMoney(breakEvenValue) }
     ]
   };
 }

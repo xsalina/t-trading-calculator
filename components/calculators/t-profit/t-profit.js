@@ -77,6 +77,10 @@ Component({
       type: Boolean,
       value: false,
     },
+    calculatorKey: {
+      type: String,
+      value: "t-profit",
+    },
     isDefaultCalculator: {
       type: Boolean,
       value: false,
@@ -89,6 +93,8 @@ Component({
     feeSummary: "",
     rememberData: true,
     operations: [],
+    displayOperations: [],
+    latestFirst: true,
     summary: null,
     preview: null,
     baseInfo: null,
@@ -275,6 +281,20 @@ Component({
         summary: this.buildSummary(),
         preview: this.buildPreview(),
         baseInfo: this.buildBaseInfo(),
+        displayOperations: this.getDisplayOperations(this.data.operations),
+      });
+    },
+
+    getDisplayOperations(operations) {
+      const list = operations || [];
+      return this.data.latestFirst ? list.slice().reverse() : list;
+    },
+
+    onOperationSortChange(event) {
+      const latestFirst = event.detail.value;
+      this.setData({
+        latestFirst,
+        displayOperations: latestFirst ? this.data.operations.slice().reverse() : this.data.operations,
       });
     },
 
@@ -646,6 +666,7 @@ Component({
     },
 
     saveOperation() {
+      if (this.data.submitting) return;
       if (!this.data.form.baseInitialized) {
         this.initializeBase();
         return;
@@ -688,14 +709,18 @@ Component({
         this.data.operations.length,
       );
 
+      this.setData({ submitting: true });
       this.setData({
         operations: this.data.operations.concat(operation),
         "form.tradePrice": "",
         "form.tradeShares": "",
         "form.tradeAmount": "",
+        submitting: false,
+      }, () => {
+        this.refreshAll();
+        this.persistState();
+        this.handleResultPosition("已保存，本次结果已更新");
       });
-      this.refreshAll();
-      this.persistState();
     },
 
     undoOperation(event) {
@@ -728,7 +753,11 @@ Component({
         return;
       }
 
+      this.setData({ submitting: true });
       this.updateForm({ baseInitialized: true }, "baseInitialized");
+      this.setData({ submitting: false }, () => {
+        wx.showToast({ title: "初始化完成", icon: "none", duration: 1200 });
+      });
     },
 
     clearAll() {
@@ -737,6 +766,7 @@ Component({
           includeFee: this.data.feeSettings.useFee,
         }),
         operations: [],
+        displayOperations: [],
         showEmbeddedAmountPanel: false,
         showBaseDetail: false,
         summary: null,
@@ -774,6 +804,41 @@ Component({
 
     onDefaultCalculatorTap() {
       this.triggerEvent("setdefaultcalculator");
+    },
+
+    handleResultPosition(toastText) {
+      const selector = "#" + this.data.calculatorKey + "-first-result-card";
+      wx.showToast({ title: toastText, icon: "none", duration: 1200 });
+      wx.nextTick(() => {
+        this.scrollToResultSelector(selector);
+      });
+    },
+
+    scrollToResultSelector(selector) {
+      this.createSelectorQuery()
+        .select(selector)
+        .boundingClientRect((rect) => {
+          if (!rect) return;
+          wx.createSelectorQuery()
+            .selectViewport()
+            .scrollOffset((viewport) => {
+              const scrollTop = Math.max(0, (viewport.scrollTop || 0) + rect.top - 16);
+              if (this.data.embedded) {
+                this.triggerEvent("resultready", {
+                  calculatorKey: this.data.calculatorKey,
+                  selector,
+                  scrollTop
+                });
+                return;
+              }
+              wx.pageScrollTo({
+                scrollTop,
+                duration: 300
+              });
+            })
+            .exec();
+        })
+        .exec();
     },
 
     copyResult() {

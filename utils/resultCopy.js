@@ -34,6 +34,13 @@ function buildGenericResultCopy({ title, form, inputs, result }) {
     lines.push(`${label}：${rows[label]}`);
   });
 
+  if (result && Array.isArray(result.gridRows) && result.gridRows.length) {
+    lines.push("网格明细：");
+    result.gridRows.forEach((row) => {
+      lines.push(`${row.level || ""}：买入 ${row.buyPrice || "-"}，卖出 ${row.sellPrice || "-"}，单档净收益 ${row.netProfit || "-"}`);
+    });
+  }
+
   return appendSource(lines);
 }
 

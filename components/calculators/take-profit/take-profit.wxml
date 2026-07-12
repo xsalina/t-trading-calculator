@@ -6,27 +6,29 @@
     <view class="field"><text class="label">目标收益金额</text><input class="input" type="digit" value="{{form.targetProfit}}" data-key="targetProfit" bindinput="onInput" /></view>
   </view>
   <view class="button-row action-row">
-    <button class="button primary" bindtap="calculate">计算</button>
+    <button class="button primary" bindtap="calculate" disabled="{{submitting}}">{{submitting ? '计算中…' : '计算'}}</button>
     <button wx:if="{{!embedded}}" class="button plain" bindtap="goBack">返回</button>
   </view>
-  <view wx:if="{{records.length}}" class="embedded-record-list">
+  <view wx:if="{{records.length}}" class="embedded-record-list result-section">
     <block wx:for="{{records}}" wx:key="id">
-      <calculator-result-card
-        title="{{item.resultTitle}}"
-        tag="{{item.resultTagText}}"
-        theme="{{item.resultTheme}}"
-        main-items="{{item.mainItems}}"
-        detail-items="{{item.detailItems}}"
-        removable="{{true}}"
-        remove-text="删除"
-        record-id="{{item.id}}"
-        bindremove="removeRecord"
-      />
+      <view id="{{index === 0 ? calculatorKey + '-first-result-card' : calculatorKey + '-record-' + item.id}}">
+        <calculator-result-card
+          title="{{item.resultTitle}}"
+          tag="{{item.resultTagText}}"
+          theme="{{item.resultTheme}}"
+          main-items="{{item.mainItems}}"
+          detail-items="{{item.detailItems}}"
+          removable="{{true}}"
+          remove-text="删除"
+          record-id="{{item.id}}"
+          bindremove="removeRecord"
+        />
+        <view class="result-action-row record-result-action-row">
+          <button class="button secondary result-share-button" data-id="{{item.id}}" bindtap="setShareRecord" open-type="share">分享给朋友</button>
+          <button class="button secondary result-copy-button" data-id="{{item.id}}" bindtap="copyResult">复制结果</button>
+        </view>
+      </view>
     </block>
-  </view>
-  <view wx:if="{{result && embedded}}" class="result-action-row">
-    <button class="button secondary result-share-button" open-type="share">分享给朋友</button>
-    <button class="button secondary result-copy-button" bindtap="copyResult">复制结果</button>
   </view>
   <view wx:if="{{result && !embedded}}" class="result-action-bar">
     <button class="action-primary" bindtap="openTradeRecordMiniProgram">算完顺手记录这一笔</button>

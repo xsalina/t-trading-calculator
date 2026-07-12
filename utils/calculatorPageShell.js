@@ -3,7 +3,8 @@ const { getShareMessage, getShareTimelineMessage } = require("./share");
 function createCalculatorPageShell() {
   return {
     data: {
-      entryQuery: {}
+      entryQuery: {},
+      showBackToTop: false
     },
 
     onLoad(query) {
@@ -18,6 +19,20 @@ function createCalculatorPageShell() {
 
     onShareTimeline() {
       return getShareTimelineMessage();
+    },
+
+    onPageScroll(event) {
+      const shouldShow = event.scrollTop > 500;
+      if (shouldShow === this.data.showBackToTop) return;
+      this.setData({ showBackToTop: shouldShow });
+    },
+
+    backToTop() {
+      wx.pageScrollTo({
+        scrollTop: 0,
+        duration: 300
+      });
+      this.setData({ showBackToTop: false });
     }
   };
 }

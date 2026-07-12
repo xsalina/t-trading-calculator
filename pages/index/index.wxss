@@ -310,24 +310,25 @@
 }
 
 .miniapp-card {
-  background: #ffffff;
+  background: #F7F9FF;
   padding: 18rpx 24rpx;
   border-radius: 16rpx;
   display: flex;
   justify-content: space-between;
   align-items: center;
   margin-bottom: 14rpx;
-  box-shadow: 0 4rpx 12rpx rgba(0, 0, 0, 0.018);
-  border: 1rpx solid rgba(49, 87, 200, 0.14);
+  box-shadow: 0 8rpx 24rpx rgba(49, 87, 200, 0.08);
+  border: 1rpx solid rgba(49, 87, 200, 0.22);
 }
 
 /* --- 3. Pro 工具区域优化 --- */
 .compact-pro-card {
   margin: 48rpx 0 48rpx 0; /* 调整了上下间距，使其呼吸感更好 */
-  background: #ffffff;
+  background: #F7F9FF;
   padding: 32rpx 24rpx;    /* 增加卡片内边距 */
   border-radius: 20rpx;
-  border: 1rpx solid rgba(49, 87, 200, 0.2);
+  border: 1rpx solid rgba(49, 87, 200, 0.22);
+  box-shadow: 0 8rpx 24rpx rgba(49, 87, 200, 0.08);
 }
 .miniapp-card-hover {
   opacity: 0.9;
@@ -363,13 +364,17 @@
   line-height: 56rpx;
   padding: 0 20rpx;
   border-radius: 999rpx;
-  background: #eef3ff;
-  border: 1rpx solid rgba(49, 87, 200, 0.22);
-  color: #2446A8;
+  background: #E9EFFF;
+  border: 1rpx solid rgba(49, 87, 200, 0.24);
+  color: #2448A8;
   font-size: 24rpx;
   font-weight: 700;
   text-align: center;
   box-sizing: border-box;
+}
+
+.miniapp-card-hover .arrow-white {
+  background: #DCE6FF;
 }
 
 .common-title {
@@ -470,18 +475,21 @@
 }
 
 .button.primary.share-button {
-  background-color: #3157C8;
-  color: #ffffff;
+  background-color: #EEF3FF;
+  color: #2448A8;
+  border: 1rpx solid rgba(49, 87, 200, 0.28);
   min-height: 78rpx;
   padding: 18rpx 0;
   font-size: 30rpx;
   font-weight: 600;
-  box-shadow: 0 8rpx 20rpx rgba(49, 87, 200, 0.2);
+  box-shadow: 0 6rpx 18rpx rgba(49, 87, 200, 0.07);
   width: 100% !important;
 }
 
 .share-btn-hover {
-  background-color: #00a383 !important;
+  background-color: #DDE7FF !important;
+  color: #173B8F !important;
+  border-color: rgba(49, 87, 200, 0.35) !important;
   box-shadow: none !important;
 }
 
@@ -498,6 +506,46 @@
   line-height: 1.6;
   padding: 0 40rpx;
   margin-top: 32rpx;
+}
+
+.back-to-top {
+  position: fixed;
+  right: 24rpx;
+  bottom: calc(38rpx + env(safe-area-inset-bottom));
+  z-index: 18;
+  min-width: 140rpx;
+  height: 78rpx;
+  padding: 0 18rpx;
+  border-radius: 999rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6rpx;
+  background: #FFFFFF;
+  color: #3157C8;
+  border: 1rpx solid rgba(49, 87, 200, 0.22);
+  box-shadow: 0 8rpx 24rpx rgba(15, 23, 42, 0.12);
+  opacity: 0;
+  pointer-events: none;
+  transform: translateY(16rpx);
+  transition: opacity 0.2s ease, transform 0.2s ease;
+  box-sizing: border-box;
+}
+
+.back-to-top.visible {
+  opacity: 1;
+  pointer-events: auto;
+  transform: translateY(0);
+}
+
+.back-to-top-icon {
+  font-size: 26rpx;
+  font-weight: 800;
+}
+
+.back-to-top-text {
+  font-size: 22rpx;
+  font-weight: 700;
 }
 
 .picker-mask {

@@ -3,21 +3,21 @@
   margin-bottom: 16rpx;
   padding: 16rpx;
   border-radius: 14rpx;
-  background: #ffffff;
-  border: 1rpx solid #e8eef5;
+  background: #FFFFFF;
+  border: 1rpx solid #E6EAF2;
   box-sizing: border-box;
 }
 
 .calculator-result-card.buy {
-  border-left: 8rpx solid rgba(49, 87, 200, 0.5);
+  border-left: 8rpx solid rgba(49, 87, 200, 0.45);
 }
 
 .calculator-result-card.sell {
-  border-left: 8rpx solid rgba(214, 75, 60, 0.45);
+  border-left: 8rpx solid rgba(49, 87, 200, 0.45);
 }
 
 .calculator-result-card.neutral {
-  border-left: 8rpx solid #e2e8f0;
+  border-left: 8rpx solid rgba(49, 87, 200, 0.45);
 }
 
 .result-card-head {
@@ -30,7 +30,7 @@
 
 .result-card-title {
   min-width: 0;
-  color: #1e293b;
+  color: #1F2937;
   font-size: 26rpx;
   font-weight: 800;
 }
@@ -46,7 +46,7 @@
 
 .result-card-time {
   flex-shrink: 0;
-  color: #94a3b8;
+  color: #98A2B3;
   font-size: 21rpx;
   font-weight: 500;
 }
@@ -72,9 +72,9 @@
   height: 46rpx;
   line-height: 46rpx;
   border-radius: 999rpx;
-  color: #ef4444;
-  background: #fff5f5;
-  border: 1rpx solid #fee2e2;
+  color: #E5483F;
+  background: #FFF5F5;
+  border: 1rpx solid #FBD6D3;
   font-size: 21rpx;
   font-weight: 700;
   white-space: nowrap;
@@ -89,8 +89,8 @@
   flex-shrink: 0;
   padding: 4rpx 12rpx;
   border-radius: 999rpx;
-  background: #f1f5f9;
-  color: #8a97a8;
+  background: #F7F8FA;
+  color: #667085;
   font-size: 21rpx;
   font-weight: 600;
   white-space: nowrap;
@@ -107,31 +107,43 @@
   min-width: 0;
   padding: 12rpx;
   border-radius: 12rpx;
-  background: #f8fafc;
+  background: #F7F8FA;
+  border: 1rpx solid #E6EAF2;
   box-sizing: border-box;
 }
 
 .calculator-result-card.buy .result-card-main-item {
-  background: #f3f6ff;
+  background: #F7F8FA;
 }
 
 .calculator-result-card.sell .result-card-main-item {
-  background: #fff5f5;
+  background: #F7F8FA;
+  border-color: #E6EAF2;
 }
 
 .result-card-main-item text:first-child {
   display: block;
-  color: #64748b;
+  color: #98A2B3;
   font-size: 20rpx;
   margin-bottom: 4rpx;
 }
 
 .result-card-main-item text:last-child {
   display: block;
-  color: #1e293b;
-  font-size: 28rpx;
+  color: #173B8F;
+  font-size: 36rpx;
   line-height: 1.15;
   font-weight: 800;
+}
+
+.result-card-main-item:first-child text:last-child {
+  font-size: 42rpx;
+  font-weight: 800;
+}
+
+.result-card-main-item:nth-child(2) text:last-child {
+  font-size: 34rpx;
+  font-weight: 700;
 }
 
 .result-card-detail {
@@ -145,22 +157,38 @@
   display: flex;
   justify-content: space-between;
   gap: 8rpx;
-  color: #8a97a8;
-  font-size: 21rpx;
+  color: #98A2B3;
+  font-size: 20rpx;
 }
 
 .result-card-detail text:last-child {
-  color: #1e293b;
-  font-weight: 700;
+  color: #24324A;
+  font-weight: 600;
   text-align: right;
 }
 
 .result-card-main-item text:last-child.positive,
 .result-card-detail text:last-child.positive {
-  color: #d64b3c;
+  color: #E4572E;
+  font-weight: 700;
 }
 
 .result-card-main-item text:last-child.negative,
 .result-card-detail text:last-child.negative {
-  color: #138a57;
+  color: #079455;
+  font-weight: 700;
+}
+
+.result-card-main-item text:last-child.positive {
+  display: inline-block;
+  padding: 2rpx 8rpx;
+  border-radius: 8rpx;
+  background: #FFF4F1;
+}
+
+.result-card-main-item text:last-child.negative {
+  display: inline-block;
+  padding: 2rpx 8rpx;
+  border-radius: 8rpx;
+  background: #F0FDF4;
 }

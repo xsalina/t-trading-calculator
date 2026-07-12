@@ -1,1 +1,59 @@
 @import "../calculator-common.wxss";
+
+.grid-detail-card {
+  width: 100%;
+  margin: -8rpx 0 18rpx;
+  padding: 0 16rpx 14rpx;
+  border-radius: 0 0 16rpx 16rpx;
+  background: #FFFFFF;
+  border-top: 1rpx solid #E6EAF2;
+  box-sizing: border-box;
+}
+
+.grid-detail-toggle {
+  min-height: 64rpx;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  color: #3157C8;
+  font-size: 24rpx;
+  font-weight: 700;
+}
+
+.grid-table {
+  overflow: hidden;
+  border-radius: 12rpx;
+  border: 1rpx solid #E6EAF2;
+}
+
+.grid-head,
+.grid-line {
+  display: grid;
+  grid-template-columns: 0.85fr 1.2fr 1.2fr 1.55fr;
+  align-items: center;
+  gap: 8rpx;
+  padding: 12rpx 10rpx;
+  box-sizing: border-box;
+}
+
+.grid-head {
+  background: #F7F8FA;
+  color: #667085;
+  font-size: 20rpx;
+  font-weight: 700;
+}
+
+.grid-line {
+  min-height: 58rpx;
+  color: #24324A;
+  font-size: 20rpx;
+  border-top: 1rpx solid #E6EAF2;
+}
+
+.grid-line text,
+.grid-head text {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}

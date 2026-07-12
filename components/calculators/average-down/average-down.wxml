@@ -76,7 +76,7 @@
     </view>
 
     <view class="button-row">
-      <button class="button primary" bindtap="calculate">{{form.baseInitialized ? '保存补仓' : '初始化原持仓'}}</button>
+      <button class="button primary" bindtap="calculate" disabled="{{submitting}}">{{submitting ? '保存中…' : (form.baseInitialized ? '保存补仓' : '初始化原持仓')}}</button>
       <button class="button plain" bindtap="clearRecords">全部清除</button>
     </view>
   </view>
@@ -90,7 +90,7 @@
     detail-items="{{preview.detailItems}}"
   />
 
-  <view wx:if="{{result}}" class="card compact-summary-card">
+  <view wx:if="{{result}}" id="{{calculatorKey}}-first-result-card" class="card compact-summary-card">
     <view class="summary-title">补仓结果</view>
     <view class="summary-grid">
       <block wx:for="{{result.rows}}" wx:key="label">
@@ -102,20 +102,29 @@
     </view>
   </view>
 
+  <view wx:if="{{records.length > 1}}" class="operation-sort-row">
+    <view class="operation-sort-control">
+      <text class="operation-sort-label">最新操作在前</text>
+      <switch checked="{{latestFirst}}" color="#3157C8" bindchange="onOperationSortChange" />
+    </view>
+  </view>
+
   <view wx:if="{{records.length}}" class="embedded-record-list">
-    <block wx:for="{{records}}" wx:key="id">
-      <calculator-result-card
-        title="{{item.resultTitle}}"
-        tag="{{item.resultTagText}}"
-        time-text="{{item.resultTimeText}}"
-        theme="{{item.resultTheme}}"
-        main-items="{{item.mainItems}}"
-        detail-items="{{item.detailItems}}"
-        removable="{{true}}"
-        remove-text="撤销本笔"
-        record-id="{{item.id}}"
-        bindremove="removeRecord"
-      />
+    <block wx:for="{{displayRecords}}" wx:key="id">
+      <view id="{{calculatorKey}}-operation-{{item.id}}">
+        <calculator-result-card
+          title="{{item.resultTitle}}"
+          tag="{{item.resultTagText}}"
+          time-text="{{item.resultTimeText}}"
+          theme="{{item.resultTheme}}"
+          main-items="{{item.mainItems}}"
+          detail-items="{{item.detailItems}}"
+          removable="{{true}}"
+          remove-text="撤销本笔"
+          record-id="{{item.id}}"
+          bindremove="removeRecord"
+        />
+      </view>
     </block>
   </view>
 
