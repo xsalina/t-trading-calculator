@@ -8,7 +8,10 @@
         <view wx:if="{{tag}}" class="result-card-tag">{{tag}}</view>
         <view wx:if="{{timeText}}" class="result-card-time">{{timeText}}</view>
       </view>
-      <button wx:if="{{removable}}" class="undo-button" bindtap="onRemove">{{removeText || '撤销本笔'}}</button>
+      <button wx:if="{{removable}}" class="undo-button" bindtap="onRemove">
+        <image class="undo-icon" src="{{(removeText || '撤销本笔') === '删除' ? '/assets/images/delete.png' : '/assets/images/return.png'}}" mode="aspectFit" />
+        <text>{{removeText || '撤销本笔'}}</text>
+      </button>
     </view>
   </view>
 

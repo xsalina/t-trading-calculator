@@ -69,8 +69,6 @@
 
   <view wx:if="{{result && !embedded}}" class="result-action-bar">
     <button class="action-primary" bindtap="openTradeRecordMiniProgram">算完顺手记录这一笔</button>
-    <button class="action-secondary" open-type="share">分享给朋友</button>
-    <button class="action-secondary" bindtap="copyResult">复制结果</button>
   </view>
 
   <view class="notice">本页按固定涨跌幅做复利推演，不代表真实行情。本工具仅用于测算，不构成任何投资建议。</view>

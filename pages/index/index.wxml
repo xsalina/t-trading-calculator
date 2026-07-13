@@ -11,10 +11,11 @@
 
   <view id="homeCalculator" class="home-calculator-card" wx:if="{{activeCalculator}}">
     <view class="workbench-head">
-      <scroll-view scroll-x class="calculator-tab-scroll" show-scrollbar="{{false}}">
+      <scroll-view scroll-x class="calculator-tab-scroll" show-scrollbar="{{false}}" scroll-into-view="{{activeTabIntoView}}" scroll-with-animation="{{true}}">
         <view class="calculator-tab-list">
           <block wx:for="{{calculators}}" wx:key="type">
             <view
+              id="calculator-tab-{{item.type}}"
               class="calculator-tab {{item.type === activeCalculatorType ? 'active' : ''}}"
               data-type="{{item.type}}"
               bindtap="switchHomeCalculator"
@@ -62,7 +63,7 @@
     <button class="button secondary contact-button" bindtap="openArticle" hover-class="btn-hover">使用说明 / 文章教程</button>
   </view>
 
-  <view class="all-calculators-entry" bindtap="toggleAllCalculators" hover-class="all-calculators-hover">
+  <view id="allCalculatorsEntry" class="all-calculators-entry" bindtap="toggleAllCalculators" hover-class="all-calculators-hover">
     <view class="all-calculators-copy">
       <view class="all-calculators-title">全部计算器</view>
       <view class="all-calculators-desc">查看完整计算工具</view>
@@ -70,7 +71,7 @@
     <view class="all-calculators-action">{{showAllCalculators ? ' 点击折叠' : '查看 8 个 >'}}</view>
   </view>
 
-  <view wx:if="{{showAllCalculators}}" class="card calculator-card compact-calculator-card bottom-calculator-list">
+  <view wx:if="{{showAllCalculators}}" id="bottomCalculatorList" class="card calculator-card compact-calculator-card bottom-calculator-list">
     <block wx:for="{{bottomCalculators}}" wx:key="type">
       <view class="list-item" data-url="{{item.url}}" bindtap="goCalculatorPage" hover-class="list-item-hover">
         <view class="list-item-left">

@@ -76,8 +76,11 @@
     </view>
 
     <view class="button-row">
+      <button wx:if="{{form.baseInitialized}}" class="button plain clear-action-button" bindtap="clearRecords">
+        <image class="clear-action-icon" src="/assets/images/delete.png" mode="aspectFit" />
+        <text>清除全部</text>
+      </button>
       <button class="button primary" bindtap="calculate" disabled="{{submitting}}">{{submitting ? '保存中…' : (form.baseInitialized ? '保存回补' : '初始化卖出')}}</button>
-      <button wx:if="{{form.baseInitialized}}" class="button plain" bindtap="clearRecords">全部清除</button>
     </view>
   </view>
 

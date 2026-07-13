@@ -729,8 +729,8 @@ Component({
       wx.showModal({
         title: "确认撤销这笔操作？",
         content: "撤销后会重新计算后续持仓、成本和收益。",
-        confirmText: "撤销",
-        confirmColor: "#3157C8",
+        confirmText: "确认撤销",
+        confirmColor: "#D96B6B",
         success: (res) => {
           if (!res.confirm) return;
           const remainingOperations = this.data.operations.filter(
@@ -761,6 +761,19 @@ Component({
     },
 
     clearAll() {
+      wx.showModal({
+        title: "确认全部清除？",
+        content: "清除后会重置底仓和所有买入/卖出操作记录。",
+        confirmText: "确认清除",
+        confirmColor: "#D96B6B",
+        success: (res) => {
+          if (!res.confirm) return;
+          this.resetAllData();
+        },
+      });
+    },
+
+    resetAllData() {
       this.setData({
         form: Object.assign({}, DEFAULT_FORM, {
           includeFee: this.data.feeSettings.useFee,

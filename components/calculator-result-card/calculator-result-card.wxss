@@ -66,23 +66,40 @@
 }
 
 .undo-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
   margin: 0;
-  padding: 0 14rpx;
+  padding: 12rpx 16rpx;
   min-width: 0;
-  height: 46rpx;
-  line-height: 46rpx;
-  border-radius: 999rpx;
-  color: #E5483F;
-  background: #FFF5F5;
-  border: 1rpx solid #FBD6D3;
-  font-size: 21rpx;
-  font-weight: 700;
+  width: auto;
+  height: auto;
+  line-height: 1;
+  border-radius: 0;
+  color: #7C8799;
+  background: #ffffff;
+  border: 1rpx solid #E4E9F2;
+  font-size: 24rpx;
+  font-weight: 400;
   white-space: nowrap;
   box-sizing: border-box;
 }
 
+.undo-button:hover,
+.undo-button:active {
+  color: #5f6b7c;
+  background: #F8FAFC;
+}
+
 .undo-button::after {
   border: 0;
+}
+
+.undo-icon {
+  width: 28rpx;
+  height: 28rpx;
+  margin-right: 8rpx;
+  flex-shrink: 0;
 }
 
 .result-card-tag {

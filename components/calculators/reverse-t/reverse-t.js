@@ -417,8 +417,8 @@ Component(createCalculatorComponent({
       wx.showModal({
         title: "确认撤销这笔回补？",
         content: "撤销后会重新计算剩余待回补数量和反T收益。",
-        confirmText: "撤销",
-        confirmColor: "#3157C8",
+        confirmText: "确认撤销",
+        confirmColor: "#D96B6B",
         success: (res) => {
           if (!res.confirm) return;
           const basePendingShares = this.getBasePendingShares(safeNumber(this.data.form.shares));
@@ -437,6 +437,19 @@ Component(createCalculatorComponent({
     },
 
     clearRecords() {
+      wx.showModal({
+        title: "确认全部清除？",
+        content: "清除后会重置卖出信息和所有回补记录。",
+        confirmText: "确认清除",
+        confirmColor: "#D96B6B",
+        success: (res) => {
+          if (!res.confirm) return;
+          this.resetRecords();
+        }
+      });
+    },
+
+    resetRecords() {
       this.setData({
         form: {
           sellPrice: "",

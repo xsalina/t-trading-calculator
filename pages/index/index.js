@@ -75,6 +75,7 @@ Page({
     defaultCalculator: CALCULATORS[0],
     activeCalculatorType: SYSTEM_DEFAULT_CALCULATOR_TYPE,
     activeCalculator: CALCULATORS[0],
+    activeTabIntoView: "",
     entryQuery: {},
     showDefaultPicker: false,
     showFavoriteGuide: false,
@@ -90,6 +91,10 @@ Page({
 
   onShow() {
     this.initDefaultCalculator();
+  },
+
+  onReady() {
+    this.scrollActiveCalculatorTab();
   },
 
   onUnload() {
@@ -117,7 +122,7 @@ Page({
       this.setData({
         activeCalculatorType: calculator.type,
         activeCalculator: calculator
-      });
+      }, () => this.scrollActiveCalculatorTab(calculator.type));
     }
   },
 
@@ -187,8 +192,23 @@ Page({
     this.setData({
       activeCalculatorType: calculator.type,
       activeCalculator: calculator
-    });
+    }, () => this.scrollActiveCalculatorTab(calculator.type));
     this.hasActiveCalculatorChanged = true;
+  },
+
+  getCalculatorTabId(type) {
+    return "calculator-tab-" + type;
+  },
+
+  scrollActiveCalculatorTab(type) {
+    const targetType = type || this.data.activeCalculatorType;
+    if (!targetType) return;
+    const tabId = this.getCalculatorTabId(targetType);
+    this.setData({ activeTabIntoView: "" }, () => {
+      wx.nextTick(() => {
+        this.setData({ activeTabIntoView: tabId });
+      });
+    });
   },
 
   scrollHomeCalculatorAfterSwitch(type) {
@@ -258,8 +278,18 @@ Page({
   },
 
   toggleAllCalculators() {
+    const nextValue = !this.data.showAllCalculators;
     this.setData({
-      showAllCalculators: !this.data.showAllCalculators
+      showAllCalculators: nextValue
+    }, () => {
+      if (!nextValue) return;
+      wx.nextTick(() => {
+        wx.pageScrollTo({
+          selector: "#allCalculatorsEntry",
+          duration: 300,
+          offsetTop: -16
+        });
+      });
     });
   },
 
@@ -302,7 +332,7 @@ Page({
       activeCalculatorType: type,
       activeCalculator: calculator,
       showDefaultPicker: false
-    });
+    }, () => this.scrollActiveCalculatorTab(type));
     wx.showToast({
       title: "已设为首页默认",
       icon: "success"

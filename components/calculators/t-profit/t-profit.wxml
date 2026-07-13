@@ -97,10 +97,13 @@
       <view class="field-tip">填写金额后，将按所选单位自动换算股数</view>
     </view>
     <view class="button-row">
+      <button wx:if="{{form.baseInitialized}}" class="button plain clear-action-button" bindtap="clearAll">
+        <image class="clear-action-icon" src="/assets/images/delete.png" mode="aspectFit" />
+        <text>清除全部</text>
+      </button>
       <button class="button primary" bindtap="saveOperation" disabled="{{submitting}}">
         {{submitting ? '保存中…' : (form.baseInitialized ? '保存操作' : '初始化底仓')}}
       </button>
-      <button wx:if="{{form.baseInitialized}}" class="button plain" bindtap="clearAll">全部清除</button>
     </view>
   </view>
   <calculator-result-card

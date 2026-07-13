@@ -121,14 +121,14 @@
 }
 
 .calculator-tab {
-  height: 60rpx;
-  line-height: 60rpx;
-  padding: 0 30rpx;
+  height: 72rpx;
+  line-height: 72rpx;
+  padding: 0 34rpx;
   border-radius: 16rpx; /* 稍微柔和一点的圆角 */
   background: #f1f5f9;  /* 非常浅的灰色，更高级 */
   color: #64748b;
-  font-size: 26rpx;
-  font-weight: 500;
+  font-size: 28rpx;
+  font-weight: 600;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); /* 平滑过渡 */
 }
 /* --- 2. 计算区整体容器优化 (在 WXML 中建议给组件包一层) --- */
@@ -423,21 +423,21 @@
 
 .all-calculators-title {
   color: #1e293b;
-  font-size: 25rpx;
-  font-weight: 700;
+  font-size: 29rpx;
+  font-weight: 800;
 }
 
 .all-calculators-desc {
-  margin-top: 4rpx;
+  margin-top: 6rpx;
   color: #94a3b8;
-  font-size: 21rpx;
+  font-size: 24rpx;
 }
 
 .all-calculators-action {
   flex-shrink: 0;
   color: #2446A8;
-  font-size: 23rpx;
-  font-weight: 700;
+  font-size: 26rpx;
+  font-weight: 800;
 }
 
 .button {
@@ -504,8 +504,10 @@
   color: #cbd5e1;
   text-align: center;
   line-height: 1.6;
-  padding: 0 40rpx;
+  min-height: 112rpx;
+  padding: 40rpx 0;
   margin-top: 32rpx;
+  box-sizing: border-box;
 }
 
 .back-to-top {

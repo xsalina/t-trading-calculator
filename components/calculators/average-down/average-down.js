@@ -465,6 +465,19 @@ Component(createCalculatorComponent({
     },
 
     clearRecords() {
+      wx.showModal({
+        title: "确认全部清除？",
+        content: "清除后会重置原持仓和所有补仓记录。",
+        confirmText: "确认清除",
+        confirmColor: "#D96B6B",
+        success: (res) => {
+          if (!res.confirm) return;
+          this.resetRecords();
+        }
+      });
+    },
+
+    resetRecords() {
       this.setData({
         form: {
           originalCost: "",
@@ -495,8 +508,8 @@ Component(createCalculatorComponent({
       wx.showModal({
         title: "确认撤销这笔补仓？",
         content: "撤销后会基于剩余补仓记录重新计算持仓成本和累计结果。",
-        confirmText: "撤销",
-        confirmColor: "#3157C8",
+        confirmText: "确认撤销",
+        confirmColor: "#D96B6B",
         success: (res) => {
           if (!res.confirm) return;
           const basePosition = this.data.basePosition || this.getBasePosition(
