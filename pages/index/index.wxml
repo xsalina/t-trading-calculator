@@ -67,7 +67,7 @@
       <view class="all-calculators-title">全部计算器</view>
       <view class="all-calculators-desc">查看完整计算工具</view>
     </view>
-    <view class="all-calculators-action">{{showAllCalculators ? '收起' : '查看 8 个 >'}}</view>
+    <view class="all-calculators-action">{{showAllCalculators ? ' 点击折叠' : '查看 8 个 >'}}</view>
   </view>
 
   <view wx:if="{{showAllCalculators}}" class="card calculator-card compact-calculator-card bottom-calculator-list">

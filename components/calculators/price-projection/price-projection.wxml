@@ -42,7 +42,7 @@
         <view class="projection-detail-card">
           <view class="projection-detail-toggle" data-id="{{item.id}}" bindtap="toggleProjectionDetail">
             <text>近50天明细</text>
-            <text>{{item.showDetails ? '收起' : '展开 >'}}</text>
+            <text>{{item.showDetails ? ' 点击折叠' : '点击展开 >'}}</text>
           </view>
           <view wx:if="{{item.showDetails}}" class="projection-table">
             <view class="projection-head">

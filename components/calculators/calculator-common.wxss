@@ -101,8 +101,8 @@ calculator-form-header {
   width: 100%;
   margin: 2rpx 0 6rpx;
   color: #1e293b;
-  font-size: 24rpx;
-  font-weight: 700;
+  font-size: 26rpx;
+  font-weight: 800;
 }
 
 .form-subtitle-row {
@@ -117,8 +117,8 @@ calculator-form-header {
 }
 
 .calculator-shell.embedded .t-home-form-card .form-subtitle {
-  margin: 0 0 5rpx;
-  font-size: 23rpx;
+  margin: 10rpx 0;
+  font-size: 26rpx;
 }
 
 .calculator-shell.embedded .t-home-form-card .form-subtitle-row {
@@ -127,6 +127,35 @@ calculator-form-header {
 
 .operation-title-row {
   margin-top: 1rpx;
+}
+
+.direction-select-row {
+  width: 100%;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12rpx;
+  margin: 0 0 14rpx;
+  padding: 6rpx;
+  border-radius: 16rpx;
+  background: #F2F4F7;
+  box-sizing: border-box;
+}
+
+.direction-select-item {
+  min-height: 72rpx;
+  line-height: 72rpx;
+  border-radius: 12rpx;
+  color: #667085;
+  font-size: 30rpx;
+  font-weight: 800;
+  text-align: center;
+  box-sizing: border-box;
+}
+
+.direction-select-item.active {
+  background: #3157C8;
+  color: #ffffff;
+  box-shadow: 0 8rpx 18rpx rgba(49, 87, 200, 0.18);
 }
 
 .mini-direction-switch {
@@ -165,18 +194,18 @@ calculator-form-header {
   align-items: center;
   justify-content: space-between;
   color: #3157C8;
-  font-size: 22rpx;
-  font-weight: 700;
+  font-size: 26rpx;
+  font-weight: 800;
   box-sizing: border-box;
 }
 
 .amount-toggle-under-shares {
   min-height: 38rpx;
-  margin: 8rpx 0 0;
+  margin: 18rpx 0 0;
   padding-left: 0;
   justify-content: flex-end;
   gap: 8rpx;
-  font-size: 21rpx;
+  font-size: 26rpx;
 }
 
 .base-position-card {

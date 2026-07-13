@@ -29,13 +29,13 @@ calculator-result-card .result-card-main-item:nth-child(2) text:last-child {
 }
 
 .projection-detail-toggle {
-  min-height: 64rpx;
+  min-height: 84rpx;
   display: flex;
   align-items: center;
   justify-content: space-between;
   color: #3157C8;
-  font-size: 24rpx;
-  font-weight: 700;
+  font-size: 26rpx;
+  font-weight: 800;
 }
 
 .projection-table {

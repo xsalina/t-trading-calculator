@@ -35,14 +35,10 @@
     />
     <view wx:if="{{form.baseInitialized}}" class="form-subtitle form-subtitle-row operation-title-row">
       <text>新交易方向</text>
-      <view class="mini-direction-switch">
-        <view class="mini-direction-item {{form.direction === 'SELL' ? 'active' : ''}}" data-direction="SELL" bindtap="setDirection">
-          卖出
-        </view>
-        <view class="mini-direction-item {{form.direction === 'BUY' ? 'active' : ''}}" data-direction="BUY" bindtap="setDirection">
-          买入
-        </view>
-      </view>
+    </view>
+    <view wx:if="{{form.baseInitialized}}" class="direction-select-row">
+      <view class="direction-select-item {{form.direction === 'SELL' ? 'active' : ''}}" data-direction="SELL" bindtap="setDirection">卖出</view>
+      <view class="direction-select-item {{form.direction === 'BUY' ? 'active' : ''}}" data-direction="BUY" bindtap="setDirection">买入</view>
     </view>
     <view wx:if="{{form.baseInitialized}}" class="field">
       <text class="label">{{form.direction === 'SELL' ? '卖出' : '买入'}}价格</text>
@@ -69,7 +65,7 @@
       </view>
       <view wx:if="{{form.direction === 'BUY'}}" class="amount-toggle amount-toggle-under-shares" bindtap="toggleEmbeddedAmountPanel">
         <text>按金额换算股数</text>
-        <text>{{showEmbeddedAmountPanel ? '收起' : '>'}}</text>
+        <text>{{showEmbeddedAmountPanel ? ' 点击折叠' : '>'}}</text>
       </view>
     </view>
     <view wx:if="{{form.baseInitialized && form.direction === 'BUY' && showEmbeddedAmountPanel}}" class="field full-field">
@@ -104,7 +100,7 @@
       <button class="button primary" bindtap="saveOperation" disabled="{{submitting}}">
         {{submitting ? '保存中…' : (form.baseInitialized ? '保存操作' : '初始化底仓')}}
       </button>
-      <button class="button plain" bindtap="clearAll">全部清除</button>
+      <button wx:if="{{form.baseInitialized}}" class="button plain" bindtap="clearAll">全部清除</button>
     </view>
   </view>
   <calculator-result-card
