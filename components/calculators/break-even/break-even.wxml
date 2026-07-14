@@ -1,4 +1,4 @@
-<view class="calculator-shell {{embedded ? 'embedded' : 'standalone'}} {{result && !embedded ? 'has-fixed-action' : ''}}">
+<view class="calculator-shell {{embedded ? 'embedded' : 'standalone'}}">
   <view class="card">
     <calculator-form-header title="回本计算器" calculator-type="break-even" remember-data="{{rememberData}}" show-fee="{{true}}" include-fee="{{form.includeFee}}" home="{{embedded}}" show-default="{{true}}" managed-default="{{embedded}}" is-default="{{isDefaultCalculator}}" bindrememberchange="onRememberSwitch" bindfeechange="onFeeSwitch" binddefaulttap="onDefaultCalculatorTap" />
     <view class="field"><text class="label">持仓成本价</text><view class="step-field"><button class="step-button" data-key="costPrice" data-step="-0.01" data-min="0" bindtap="adjustNumber">-</button><input class="input" type="digit" value="{{form.costPrice}}" data-key="costPrice" bindinput="onInput" /><button class="step-button" data-key="costPrice" data-step="0.01" data-min="0" bindtap="adjustNumber">+</button></view></view>
@@ -29,12 +29,17 @@
           <button class="button secondary result-share-button" data-id="{{item.id}}" bindtap="setShareRecord" open-type="share">分享给朋友</button>
           <button class="button secondary result-copy-button" data-id="{{item.id}}" bindtap="copyResult">复制结果</button>
         </view>
+        <calculator-pro-guide
+          wx:if="{{index === 0}}"
+          calculator-type="break-even"
+          source-page="{{embedded ? 'tab' : 'detail'}}"
+          entry-position="action_after"
+          has-result="{{records.length > 0}}"
+          result-count="{{records.length}}"
+          form="{{form}}"
+        />
       </view>
     </block>
-  </view>
-
-  <view wx:if="{{result && !embedded}}" class="result-action-bar">
-    <button class="action-primary" bindtap="openTradeRecordMiniProgram">算完顺手记录这一笔</button>
   </view>
 
   <view class="notice">本页按当前价回到持仓成本价测算回本空间，仅供测算，不构成任何投资建议。</view>

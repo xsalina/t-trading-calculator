@@ -25,23 +25,23 @@
       </scroll-view>
     </view>
     <view class="calculator-container">
-    <t-profit-calculator wx:if="{{activeCalculatorType === 't-profit'}}" embedded="{{true}}" calculator-key="t-profit" entry-query="{{entryQuery}}" is-default-calculator="{{activeCalculatorType === defaultCalculatorType}}" bindsetdefaultcalculator="setCurrentAsDefault" bindresultready="onCalculatorResultReady"></t-profit-calculator>
-    <break-even-calculator wx:elif="{{activeCalculatorType === 'break-even'}}" embedded="{{true}}" calculator-key="break-even" entry-query="{{entryQuery}}" is-default-calculator="{{activeCalculatorType === defaultCalculatorType}}" bindsetdefaultcalculator="setCurrentAsDefault" bindresultready="onCalculatorResultReady"></break-even-calculator>
-    <reverse-t-calculator wx:elif="{{activeCalculatorType === 'reverse-t'}}" embedded="{{true}}" calculator-key="reverse-t" entry-query="{{entryQuery}}" is-default-calculator="{{activeCalculatorType === defaultCalculatorType}}" bindsetdefaultcalculator="setCurrentAsDefault" bindresultready="onCalculatorResultReady"></reverse-t-calculator>
-    <take-profit-calculator wx:elif="{{activeCalculatorType === 'take-profit'}}" embedded="{{true}}" calculator-key="take-profit" entry-query="{{entryQuery}}" is-default-calculator="{{activeCalculatorType === defaultCalculatorType}}" bindsetdefaultcalculator="setCurrentAsDefault" bindresultready="onCalculatorResultReady"></take-profit-calculator>
-    <average-down-calculator wx:elif="{{activeCalculatorType === 'average-down'}}" embedded="{{true}}" calculator-key="average-down" entry-query="{{entryQuery}}" is-default-calculator="{{activeCalculatorType === defaultCalculatorType}}" bindsetdefaultcalculator="setCurrentAsDefault" bindresultready="onCalculatorResultReady"></average-down-calculator>
-    <sell-estimate-calculator wx:elif="{{activeCalculatorType === 'sell-estimate'}}" embedded="{{true}}" calculator-key="sell-estimate" entry-query="{{entryQuery}}" is-default-calculator="{{activeCalculatorType === defaultCalculatorType}}" bindsetdefaultcalculator="setCurrentAsDefault" bindresultready="onCalculatorResultReady"></sell-estimate-calculator>
-    <grid-calculator wx:elif="{{activeCalculatorType === 'grid'}}" embedded="{{true}}" calculator-key="grid" entry-query="{{entryQuery}}" is-default-calculator="{{activeCalculatorType === defaultCalculatorType}}" bindsetdefaultcalculator="setCurrentAsDefault" bindresultready="onCalculatorResultReady"></grid-calculator>
-    <price-projection-calculator wx:elif="{{activeCalculatorType === 'price-projection'}}" embedded="{{true}}" calculator-key="price-projection" entry-query="{{entryQuery}}" is-default-calculator="{{activeCalculatorType === defaultCalculatorType}}" bindsetdefaultcalculator="setCurrentAsDefault" bindresultready="onCalculatorResultReady"></price-projection-calculator>
+    <t-profit-calculator wx:if="{{activeCalculatorType === 't-profit'}}" embedded="{{true}}" calculator-key="t-profit" entry-query="{{entryQuery}}" is-default-calculator="{{activeCalculatorType === defaultCalculatorType}}" bindsetdefaultcalculator="setCurrentAsDefault" bindresultready="onCalculatorResultReady" bindresultstatechange="onCalculatorResultStateChange"></t-profit-calculator>
+    <break-even-calculator wx:elif="{{activeCalculatorType === 'break-even'}}" embedded="{{true}}" calculator-key="break-even" entry-query="{{entryQuery}}" is-default-calculator="{{activeCalculatorType === defaultCalculatorType}}" bindsetdefaultcalculator="setCurrentAsDefault" bindresultready="onCalculatorResultReady" bindresultstatechange="onCalculatorResultStateChange"></break-even-calculator>
+    <reverse-t-calculator wx:elif="{{activeCalculatorType === 'reverse-t'}}" embedded="{{true}}" calculator-key="reverse-t" entry-query="{{entryQuery}}" is-default-calculator="{{activeCalculatorType === defaultCalculatorType}}" bindsetdefaultcalculator="setCurrentAsDefault" bindresultready="onCalculatorResultReady" bindresultstatechange="onCalculatorResultStateChange"></reverse-t-calculator>
+    <take-profit-calculator wx:elif="{{activeCalculatorType === 'take-profit'}}" embedded="{{true}}" calculator-key="take-profit" entry-query="{{entryQuery}}" is-default-calculator="{{activeCalculatorType === defaultCalculatorType}}" bindsetdefaultcalculator="setCurrentAsDefault" bindresultready="onCalculatorResultReady" bindresultstatechange="onCalculatorResultStateChange"></take-profit-calculator>
+    <average-down-calculator wx:elif="{{activeCalculatorType === 'average-down'}}" embedded="{{true}}" calculator-key="average-down" entry-query="{{entryQuery}}" is-default-calculator="{{activeCalculatorType === defaultCalculatorType}}" bindsetdefaultcalculator="setCurrentAsDefault" bindresultready="onCalculatorResultReady" bindresultstatechange="onCalculatorResultStateChange"></average-down-calculator>
+    <sell-estimate-calculator wx:elif="{{activeCalculatorType === 'sell-estimate'}}" embedded="{{true}}" calculator-key="sell-estimate" entry-query="{{entryQuery}}" is-default-calculator="{{activeCalculatorType === defaultCalculatorType}}" bindsetdefaultcalculator="setCurrentAsDefault" bindresultready="onCalculatorResultReady" bindresultstatechange="onCalculatorResultStateChange"></sell-estimate-calculator>
+    <grid-calculator wx:elif="{{activeCalculatorType === 'grid'}}" embedded="{{true}}" calculator-key="grid" entry-query="{{entryQuery}}" is-default-calculator="{{activeCalculatorType === defaultCalculatorType}}" bindsetdefaultcalculator="setCurrentAsDefault" bindresultready="onCalculatorResultReady" bindresultstatechange="onCalculatorResultStateChange"></grid-calculator>
+    <price-projection-calculator wx:elif="{{activeCalculatorType === 'price-projection'}}" embedded="{{true}}" calculator-key="price-projection" entry-query="{{entryQuery}}" is-default-calculator="{{activeCalculatorType === defaultCalculatorType}}" bindsetdefaultcalculator="setCurrentAsDefault" bindresultready="onCalculatorResultReady" bindresultstatechange="onCalculatorResultStateChange"></price-projection-calculator>
   </view>
   </view>
 
-  <view class="miniapp-card compact-pro-card" bindtap="openTradeRecordMiniProgram" hover-class="miniapp-card-hover">
+  <view wx:if="{{!activeCalculatorHasResult}}" class="miniapp-card compact-pro-card" bindtap="openTradeRecordMiniProgram" hover-class="miniapp-card-hover">
     <view class="miniapp-content">
       <view class="miniapp-icon">📱</view>
       <view class="miniapp-copy">
         <view class="miniapp-title">做T记录助手Pro</view>
-        <view class="miniapp-desc">股友好评的做T记录神器</view>
+        <view class="miniapp-desc">朋友好评的做T记录神器</view>
       </view>
     </view>
     <view class="arrow-white">去记录 ></view>

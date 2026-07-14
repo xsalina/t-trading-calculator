@@ -1,4 +1,4 @@
-<view class="calculator-shell {{embedded ? 'embedded' : 'standalone'}} {{result && !embedded ? 'has-fixed-action' : ''}}">
+<view class="calculator-shell {{embedded ? 'embedded' : 'standalone'}}">
   <view class="card">
     <calculator-form-header title="涨跌幅推演计算器" calculator-type="price-projection" remember-data="{{rememberData}}" show-default="{{true}}" managed-default="{{embedded}}" is-default="{{isDefaultCalculator}}" bindrememberchange="onRememberSwitch" binddefaulttap="onDefaultCalculatorTap" />
     <view class="field">
@@ -39,6 +39,15 @@
           <button class="button secondary result-share-button" data-id="{{item.id}}" bindtap="setShareRecord" open-type="share">分享给朋友</button>
           <button class="button secondary result-copy-button" data-id="{{item.id}}" bindtap="copyResult">复制结果</button>
         </view>
+        <calculator-pro-guide
+          wx:if="{{index === 0}}"
+          calculator-type="price-projection"
+          source-page="{{embedded ? 'tab' : 'detail'}}"
+          entry-position="action_after"
+          has-result="{{records.length > 0}}"
+          result-count="{{records.length}}"
+          form="{{form}}"
+        />
         <view class="projection-detail-card">
           <view class="projection-detail-toggle" data-id="{{item.id}}" bindtap="toggleProjectionDetail">
             <text>近50天明细</text>
@@ -65,10 +74,6 @@
         </view>
       </view>
     </block>
-  </view>
-
-  <view wx:if="{{result && !embedded}}" class="result-action-bar">
-    <button class="action-primary" bindtap="openTradeRecordMiniProgram">算完顺手记录这一笔</button>
   </view>
 
   <view class="notice">本页按固定涨跌幅做复利推演，不代表真实行情。本工具仅用于测算，不构成任何投资建议。</view>

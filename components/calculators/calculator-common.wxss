@@ -4,10 +4,6 @@
   box-sizing: border-box;
 }
 
-.calculator-shell.standalone.has-fixed-action {
-  padding-bottom: calc(240rpx + env(safe-area-inset-bottom));
-}
-
 .calculator-shell.embedded {
   padding: 0;
   box-sizing: border-box;
@@ -356,6 +352,18 @@ calculator-form-header {
   margin-right: -10rpx;
 }
 
+.t-operation-toolbar {
+  justify-content: space-between;
+  padding: 18rpx 4rpx 14rpx;
+}
+
+.operation-list-title {
+  color: #1F2937;
+  font-size: 26rpx;
+  font-weight: 700;
+  line-height: 1;
+}
+
 .compact-summary-card {
   padding: 16rpx;
   border-left: 8rpx solid rgba(49, 87, 200, 0.45);
@@ -506,90 +514,6 @@ calculator-form-header {
 
 .result-action-row .result-copy-button:active {
   background: #F3F6FF;
-}
-
-.result-action-bar {
-  position: fixed;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  z-index: 99;
-  padding: 16rpx 24rpx calc(16rpx + env(safe-area-inset-bottom));
-  background: #ffffff;
-  box-shadow: 0 -8rpx 24rpx rgba(0, 0, 0, 0.06);
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 12rpx;
-  box-sizing: border-box;
-}
-
-.action-primary,
-.action-secondary {
-  margin: 0;
-  min-width: 0;
-  height: 80rpx;
-  line-height: 80rpx;
-  border-radius: 999rpx;
-  font-weight: 700;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  box-sizing: border-box;
-  white-space: nowrap;
-}
-
-.action-primary {
-  flex: 0 0 100%;
-  padding: 0 20rpx;
-  background: #E4EBFF;
-  color: #2448A8;
-  border: 1rpx solid rgba(49, 87, 200, 0.28);
-  box-shadow: none;
-  font-size: 28rpx;
-}
-
-.action-primary:active {
-  background: #D5E0FF;
-  border-color: rgba(49, 87, 200, 0.35);
-  color: #173B8F;
-  transform: scale(0.99);
-}
-
-.action-primary[disabled],
-.action-primary.disabled {
-  background: #F2F4F7;
-  color: #B0B8C5;
-  border-color: #E4E7EC;
-  box-shadow: none;
-}
-
-.action-secondary {
-  flex: 1;
-  width: auto;
-  padding: 0 10rpx;
-  background: #EEF3FF;
-  color: #3157C8;
-  border: 1rpx solid rgba(49, 87, 200, 0.22);
-  font-size: 26rpx;
-}
-
-.action-secondary:active {
-  background: #DDE7FF;
-}
-
-.action-secondary + .action-secondary {
-  background: #FFFFFF;
-  border: 2rpx solid rgba(49, 87, 200, 0.30);
-}
-
-.action-secondary + .action-secondary:active {
-  background: #F3F6FF;
-}
-
-.action-primary::after,
-.action-secondary::after {
-  border: 0;
 }
 
 .compact-head {

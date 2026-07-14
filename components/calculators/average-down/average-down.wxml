@@ -1,4 +1,4 @@
-<view class="calculator-shell {{embedded ? 'embedded' : 'standalone'}} {{result && !embedded ? 'has-fixed-action' : ''}}">
+<view class="calculator-shell {{embedded ? 'embedded' : 'standalone'}}">
   <view class="card t-home-form-card">
     <calculator-form-header title="补仓降本计算器" calculator-type="average-down" remember-data="{{rememberData}}" show-fee="{{true}}" include-fee="{{form.includeFee}}" home="{{embedded}}" show-default="{{true}}" managed-default="{{embedded}}" is-default="{{isDefaultCalculator}}" bindrememberchange="onRememberSwitch" bindfeechange="onFeeSwitch" binddefaulttap="onDefaultCalculatorTap" />
 
@@ -104,6 +104,17 @@
       </block>
     </view>
   </view>
+  <calculator-pro-guide
+    id="{{calculatorKey}}-pro-guide-card"
+    wx:if="{{records.length}}"
+    calculator-type="average-down"
+    source-page="{{embedded ? 'tab' : 'detail'}}"
+    entry-position="result_after"
+    has-result="{{records.length > 0}}"
+    result-count="{{records.length}}"
+    direction="BUY"
+    form="{{form}}"
+  />
 
   <view wx:if="{{records.length > 1}}" class="operation-sort-row">
     <view class="operation-sort-control">
@@ -135,10 +146,9 @@
     <button class="button secondary result-share-button" open-type="share">分享给朋友</button>
     <button class="button secondary result-copy-button" bindtap="copyResult">复制结果</button>
   </view>
-  <view wx:if="{{result && !embedded}}" class="result-action-bar">
-    <button class="action-primary" bindtap="openTradeRecordMiniProgram">算完顺手记录这一笔</button>
-    <button class="action-secondary" open-type="share">分享给朋友</button>
-    <button class="action-secondary" bindtap="copyResult">复制结果</button>
+  <view wx:if="{{result && !embedded}}" class="result-action-row">
+    <button class="button secondary result-share-button" open-type="share">分享给朋友</button>
+    <button class="button secondary result-copy-button" bindtap="copyResult">复制结果</button>
   </view>
 
   <button wx:if="{{!embedded}}" class="button plain action-row" bindtap="goBack">返回</button>

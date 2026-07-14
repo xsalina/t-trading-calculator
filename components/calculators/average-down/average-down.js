@@ -186,6 +186,7 @@ Component(createCalculatorComponent({
         "form.buyAmount": "",
         submitting: false
       }, () => {
+        this.emitResultState();
         this.refreshPreview();
         this.persistForm();
         this.handleResultPosition("补仓结果已生成");
@@ -215,7 +216,7 @@ Component(createCalculatorComponent({
     },
 
     handleResultPosition(toastText) {
-      const selector = "#" + this.data.calculatorKey + "-first-result-card";
+      const selector = "#" + this.data.calculatorKey + "-pro-guide-card";
       wx.showToast({ title: toastText, icon: "none", duration: 1200 });
       wx.nextTick(() => {
         this.scrollToResultSelector(selector);
@@ -498,6 +499,7 @@ Component(createCalculatorComponent({
         basePositionCard: null,
         showAmountPanel: false
       }, () => {
+        this.emitResultState();
         this.refreshPreview();
         this.persistForm();
       });
@@ -527,10 +529,22 @@ Component(createCalculatorComponent({
             result: this.buildCumulativeResult(records, basePosition),
             basePosition,
             basePositionCard: this.buildBasePositionCard(basePosition)
-          }, () => this.refreshPreview());
+          }, () => {
+            this.emitResultState();
+            this.refreshPreview();
+          });
           this.persistForm();
           wx.showToast({ title: "已撤销本笔并重新计算", icon: "none" });
         }
+      });
+    },
+
+    emitResultState() {
+      const resultCount = (this.data.records || []).length;
+      this.triggerEvent("resultstatechange", {
+        calculatorKey: this.data.calculatorKey,
+        hasResult: resultCount > 0,
+        resultCount
       });
     }
   },

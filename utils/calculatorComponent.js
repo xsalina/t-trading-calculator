@@ -89,6 +89,7 @@ function createCalculatorComponent(options) {
           records: hasExternalEntry ? [] : this.data.records,
           result: hasExternalEntry ? null : this.data.result
         }, () => {
+          this.emitResultState();
           if (typeof options.afterInit === "function") {
             options.afterInit.call(this, externalPreset);
           }
@@ -198,6 +199,7 @@ function createCalculatorComponent(options) {
             records: [record].concat(this.data.records),
             submitting: false
           }, () => {
+            this.emitResultState();
             this.persistForm();
             this.handleResultPosition({
               selector: "#" + this.data.calculatorKey + "-first-result-card",
@@ -299,7 +301,9 @@ function createCalculatorComponent(options) {
       },
 
       clearRecords() {
-        this.setData({ records: [], result: null });
+        this.setData({ records: [], result: null }, () => {
+          this.emitResultState();
+        });
       },
 
       removeRecord(event) {
@@ -308,6 +312,17 @@ function createCalculatorComponent(options) {
         this.setData({
           records,
           result: records.length ? records[0].result : null
+        }, () => {
+          this.emitResultState();
+        });
+      },
+
+      emitResultState() {
+        const resultCount = (this.data.records || []).length;
+        this.triggerEvent("resultstatechange", {
+          calculatorKey: this.data.calculatorKey,
+          hasResult: Boolean(resultCount || this.data.result),
+          resultCount
         });
       }
     }, options.methods || {})

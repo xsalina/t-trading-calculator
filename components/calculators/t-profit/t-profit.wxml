@@ -1,4 +1,4 @@
-<view class="calculator-shell {{embedded ? 'embedded' : 'standalone'}} {{operations.length && !embedded ? 'has-fixed-action' : ''}}">
+<view class="calculator-shell {{embedded ? 'embedded' : 'standalone'}}">
   <view class="card t-home-form-card">
     <calculator-form-header title="做T计算器" calculator-type="t-profit" remember-data="{{rememberData}}" show-fee="{{true}}" include-fee="{{form.includeFee}}" home="{{embedded}}" show-default="{{true}}" managed-default="{{embedded}}" is-default="{{isDefaultCalculator}}" bindrememberchange="onRememberSwitch" bindfeechange="onSwitchChange" binddefaulttap="onDefaultCalculatorTap" />
     <view wx:if="{{!form.baseInitialized}}" class="field">
@@ -129,7 +129,19 @@
       </block>
     </view>
   </view>
-  <view wx:if="{{operations.length > 1}}" class="operation-sort-row">
+  <calculator-pro-guide
+    id="{{calculatorKey}}-pro-guide-card"
+    wx:if="{{operations.length}}"
+    calculator-type="t-profit"
+    source-page="{{embedded ? 'tab' : 'detail'}}"
+    entry-position="result_after"
+    has-result="{{operations.length > 0}}"
+    result-count="{{operations.length}}"
+    direction="{{form.direction}}"
+    form="{{form}}"
+  />
+  <view wx:if="{{operations.length}}" class="operation-sort-row t-operation-toolbar">
+    <text class="operation-list-title">操作明细</text>
     <view class="operation-sort-control">
       <text class="operation-sort-label">最新操作在前</text>
       <switch checked="{{latestFirst}}" color="#3157C8" bindchange="onOperationSortChange" />
@@ -157,10 +169,9 @@
     <button class="button secondary result-share-button" open-type="share">分享给朋友</button>
     <button class="button secondary result-copy-button" bindtap="copyResult">复制结果</button>
   </view>
-  <view wx:if="{{operations.length && !embedded}}" class="result-action-bar">
-    <button class="action-primary" bindtap="openTradeRecordMiniProgram">算完顺手记录这一笔</button>
-    <button class="action-secondary" open-type="share">分享给朋友</button>
-    <button class="action-secondary" bindtap="copyResult">复制结果</button>
+  <view wx:if="{{operations.length && !embedded}}" class="result-action-row">
+    <button class="button secondary result-share-button" open-type="share">分享给朋友</button>
+    <button class="button secondary result-copy-button" bindtap="copyResult">复制结果</button>
   </view>
   <button wx:if="{{!embedded}}" class="button plain action-row" bindtap="goBack">返回</button>
   <view class="notice" style="margin-top: 20rpx;">本工具仅用于做T流水和持仓成本测算，不构成任何投资建议。</view>

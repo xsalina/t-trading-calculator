@@ -1,0 +1,10 @@
+<view wx:if="{{visible}}" class="calculator-pro-guide">
+  <view class="pro-guide-title">{{guide.title}}</view>
+  <view class="pro-guide-desc">{{guide.description}}</view>
+  <view class="pro-guide-tags">
+    <block wx:for="{{guide.tags}}" wx:key="*this">
+      <text class="pro-guide-tag">{{item}}</text>
+    </block>
+  </view>
+  <button class="pro-guide-button" bindtap="openPro">{{guide.buttonText}}</button>
+</view>

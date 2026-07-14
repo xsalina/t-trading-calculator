@@ -282,6 +282,8 @@ Component({
         preview: this.buildPreview(),
         baseInfo: this.buildBaseInfo(),
         displayOperations: this.getDisplayOperations(this.data.operations),
+      }, () => {
+        this.emitResultState();
       });
     },
 
@@ -819,8 +821,17 @@ Component({
       this.triggerEvent("setdefaultcalculator");
     },
 
+    emitResultState() {
+      const resultCount = (this.data.operations || []).length;
+      this.triggerEvent("resultstatechange", {
+        calculatorKey: this.data.calculatorKey,
+        hasResult: resultCount > 0,
+        resultCount
+      });
+    },
+
     handleResultPosition(toastText) {
-      const selector = "#" + this.data.calculatorKey + "-first-result-card";
+      const selector = "#" + this.data.calculatorKey + "-pro-guide-card";
       wx.showToast({ title: toastText, icon: "none", duration: 1200 });
       wx.nextTick(() => {
         this.scrollToResultSelector(selector);

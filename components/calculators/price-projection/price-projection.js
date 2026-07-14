@@ -92,6 +92,7 @@ Component({
         records: isExternalEntry(entryQuery) ? [] : this.data.records,
         result: isExternalEntry(entryQuery) ? null : this.data.result
       }, () => {
+        this.emitResultState();
         if (externalPreset.applied) {
           this.persistForm();
         }
@@ -175,6 +176,7 @@ Component({
           records: [record].concat(this.data.records),
           submitting: false
         }, () => {
+          this.emitResultState();
           this.persistForm();
           this.handleResultPosition("推演结果已生成");
         });
@@ -187,6 +189,8 @@ Component({
       this.setData({
         records,
         result: records.length ? records[0].result : null
+      }, () => {
+        this.emitResultState();
       });
     },
 
@@ -218,6 +222,15 @@ Component({
 
     onDefaultCalculatorTap() {
       this.triggerEvent("setdefaultcalculator");
+    },
+
+    emitResultState() {
+      const resultCount = (this.data.records || []).length;
+      this.triggerEvent("resultstatechange", {
+        calculatorKey: this.data.calculatorKey,
+        hasResult: resultCount > 0,
+        resultCount
+      });
     },
 
     handleResultPosition(toastText) {
