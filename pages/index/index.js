@@ -354,6 +354,12 @@ Page({
     });
   },
 
+  goFeeSettings() {
+    wx.navigateTo({
+      url: "/pages/fee-settings/fee-settings"
+    });
+  },
+
   onShareAppMessage() {
     return getShareMessage();
   },

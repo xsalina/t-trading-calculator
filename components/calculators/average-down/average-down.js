@@ -488,7 +488,7 @@ Component(createCalculatorComponent({
           convertUnit: "100",
           roundLot: true,
           baseInitialized: false,
-          includeFee: this.data.feeSettings.useFee
+          includeFee: this.data.form.includeFee
         },
         records: [],
         displayRecords: [],

@@ -1,4 +1,4 @@
-const { getFeeSettings } = require("./fee");
+const { getFeeSettings, getCurrentIncludeFee, setCurrentIncludeFee } = require("./fee");
 const {
   clone,
   getSavedState,
@@ -65,18 +65,19 @@ function createCalculatorComponent(options) {
     methods: Object.assign({
       initCalculator() {
         const feeSettings = getFeeSettings();
+        const includeFee = getCurrentIncludeFee();
         const saved = getSavedState(options.pageKey);
         const rememberData = saved.rememberData !== false;
         const savedForm = saved.form || {};
         const entryQuery = this.data.entryQuery || {};
         const hasExternalEntry = isExternalEntry(entryQuery);
         let form = hasExternalEntry
-          ? Object.assign({}, defaultForm, { includeFee: feeSettings.useFee })
+          ? Object.assign({}, defaultForm, { includeFee })
           : rememberData
           ? Object.assign({}, defaultForm, savedForm, {
-            includeFee: typeof savedForm.includeFee === "boolean" ? savedForm.includeFee : feeSettings.useFee
+            includeFee
           })
-          : Object.assign({}, this.data.form, { includeFee: feeSettings.useFee });
+          : Object.assign({}, this.data.form, { includeFee });
         const externalPreset = applyExternalFormPreset(options.pageKey, form, entryQuery);
         form = externalPreset.form;
 
@@ -105,9 +106,10 @@ function createCalculatorComponent(options) {
       },
 
       onFeeSwitch(event) {
+        const includeFee = setCurrentIncludeFee(event.detail.value);
         this.setData({
-          "form.includeFee": event.detail.value,
-          feeSummary: buildFeeSummary(this.data.feeSettings, event.detail.value)
+          "form.includeFee": includeFee,
+          feeSummary: buildFeeSummary(this.data.feeSettings, includeFee)
         }, () => {
           this.afterFormChange("includeFee");
         });

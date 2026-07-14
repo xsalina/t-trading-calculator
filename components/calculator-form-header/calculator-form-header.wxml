@@ -14,7 +14,7 @@
     </view>
   </view>
   <view wx:if="{{showFee}}" class="calculator-form-fee-row">
-    <text>交易费率：{{includeFee ? (home ? '已计入估算' : '已计入') : '未计入'}}</text>
+    <text>交易费率：{{includeFee ? '已计入估算' : '未计入估算'}}</text>
     <view class="calculator-form-fee">
       <navigator url="/pages/fee-settings/fee-settings">设置 ></navigator>
       <switch color="#3157C8" checked="{{includeFee}}" bindchange="onFeeChange" />

@@ -48,9 +48,10 @@
   </view>
 
   <view class="share-area">
+    <button class="button secondary fee-settings-button" bindtap="goFeeSettings" hover-class="btn-hover">交易费用设置</button>
     <button class="button primary share-button" open-type="share" hover-class="share-btn-hover">分享小程序</button>
-    <view class="share-copy">感谢您的分享支持，祝您投资顺利！</view>
   </view>
+  <view class="share-copy">感谢您的分享支持，祝您投资顺利！</view>
   <view class="action-area">
     <button
       class="button secondary contact-button"

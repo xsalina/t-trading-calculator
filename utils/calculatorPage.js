@@ -1,4 +1,4 @@
-const { getFeeSettings } = require("./fee");
+const { getFeeSettings, getCurrentIncludeFee, setCurrentIncludeFee } = require("./fee");
 const {
   clone,
   getSavedState,
@@ -28,14 +28,15 @@ function createCalculatorPage(options) {
 
     onShow() {
       const feeSettings = getFeeSettings();
+      const includeFee = getCurrentIncludeFee();
       const saved = getSavedState(options.pageKey);
       const rememberData = saved.rememberData !== false;
       const savedForm = saved.form || {};
       let form = rememberData
         ? Object.assign({}, defaultForm, savedForm, {
-          includeFee: typeof savedForm.includeFee === "boolean" ? savedForm.includeFee : feeSettings.useFee
+          includeFee
         })
-        : Object.assign({}, this.data.form, { includeFee: feeSettings.useFee });
+        : Object.assign({}, this.data.form, { includeFee });
       const externalPreset = applyExternalFormPreset(options.pageKey, form, this.externalEntryQuery || {});
       form = externalPreset.form;
       if (externalPreset.applied) {
@@ -61,7 +62,7 @@ function createCalculatorPage(options) {
     },
 
     onFeeSwitch(event) {
-      this.setData({ "form.includeFee": event.detail.value });
+      this.setData({ "form.includeFee": setCurrentIncludeFee(event.detail.value) });
       this.persistForm();
     },
 

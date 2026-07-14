@@ -461,7 +461,7 @@ Component(createCalculatorComponent({
           baseInitialized: false,
           basePendingShares: "",
           externalSellFee: "",
-          includeFee: this.data.feeSettings.useFee
+          includeFee: this.data.form.includeFee
         },
         records: [],
         displayRecords: [],

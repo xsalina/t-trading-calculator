@@ -1,4 +1,4 @@
-const { getFeeSettings, saveFeeSettings, resetFeeSettings } = require("../../utils/fee");
+const { getFeeSettings, saveFeeSettings, resetFeeSettings, saveDefaultUseFee } = require("../../utils/fee");
 const { safeNumber } = require("../../utils/math");
 const { getShareMessage, getShareTimelineMessage } = require("../../utils/share");
 
@@ -25,7 +25,16 @@ Page({
 
   onSwitchChange(event) {
     const key = event.currentTarget.dataset.key;
-    this.setData({ ["form." + key]: event.detail.value });
+    const value = event.detail.value;
+    this.setData({ ["form." + key]: value });
+    if (key === "useFee") {
+      const form = saveDefaultUseFee(value);
+      this.setData({ form });
+      wx.showToast({
+        title: value ? "已设为默认计入手续费" : "已设为默认不计入手续费",
+        icon: "none"
+      });
+    }
   },
 
   save() {

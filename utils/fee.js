@@ -6,6 +6,7 @@ const {
 } = require("./math");
 
 const FEE_SETTINGS_KEY = "feeSettings";
+let currentIncludeFee;
 
 const DEFAULT_FEE_SETTINGS = {
   useFee: true,
@@ -26,6 +27,26 @@ function normalizeFeeSettings(settings) {
 
 function getFeeSettings() {
   return normalizeFeeSettings(wx.getStorageSync(FEE_SETTINGS_KEY));
+}
+
+function getCurrentIncludeFee() {
+  if (typeof currentIncludeFee !== "boolean") {
+    currentIncludeFee = Boolean(getFeeSettings().useFee);
+  }
+  return currentIncludeFee;
+}
+
+function setCurrentIncludeFee(value) {
+  currentIncludeFee = Boolean(value);
+  return currentIncludeFee;
+}
+
+function saveDefaultUseFee(value) {
+  const settings = getFeeSettings();
+  const nextSettings = saveFeeSettings(Object.assign({}, settings, {
+    useFee: Boolean(value)
+  }));
+  return nextSettings;
 }
 
 function saveFeeSettings(settings) {
@@ -88,6 +109,9 @@ module.exports = {
   FEE_SETTINGS_KEY,
   normalizeFeeSettings,
   getFeeSettings,
+  getCurrentIncludeFee,
+  setCurrentIncludeFee,
+  saveDefaultUseFee,
   saveFeeSettings,
   resetFeeSettings,
   calcTradeFee

@@ -470,8 +470,26 @@
 }
 
 .share-area {
-  margin-bottom: 46rpx;
+  display: flex;
+  gap: 20rpx;
+  margin-bottom: 14rpx;
   text-align: center;
+}
+
+.share-area .button {
+  flex: 1;
+  width: 0 !important;
+  margin: 0 !important;
+}
+
+.fee-settings-button {
+  min-height: 78rpx;
+  padding: 18rpx 0;
+  background: #ffffff;
+  color: #1f2937;
+  border: 1rpx solid #d8e0ef;
+  font-size: 28rpx;
+  font-weight: 600;
 }
 
 .button.primary.share-button {
@@ -483,7 +501,6 @@
   font-size: 30rpx;
   font-weight: 600;
   box-shadow: 0 6rpx 18rpx rgba(49, 87, 200, 0.07);
-  width: 100% !important;
 }
 
 .share-btn-hover {
@@ -496,7 +513,8 @@
 .share-copy {
   font-size: 24rpx;
   color: #94a3b8;
-  margin-top: 16rpx;
+  text-align: center;
+  margin: 0 0 36rpx;
 }
 
 .notice {

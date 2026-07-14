@@ -1,5 +1,4 @@
-const { getFeeSettings } = require("../../../utils/fee");
-const { calcTradeFee } = require("../../../utils/fee");
+const { getFeeSettings, getCurrentIncludeFee, setCurrentIncludeFee, calcTradeFee } = require("../../../utils/fee");
 const {
   safeNumber,
   safeAdd,
@@ -117,20 +116,18 @@ Component({
   methods: {
     initCalculator() {
       const feeSettings = getFeeSettings();
+      const includeFee = getCurrentIncludeFee();
       const saved = getSavedState(PAGE_KEY);
       const rememberData = saved.rememberData !== false;
       const entryQuery = this.data.entryQuery || {};
       const hasExternalEntry = isExternalEntry(entryQuery);
       let form = hasExternalEntry
-        ? Object.assign({}, DEFAULT_FORM, { includeFee: feeSettings.useFee })
+        ? Object.assign({}, DEFAULT_FORM, { includeFee })
         : rememberData
         ? Object.assign({}, DEFAULT_FORM, saved.form || {}, {
-            includeFee:
-              typeof (saved.form || {}).includeFee === "boolean"
-                ? saved.form.includeFee
-                : feeSettings.useFee,
+            includeFee,
           })
-        : Object.assign({}, this.data.form, { includeFee: feeSettings.useFee });
+        : Object.assign({}, this.data.form, { includeFee });
       form.convertUnit = String(getConvertUnit(form));
       const operations = hasExternalEntry ? [] : rememberData ? saved.operations || [] : [];
       form.baseInitialized = Boolean(form.baseInitialized || operations.length);
@@ -180,7 +177,10 @@ Component({
 
     onSwitchChange(event) {
       const key = event.currentTarget.dataset.key || event.detail.key;
-      this.updateForm({ [key]: event.detail.value }, key);
+      const value = key === "includeFee"
+        ? setCurrentIncludeFee(event.detail.value)
+        : event.detail.value;
+      this.updateForm({ [key]: value }, key);
     },
 
     onRememberSwitch(event) {
@@ -776,7 +776,7 @@ Component({
     resetAllData() {
       this.setData({
         form: Object.assign({}, DEFAULT_FORM, {
-          includeFee: this.data.feeSettings.useFee,
+          includeFee: getCurrentIncludeFee(),
         }),
         operations: [],
         displayOperations: [],
