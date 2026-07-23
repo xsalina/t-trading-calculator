@@ -93,6 +93,72 @@ calculator-form-header {
   box-sizing: border-box;
 }
 
+.group-switch-row {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 12rpx;
+  margin: 8rpx 0 18rpx;
+  box-sizing: border-box;
+}
+
+.group-scroll {
+  flex: 1;
+  min-width: 0;
+  white-space: nowrap;
+}
+
+.group-tab-list {
+  display: inline-flex;
+  align-items: center;
+  gap: 12rpx;
+  min-width: 100%;
+}
+
+.group-tab {
+  min-width: 118rpx;
+  height: 56rpx;
+  line-height: 56rpx;
+  padding: 0 22rpx;
+  border-radius: 999rpx;
+  color: #667085;
+  background: #F2F4F7;
+  font-size: 26rpx;
+  font-weight: 700;
+  text-align: center;
+  box-sizing: border-box;
+}
+
+.group-tab.active {
+  color: #ffffff;
+  background: #3157C8;
+  box-shadow: 0 8rpx 18rpx rgba(49, 87, 200, 0.16);
+}
+
+.group-tab-add {
+  color: #3157C8;
+  background: #EEF3FF;
+}
+
+.group-export,
+.group-manage {
+  flex-shrink: 0;
+  height: 56rpx;
+  line-height: 56rpx;
+  padding: 0 16rpx;
+  border-radius: 999rpx;
+  color: #3157C8;
+  background: #ffffff;
+  border: 1rpx solid #D8E2FF;
+  font-size: 25rpx;
+  font-weight: 700;
+  box-sizing: border-box;
+}
+
+.group-export {
+  background: #EEF3FF;
+}
+
 .form-subtitle {
   width: 100%;
   margin: 2rpx 0 6rpx;

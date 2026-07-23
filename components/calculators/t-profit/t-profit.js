@@ -13,15 +13,31 @@ const {
 const {
   getSavedState,
   saveState,
+  clearState,
   makeTimeText,
 } = require("../../../utils/pageState");
 const {
-  getShareMessage,
-  getShareTimelineMessage,
+  setCalculatorShareContext,
 } = require("../../../utils/share");
 const { applyExternalFormPreset, isExternalEntry } = require("../../../utils/externalEntry");
 const { appendSource, copyText, rowMap } = require("../../../utils/resultCopy");
 const { buildFeeSummary } = require("../../../utils/feeSummary");
+const {
+  reportCalculatorExport,
+  reportCalculatorResult,
+  reportProJumpFail,
+  reportProJumpSuccess,
+} = require("../../../utils/analytics");
+const { exportCalculatorGroups } = require("../../../utils/exportCalculators");
+const {
+  MAX_GROUP_COUNT,
+  stripRuntimeForm,
+  createGroup,
+  buildGroupedState,
+  getActiveGroup,
+  getActiveTabId,
+  getNextGroupIndex,
+} = require("../../../utils/calculatorGroups");
 
 const PAGE_KEY = "t-profit-ledger";
 
@@ -34,7 +50,6 @@ const DEFAULT_FORM = {
   tradeAmount: "",
   convertUnit: "100",
   roundLot: true,
-  includeFee: true,
   baseInitialized: false,
 };
 
@@ -88,6 +103,7 @@ Component({
 
   data: {
     form: DEFAULT_FORM,
+    includeFee: true,
     feeSettings: {},
     feeSummary: "",
     rememberData: true,
@@ -99,6 +115,9 @@ Component({
     baseInfo: null,
     showEmbeddedAmountPanel: false,
     showBaseDetail: false,
+    groups: [],
+    activeGroupId: "",
+    activeGroupTabId: "",
   },
 
   lifetimes: {
@@ -116,20 +135,29 @@ Component({
   methods: {
     initCalculator() {
       const feeSettings = getFeeSettings();
-      const includeFee = getCurrentIncludeFee();
       const saved = getSavedState(PAGE_KEY);
-      const rememberData = saved.rememberData !== false;
+      const rememberData = this.data.rememberData === false ? false : saved.rememberData !== false;
+      const includeFee = rememberData && saved.version === 2 && typeof saved.includeFee === "boolean"
+        ? saved.includeFee
+        : getCurrentIncludeFee();
       const entryQuery = this.data.entryQuery || {};
       const hasExternalEntry = isExternalEntry(entryQuery);
-      let form = hasExternalEntry
-        ? Object.assign({}, DEFAULT_FORM, { includeFee })
+      const groupedState = hasExternalEntry
+        ? buildGroupedState({}, DEFAULT_FORM, "operations")
         : rememberData
-        ? Object.assign({}, DEFAULT_FORM, saved.form || {}, {
-            includeFee,
-          })
-        : Object.assign({}, this.data.form, { includeFee });
+        ? buildGroupedState(saved, DEFAULT_FORM, "operations")
+        : {
+          groups: this.data.groups && this.data.groups.length
+            ? this.data.groups
+            : buildGroupedState({}, DEFAULT_FORM, "operations").groups,
+          activeGroupId: this.data.activeGroupId,
+        };
+      let groups = groupedState.groups;
+      let activeGroupId = groupedState.activeGroupId || (groups[0] && groups[0].id);
+      let activeGroup = getActiveGroup(groups, activeGroupId);
+      let form = Object.assign({}, DEFAULT_FORM, activeGroup ? activeGroup.form : {}, { includeFee });
       form.convertUnit = String(getConvertUnit(form));
-      const operations = hasExternalEntry ? [] : rememberData ? saved.operations || [] : [];
+      const operations = hasExternalEntry ? [] : (activeGroup && activeGroup.operations) || [];
       form.baseInitialized = Boolean(form.baseInitialized || operations.length);
       const externalPreset = applyExternalFormPreset(
         PAGE_KEY,
@@ -137,16 +165,30 @@ Component({
         entryQuery,
       );
       form = externalPreset.form;
+      if (externalPreset.applied && activeGroup) {
+        const nextActiveGroup = Object.assign({}, activeGroup, {
+          form: stripRuntimeForm(form),
+          operations: [],
+        });
+        groups = groups.map((group) => group.id === activeGroup.id ? nextActiveGroup : group);
+        activeGroup = nextActiveGroup;
+        activeGroupId = nextActiveGroup.id;
+      }
 
       this.setData(
         {
+          includeFee,
           feeSettings,
-          feeSummary: buildFeeSummary(feeSettings, form.includeFee),
+          feeSummary: buildFeeSummary(feeSettings, includeFee),
           rememberData,
+          groups,
+          activeGroupId,
+          activeGroupTabId: getActiveTabId(activeGroupId),
           form,
           operations,
-          showEmbeddedAmountPanel: hasExternalEntry ? false : this.data.showEmbeddedAmountPanel,
-          showBaseDetail: hasExternalEntry ? false : this.data.showBaseDetail,
+          latestFirst: activeGroup ? activeGroup.latestFirst !== false : true,
+          showEmbeddedAmountPanel: hasExternalEntry ? false : Boolean(activeGroup && activeGroup.showEmbeddedAmountPanel),
+          showBaseDetail: hasExternalEntry ? false : Boolean(activeGroup && activeGroup.showBaseDetail),
         },
         () => {
           if (operations.length) {
@@ -177,9 +219,19 @@ Component({
 
     onSwitchChange(event) {
       const key = event.currentTarget.dataset.key || event.detail.key;
-      const value = key === "includeFee"
-        ? setCurrentIncludeFee(event.detail.value)
-        : event.detail.value;
+      if (key === "includeFee") {
+        const includeFee = setCurrentIncludeFee(event.detail.value);
+        this.setData({
+          includeFee,
+          "form.includeFee": includeFee,
+          feeSummary: buildFeeSummary(this.data.feeSettings, includeFee),
+        }, () => {
+          this.recalculateCurrentGroup();
+          this.persistState();
+        });
+        return;
+      }
+      const value = event.detail.value;
       this.updateForm({ [key]: value }, key);
     },
 
@@ -189,7 +241,7 @@ Component({
       if (rememberData) {
         this.persistState();
       } else {
-        saveState(PAGE_KEY, { rememberData: false });
+        clearState(PAGE_KEY);
       }
     },
 
@@ -205,13 +257,13 @@ Component({
     toggleEmbeddedAmountPanel() {
       this.setData({
         showEmbeddedAmountPanel: !this.data.showEmbeddedAmountPanel,
-      });
+      }, () => this.persistState());
     },
 
     toggleBaseDetail() {
       this.setData({
         showBaseDetail: !this.data.showBaseDetail,
-      });
+      }, () => this.persistState());
     },
 
     setConvertUnit(event) {
@@ -248,9 +300,7 @@ Component({
         {
           form,
           feeSummary:
-            key === "includeFee"
-              ? buildFeeSummary(this.data.feeSettings, form.includeFee)
-              : this.data.feeSummary,
+            this.data.feeSummary,
         },
         () => {
           this.refreshAll();
@@ -283,6 +333,7 @@ Component({
         baseInfo: this.buildBaseInfo(),
         displayOperations: this.getDisplayOperations(this.data.operations),
       }, () => {
+        this.updateShareContext();
         this.emitResultState();
       });
     },
@@ -292,12 +343,175 @@ Component({
       return this.data.latestFirst ? list.slice().reverse() : list;
     },
 
+    buildGroupsWithCurrentState() {
+      const groups = this.data.groups && this.data.groups.length
+        ? this.data.groups
+        : buildGroupedState({}, DEFAULT_FORM, "operations").groups;
+      return groups.map((group) => {
+        if (group.id !== this.data.activeGroupId) return group;
+        return Object.assign({}, group, {
+          form: stripRuntimeForm(this.data.form),
+          operations: this.data.operations || [],
+          latestFirst: this.data.latestFirst !== false,
+          showEmbeddedAmountPanel: Boolean(this.data.showEmbeddedAmountPanel),
+          showBaseDetail: Boolean(this.data.showBaseDetail),
+          updatedAt: Date.now(),
+        });
+      });
+    },
+
+    syncCurrentGroup(callback) {
+      this.setData({ groups: this.buildGroupsWithCurrentState() }, () => {
+        if (typeof callback === "function") callback();
+      });
+    },
+
+    loadGroup(group) {
+      if (!group) return;
+      const form = Object.assign({}, DEFAULT_FORM, group.form || {}, {
+        includeFee: this.data.includeFee,
+      });
+      form.convertUnit = String(getConvertUnit(form));
+      const operations = group.operations || [];
+      this.setData({
+        activeGroupId: group.id,
+        activeGroupTabId: getActiveTabId(group.id),
+        form,
+        operations: [],
+        displayOperations: [],
+        latestFirst: group.latestFirst !== false,
+        showEmbeddedAmountPanel: Boolean(group.showEmbeddedAmountPanel),
+        showBaseDetail: Boolean(group.showBaseDetail),
+        summary: null,
+        preview: null,
+        baseInfo: null,
+      }, () => {
+        const rebuiltOperations = operations.length ? this.rebuildOperations(operations) : [];
+        this.setData({ operations: rebuiltOperations }, () => {
+          this.refreshAll();
+          this.persistState();
+        });
+      });
+    },
+
+    switchGroup(event) {
+      const id = event.currentTarget.dataset.id;
+      if (!id || id === this.data.activeGroupId) return;
+      this.syncCurrentGroup(() => {
+        this.loadGroup(getActiveGroup(this.data.groups, id));
+      });
+    },
+
+    addGroup() {
+      this.syncCurrentGroup(() => {
+        const groups = this.data.groups || [];
+        if (groups.length >= MAX_GROUP_COUNT) {
+          wx.showToast({ title: "最多保留10组", icon: "none" });
+          return;
+        }
+        const nextIndex = getNextGroupIndex(groups);
+        const group = createGroup(nextIndex, DEFAULT_FORM);
+        this.setData({ groups: groups.concat(group) }, () => {
+          this.loadGroup(group);
+          wx.showToast({ title: "已新增第" + (nextIndex + 1) + "组", icon: "none" });
+        });
+      });
+    },
+
+    openGroupManage() {
+      wx.showActionSheet({
+        itemList: ["修改当前组名称", "清空当前组", "删除当前组"],
+        success: (res) => {
+          if (res.tapIndex === 0) this.renameCurrentGroup();
+          if (res.tapIndex === 1) this.clearAll();
+          if (res.tapIndex === 2) this.deleteCurrentGroup();
+        },
+      });
+    },
+
+    exportAllGroups() {
+      this.syncCurrentGroup(() => {
+        const groups = this.data.groups || [];
+        reportCalculatorExport({
+          calculatorType: "t-profit",
+          sourcePage: this.data.embedded ? "tab" : "detail",
+          groupCount: groups.length,
+        });
+        exportCalculatorGroups({
+          type: "t-profit",
+          groups,
+          feeSettings: this.data.feeSettings,
+          includeFee: this.data.includeFee,
+        });
+      });
+    },
+
+    renameCurrentGroup() {
+      const group = getActiveGroup(this.data.groups, this.data.activeGroupId);
+      if (!group) return;
+      wx.showModal({
+        title: "修改分组名称",
+        editable: true,
+        placeholderText: group.customName || group.defaultName,
+        success: (res) => {
+          if (!res.confirm) return;
+          const customName = String(res.content || "").trim().slice(0, 12);
+          const groups = (this.data.groups || []).map((item) => item.id === group.id
+            ? Object.assign({}, item, { customName, updatedAt: Date.now() })
+            : item);
+          this.setData({ groups }, () => this.persistState());
+        },
+      });
+    },
+
+    deleteCurrentGroup() {
+      wx.showModal({
+        title: "确认删除当前组？",
+        content: "删除后只移除当前组，其他分组不受影响。",
+        confirmText: "确认删除",
+        confirmColor: "#D96B6B",
+        success: (res) => {
+          if (!res.confirm) return;
+          const groups = this.data.groups || [];
+          const index = groups.findIndex((group) => group.id === this.data.activeGroupId);
+          let nextGroups = groups.filter((group) => group.id !== this.data.activeGroupId);
+          if (!nextGroups.length) {
+            nextGroups = [createGroup(0, DEFAULT_FORM)];
+          }
+          const nextGroup = nextGroups[Math.max(0, Math.min(index, nextGroups.length - 1))];
+          this.setData({ groups: nextGroups }, () => {
+            this.loadGroup(nextGroup);
+            wx.showToast({ title: "已删除当前组", icon: "none" });
+          });
+        },
+      });
+    },
+
+    getActiveGroupReportInfo() {
+      const groups = this.data.groups || [];
+      const index = groups.findIndex((group) => group.id === this.data.activeGroupId);
+      const group = index >= 0 ? groups[index] : null;
+      return {
+        groupIndex: index >= 0 ? index + 1 : 1,
+        groupName: group ? (group.customName || group.defaultName || "") : "",
+      };
+    },
+
+    reportCalculatorAction(action, extraParams) {
+      reportCalculatorResult(Object.assign({
+        calculatorType: "t-profit",
+        action,
+        sourcePage: this.data.embedded ? "tab" : "detail",
+        hasResult: Boolean((this.data.operations || []).length),
+      }, this.getActiveGroupReportInfo(), extraParams || {}));
+    },
+
     onOperationSortChange(event) {
       const latestFirst = event.detail.value;
       this.setData({
         latestFirst,
         displayOperations: latestFirst ? this.data.operations.slice().reverse() : this.data.operations,
-      });
+      }, () => this.persistState());
     },
 
     buildBaseInfo() {
@@ -310,7 +524,7 @@ Component({
         amount,
         direction: "BUY",
         feeSettings: this.data.feeSettings,
-        includeFee: this.data.form.includeFee,
+        includeFee: this.data.includeFee,
       });
       const cashFlow = -safeAdd(amount, fee.totalFee);
       const totalCost = safeAdd(amount, fee.totalFee);
@@ -350,7 +564,7 @@ Component({
         amount,
         direction: "BUY",
         feeSettings: this.data.feeSettings,
-        includeFee: this.data.form.includeFee,
+        includeFee: this.data.includeFee,
       });
       const initialCost = safeAdd(amount, fee.totalFee);
       return {
@@ -419,14 +633,12 @@ Component({
       const price = safeNumber(operation.price);
       const shares = safeNumber(operation.shares);
       const amount = safeMultiply(price, shares);
-      const fee =
-        operation.fee ||
-        calcTradeFee({
-          amount,
-          direction,
-          feeSettings: this.data.feeSettings,
-          includeFee: this.data.form.includeFee,
-        });
+      const fee = calcTradeFee({
+        amount,
+        direction,
+        feeSettings: this.data.feeSettings,
+        includeFee: this.data.includeFee,
+      });
       const afterState = this.applyOperation(beforeState, {
         direction,
         price,
@@ -525,7 +737,7 @@ Component({
         amount,
         direction,
         feeSettings: this.data.feeSettings,
-        includeFee: this.data.form.includeFee,
+        includeFee: this.data.includeFee,
       });
 
       const afterState = this.applyOperation(beforeState, {
@@ -693,7 +905,7 @@ Component({
         amount,
         direction,
         feeSettings: this.data.feeSettings,
-        includeFee: this.data.form.includeFee,
+        includeFee: this.data.includeFee,
       });
       const operationBase = {
         id: Date.now() + "-" + this.data.operations.length,
@@ -719,6 +931,11 @@ Component({
         "form.tradeAmount": "",
         submitting: false,
       }, () => {
+        this.reportCalculatorAction("save", {
+          buttonText: "保存操作",
+          direction,
+          resultCount: this.data.operations.length,
+        });
         this.refreshAll();
         this.persistState();
         this.handleResultPosition("已保存，本次结果已更新");
@@ -758,14 +975,18 @@ Component({
       this.setData({ submitting: true });
       this.updateForm({ baseInitialized: true }, "baseInitialized");
       this.setData({ submitting: false }, () => {
+        this.reportCalculatorAction("initialize", {
+          buttonText: "初始化底仓",
+          resultCount: this.data.operations.length,
+        });
         wx.showToast({ title: "初始化完成", icon: "none", duration: 1200 });
       });
     },
 
     clearAll() {
       wx.showModal({
-        title: "确认全部清除？",
-        content: "清除后会重置底仓和所有买入/卖出操作记录。",
+        title: "确认清空当前组？",
+        content: "清空后只重置当前组的底仓和买入/卖出操作记录，其他分组不受影响。",
         confirmText: "确认清除",
         confirmColor: "#D96B6B",
         success: (res) => {
@@ -778,7 +999,7 @@ Component({
     resetAllData() {
       this.setData({
         form: Object.assign({}, DEFAULT_FORM, {
-          includeFee: getCurrentIncludeFee(),
+          includeFee: this.data.includeFee,
         }),
         operations: [],
         displayOperations: [],
@@ -793,12 +1014,43 @@ Component({
       });
     },
 
+    updateShareContext() {
+      if (!this.data.operations.length || !this.data.summary) {
+        setCalculatorShareContext(null);
+        return;
+      }
+      setCalculatorShareContext({
+        calculatorType: "t-profit",
+        form: this.data.form,
+        result: this.data.summary,
+        summary: this.data.summary,
+        record: this.data.operations[this.data.operations.length - 1] || null,
+        activeGroupId: this.data.activeGroupId,
+      });
+    },
+
+    prepareShareResult() {
+      this.persistState();
+      this.updateShareContext();
+    },
+
     persistState() {
+      const groups = this.buildGroupsWithCurrentState();
+      this.data.groups = groups;
       if (!this.data.rememberData) return;
       saveState(PAGE_KEY, {
+        version: 2,
         rememberData: true,
-        form: this.data.form,
-        operations: this.data.operations,
+        includeFee: this.data.includeFee,
+        activeGroupId: this.data.activeGroupId,
+        groups,
+      });
+    },
+
+    recalculateCurrentGroup() {
+      const operations = this.rebuildOperations(this.data.operations || []);
+      this.setData({ operations }, () => {
+        this.refreshAll();
       });
     },
 
@@ -812,8 +1064,17 @@ Component({
     },
 
     openTradeRecordMiniProgram() {
+      const params = {
+        calculatorType: "t-profit",
+        sourcePage: this.data.embedded ? "tab" : "detail",
+        entryPosition: "legacy_calculator",
+        guideType: "legacy",
+        targetPath: "/pages/index/index",
+      };
       wx.navigateToMiniProgram({
         appId: "wx253309efe732b547",
+        success: () => reportProJumpSuccess(params),
+        fail: (error) => reportProJumpFail(params, error),
       });
     },
 
@@ -871,23 +1132,16 @@ Component({
         return;
       }
 
-      const latest = this.data.operations[this.data.operations.length - 1];
       const summaryRows = rowMap(this.data.summary);
       const lines = [
         "【做T计算器】",
-        this.data.form.initialShares && this.data.form.initialPrice
-          ? `初始持仓：${this.data.form.initialShares}股，成本价 ${this.data.form.initialPrice}`
-          : "",
-        `最近操作：${latest.directionText} ${latest.sharesText}股，价格 ${latest.priceText}`,
-        latest.direction === "SELL" ? `本次卖出收益：${latest.profitText}` : "",
-        summaryRows["剩余持仓"] ? `当前持仓：${summaryRows["剩余持仓"]}` : "",
-        summaryRows["最新成本价"]
-          ? `最新成本价：${summaryRows["最新成本价"]}`
-          : "",
-        summaryRows["持仓成本"] ? `持仓成本：${summaryRows["持仓成本"]}` : "",
         summaryRows["累计已实现收益"]
-          ? `累计已实现收益：${summaryRows["累计已实现收益"]}`
+          ? `累计收益：${summaryRows["累计已实现收益"]}`
           : "",
+        summaryRows["最新成本价"]
+          ? `当前成本：${summaryRows["最新成本价"]}`
+          : "",
+        summaryRows["剩余持仓"] ? `剩余持仓：${summaryRows["剩余持仓"]}` : "",
       ];
 
       copyText(appendSource(lines));

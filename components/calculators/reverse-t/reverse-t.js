@@ -67,6 +67,8 @@ function calcAllocatedSellFee({ sellPrice, shares, basePendingShares, feeSetting
 
 Component(createCalculatorComponent({
   pageKey: "reverse-t",
+  multiGroup: true,
+  groupListKey: "records",
   defaultForm: {
     sellPrice: "",
     coverAmount: "",
@@ -89,18 +91,17 @@ Component(createCalculatorComponent({
     this.setData({
       basePendingShares,
       baseSellCard: this.buildBaseSellCard(basePendingShares)
-    }, () => this.refreshPreview());
+    }, () => this.recalculateCurrentGroup());
   },
   buildCopy() {
     if (!this.data.result) return "";
     const rows = rowMap(this.data.result);
     return appendSource([
       "【反T回补计算器】",
-      this.data.form.sellPrice ? `卖出均价：${this.data.form.sellPrice}` : "",
-      rows["累计回补数量"] ? `累计回补：${rows["累计回补数量"]}` : this.data.form.shares ? `回补股数：${this.data.form.shares}股` : "",
-      rows["平均回补价"] ? `平均回补价：${rows["平均回补价"]}` : this.data.form.coverPrice ? `回补价：${this.data.form.coverPrice}` : "",
+      this.data.form.sellPrice ? `卖出价：${this.data.form.sellPrice}` : "",
+      rows["平均回补价"] ? `平均回补价：${rows["平均回补价"]}` : "",
+      rows["累计反T收益"] ? `累计反T收益：${rows["累计反T收益"]}` : "",
       rows["剩余待回补数量"] ? `剩余待回补：${rows["剩余待回补数量"]}` : "",
-      rows["累计反T收益"] ? `累计反T收益：${rows["累计反T收益"]}` : ""
     ]);
   },
   methods: {
@@ -114,11 +115,11 @@ Component(createCalculatorComponent({
       this.setData({
         latestFirst,
         displayRecords: latestFirst ? this.data.records.slice().reverse() : this.data.records
-      });
+      }, () => this.persistForm());
     },
 
     toggleAmountPanel() {
-      this.setData({ showAmountPanel: !this.data.showAmountPanel });
+      this.setData({ showAmountPanel: !this.data.showAmountPanel }, () => this.persistForm());
     },
 
     refreshPreview() {
@@ -164,6 +165,11 @@ Component(createCalculatorComponent({
         result: this.buildCumulativeResult(records, basePendingShares),
         submitting: false
       }, () => {
+        this.reportCalculatorAction("save", {
+          buttonText: "保存回补",
+          resultCount: records.length
+        });
+        this.updateShareContext(records[records.length - 1]);
         this.emitResultState();
         this.refreshPreview();
         this.persistForm();
@@ -191,6 +197,11 @@ Component(createCalculatorComponent({
       }, () => {
         this.refreshPreview();
         this.persistForm();
+        this.updateShareContext(null);
+        this.reportCalculatorAction("initialize", {
+          buttonText: "初始化卖出",
+          resultCount: this.data.records.length
+        });
         wx.showToast({ title: "初始化完成", icon: "none", duration: 1200 });
       });
     },
@@ -249,7 +260,7 @@ Component(createCalculatorComponent({
           amount: sellAmount,
           direction: "SELL",
           feeSettings: this.data.feeSettings,
-          includeFee: this.data.form.includeFee
+          includeFee: this.data.includeFee
         }).totalFee;
       const initialCashFlow = safeSubtract(sellAmount, sellFeeTotal);
 
@@ -287,14 +298,14 @@ Component(createCalculatorComponent({
         shares,
         basePendingShares,
         feeSettings: this.data.feeSettings,
-        includeFee: this.data.form.includeFee,
+        includeFee: this.data.includeFee,
         externalSellFee: this.data.form.externalSellFee
       });
       const coverFee = calcTradeFee({
         amount: coverAmount,
         direction: "BUY",
         feeSettings: this.data.feeSettings,
-        includeFee: this.data.form.includeFee
+        includeFee: this.data.includeFee
       });
       const feeTotal = safeAdd(allocatedSellFee, coverFee.totalFee);
       const spreadProfit = safeMultiply(safeSubtract(sellPrice, coverPrice), shares);
@@ -338,14 +349,14 @@ Component(createCalculatorComponent({
           shares,
           basePendingShares,
           feeSettings: this.data.feeSettings,
-          includeFee: this.data.form.includeFee,
+          includeFee: this.data.includeFee,
           externalSellFee: this.data.form.externalSellFee
         });
         const coverFee = calcTradeFee({
           amount: coverAmount,
           direction: "BUY",
           feeSettings: this.data.feeSettings,
-          includeFee: this.data.form.includeFee
+          includeFee: this.data.includeFee
         });
         const feeTotal = safeAdd(allocatedSellFee, coverFee.totalFee);
         const spreadProfit = safeMultiply(safeSubtract(sellPrice, coverPrice), shares);
@@ -431,6 +442,7 @@ Component(createCalculatorComponent({
             displayRecords: this.getDisplayRecords(records),
             result: records.length ? this.buildCumulativeResult(records, basePendingShares) : this.buildCumulativeResult([], basePendingShares)
           }, () => {
+            this.updateShareContext(records[records.length - 1] || null);
             this.emitResultState();
             this.refreshPreview();
           });
@@ -442,8 +454,8 @@ Component(createCalculatorComponent({
 
     clearRecords() {
       wx.showModal({
-        title: "确认全部清除？",
-        content: "清除后会重置卖出信息和所有回补记录。",
+        title: "确认清空当前组？",
+        content: "清空后只重置当前组的卖出信息和回补记录，其他分组不受影响。",
         confirmText: "确认清除",
         confirmColor: "#D96B6B",
         success: (res) => {
@@ -465,7 +477,7 @@ Component(createCalculatorComponent({
           baseInitialized: false,
           basePendingShares: "",
           externalSellFee: "",
-          includeFee: this.data.form.includeFee
+          includeFee: this.data.includeFee
         },
         records: [],
         displayRecords: [],
@@ -475,14 +487,37 @@ Component(createCalculatorComponent({
         baseSellCard: null,
         showAmountPanel: false
       }, () => {
+        this.updateShareContext(null);
         this.emitResultState();
         this.refreshPreview();
         this.persistForm();
       });
     },
 
+    recalculateCurrentGroup() {
+      if (!this.data.form.baseInitialized) {
+        this.refreshPreview();
+        return;
+      }
+      const basePendingShares = this.getBasePendingShares(safeNumber(this.data.form.shares));
+      if (!basePendingShares) return;
+      const records = this.rebuildCoverRecords(this.data.records || [], basePendingShares);
+      this.setData({
+        basePendingShares,
+        baseSellCard: this.buildBaseSellCard(basePendingShares),
+        records,
+        displayRecords: this.getDisplayRecords(records),
+        result: this.buildCumulativeResult(records, basePendingShares)
+      }, () => {
+        this.updateShareContext(records[records.length - 1] || null);
+        this.refreshPreview();
+        this.emitResultState();
+      });
+    },
+
     emitResultState() {
       const resultCount = (this.data.records || []).length;
+      this.updateShareContext(resultCount ? this.data.records[this.data.records.length - 1] : null);
       this.triggerEvent("resultstatechange", {
         calculatorKey: this.data.calculatorKey,
         hasResult: resultCount > 0,

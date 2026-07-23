@@ -74,6 +74,8 @@ function buildCoreResultRows({ nextCost, reduceAmount, reduceRate, nextShares, b
 
 Component(createCalculatorComponent({
   pageKey: "average-down",
+  multiGroup: true,
+  groupListKey: "records",
   defaultForm: {
     originalCost: "",
     originalShares: "",
@@ -95,21 +97,16 @@ Component(createCalculatorComponent({
     this.setData({
       basePosition,
       basePositionCard: this.buildBasePositionCard(basePosition)
-    }, () => this.refreshPreview());
+    }, () => this.recalculateCurrentGroup());
   },
   buildCopy() {
     if (!this.data.result) return "";
     const rows = rowMap(this.data.result);
-    const lastRecord = this.data.records[this.data.records.length - 1];
     return appendSource([
       "【补仓降本计算器】",
-      this.data.form.originalCost ? `原成本价：${this.data.form.originalCost}` : "",
-      this.data.form.originalShares ? `原股数：${this.data.form.originalShares}股` : "",
-      lastRecord ? `累计补仓：${formatNumber(safeSubtract(lastRecord.afterShares, this.data.basePosition.shares), 0)}股` : "",
+      this.data.form.originalCost ? `原成本：${this.data.form.originalCost}` : "",
       rows["补仓后成本价"] ? `补仓后成本价：${rows["补仓后成本价"]}` : "",
-      rows["成本降低金额/比例"] ? `成本降低：${rows["成本降低金额/比例"]}` : "",
-      rows["补仓后总股数"] ? `当前总股数：${rows["补仓后总股数"]}` : "",
-      rows["本次投入金额"] ? `本次投入：${rows["本次投入金额"]}` : ""
+      rows["成本降低金额/比例"] ? `降本比例：${rows["成本降低金额/比例"]}` : ""
     ]);
   },
   methods: {
@@ -123,11 +120,11 @@ Component(createCalculatorComponent({
       this.setData({
         latestFirst,
         displayRecords: latestFirst ? this.data.records.slice().reverse() : this.data.records
-      });
+      }, () => this.persistForm());
     },
 
     toggleAmountPanel() {
-      this.setData({ showAmountPanel: !this.data.showAmountPanel });
+      this.setData({ showAmountPanel: !this.data.showAmountPanel }, () => this.persistForm());
     },
 
     refreshPreview() {
@@ -171,7 +168,7 @@ Component(createCalculatorComponent({
         timeText: makeTimeText(),
         buyPrice,
         buyShares,
-        includeFee: this.data.form.includeFee
+        includeFee: this.data.includeFee
       };
       const records = this.rebuildAverageDownRecords(this.data.records.concat(operation), basePosition);
 
@@ -186,6 +183,11 @@ Component(createCalculatorComponent({
         "form.buyAmount": "",
         submitting: false
       }, () => {
+        this.reportCalculatorAction("save", {
+          buttonText: "保存补仓",
+          resultCount: records.length
+        });
+        this.updateShareContext(records[records.length - 1]);
         this.emitResultState();
         this.refreshPreview();
         this.persistForm();
@@ -211,6 +213,11 @@ Component(createCalculatorComponent({
       }, () => {
         this.refreshPreview();
         this.persistForm();
+        this.updateShareContext(null);
+        this.reportCalculatorAction("initialize", {
+          buttonText: "初始化原持仓",
+          resultCount: this.data.records.length
+        });
         wx.showToast({ title: "初始化完成", icon: "none", duration: 1200 });
       });
     },
@@ -316,7 +323,7 @@ Component(createCalculatorComponent({
         amount: buyAmount,
         direction: "BUY",
         feeSettings: this.data.feeSettings,
-        includeFee: this.data.form.includeFee
+        includeFee: this.data.includeFee
       });
       const buyTotalCost = safeAdd(buyAmount, fee.totalFee);
       const nextAmount = safeAdd(currentPosition.amount, buyTotalCost);
@@ -375,7 +382,7 @@ Component(createCalculatorComponent({
           amount: buyAmount,
           direction: "BUY",
           feeSettings: this.data.feeSettings,
-          includeFee: record.includeFee
+          includeFee: this.data.includeFee
         });
         const buyTotalCost = safeAdd(buyAmount, fee.totalFee);
         const nextAmount = safeAdd(currentAmount, buyTotalCost);
@@ -399,7 +406,7 @@ Component(createCalculatorComponent({
 
         return Object.assign({}, record, {
           title: "补仓 " + (index + 1),
-          includeFee: record.includeFee,
+          includeFee: this.data.includeFee,
           buyAmount,
           buyTotalCost,
           cashFlow,
@@ -467,8 +474,8 @@ Component(createCalculatorComponent({
 
     clearRecords() {
       wx.showModal({
-        title: "确认全部清除？",
-        content: "清除后会重置原持仓和所有补仓记录。",
+        title: "确认清空当前组？",
+        content: "清空后只重置当前组的原持仓和补仓记录，其他分组不受影响。",
         confirmText: "确认清除",
         confirmColor: "#D96B6B",
         success: (res) => {
@@ -489,7 +496,7 @@ Component(createCalculatorComponent({
           convertUnit: "100",
           roundLot: true,
           baseInitialized: false,
-          includeFee: this.data.form.includeFee
+          includeFee: this.data.includeFee
         },
         records: [],
         displayRecords: [],
@@ -499,6 +506,7 @@ Component(createCalculatorComponent({
         basePositionCard: null,
         showAmountPanel: false
       }, () => {
+        this.updateShareContext(null);
         this.emitResultState();
         this.refreshPreview();
         this.persistForm();
@@ -530,6 +538,7 @@ Component(createCalculatorComponent({
             basePosition,
             basePositionCard: this.buildBasePositionCard(basePosition)
           }, () => {
+            this.updateShareContext(records[records.length - 1] || null);
             this.emitResultState();
             this.refreshPreview();
           });
@@ -539,8 +548,33 @@ Component(createCalculatorComponent({
       });
     },
 
+    recalculateCurrentGroup() {
+      if (!this.data.form.baseInitialized) {
+        this.refreshPreview();
+        return;
+      }
+      const basePosition = this.getBasePosition(
+        safeNumber(this.data.form.originalCost),
+        safeNumber(this.data.form.originalShares)
+      );
+      if (!basePosition || !safeNumber(basePosition.shares)) return;
+      const records = this.rebuildAverageDownRecords(this.data.records || [], basePosition);
+      this.setData({
+        basePosition,
+        basePositionCard: this.buildBasePositionCard(basePosition),
+        records,
+        displayRecords: this.getDisplayRecords(records),
+        result: this.buildCumulativeResult(records, basePosition)
+      }, () => {
+        this.updateShareContext(records[records.length - 1] || null);
+        this.refreshPreview();
+        this.emitResultState();
+      });
+    },
+
     emitResultState() {
       const resultCount = (this.data.records || []).length;
+      this.updateShareContext(resultCount ? this.data.records[this.data.records.length - 1] : null);
       this.triggerEvent("resultstatechange", {
         calculatorKey: this.data.calculatorKey,
         hasResult: resultCount > 0,

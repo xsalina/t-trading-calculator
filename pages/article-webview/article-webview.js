@@ -11,8 +11,8 @@ Page({
     });
   },
 
-  onShareAppMessage() {
-    return getShareMessage();
+  onShareAppMessage(event) {
+    return getShareMessage(event);
   },
 
   onShareTimeline() {

@@ -3,6 +3,12 @@ const { getSavedState, saveState } = require("../../../utils/pageState");
 const { safeNumber, safeMultiply, roundTo, formatMoney, formatNumber } = require("../../../utils/math");
 const { applyExternalFormPreset, isExternalEntry } = require("../../../utils/externalEntry");
 const { appendSource, copyText, rowMap } = require("../../../utils/resultCopy");
+const { setCalculatorShareContext } = require("../../../utils/share");
+const {
+  reportCalculatorResult,
+  reportProJumpFail,
+  reportProJumpSuccess
+} = require("../../../utils/analytics");
 
 const PAGE_KEY = "price-projection";
 const DEFAULT_FORM = {
@@ -151,6 +157,7 @@ Component({
         const startMarketValue = safeMultiply(startPrice, shares);
         const record = {
           id: Date.now() + "-" + this.data.records.length,
+          form: formSnapshot,
           result,
           copyValue: buildProjectionCopy(formSnapshot, result),
           projectionRows: result.projectionRows || [],
@@ -176,6 +183,15 @@ Component({
           records: [record].concat(this.data.records),
           submitting: false
         }, () => {
+          reportCalculatorResult({
+            calculatorType: PAGE_KEY,
+            action: "calculate",
+            buttonText: "计算50天",
+            sourcePage: this.data.embedded ? "tab" : "detail",
+            resultCount: this.data.records.length,
+            hasResult: true
+          });
+          this.updateShareContext(record);
           this.emitResultState();
           this.persistForm();
           this.handleResultPosition("推演结果已生成");
@@ -190,6 +206,7 @@ Component({
         records,
         result: records.length ? records[0].result : null
       }, () => {
+        this.updateShareContext(records[0] || null);
         this.emitResultState();
       });
     },
@@ -215,8 +232,17 @@ Component({
     },
 
     openTradeRecordMiniProgram() {
+      const params = {
+        calculatorType: "price-projection",
+        sourcePage: this.data.embedded ? "tab" : "detail",
+        entryPosition: "legacy_calculator",
+        guideType: "legacy",
+        targetPath: "/pages/index/index"
+      };
       wx.navigateToMiniProgram({
-        appId: "wx253309efe732b547"
+        appId: "wx253309efe732b547",
+        success: () => reportProJumpSuccess(params),
+        fail: (error) => reportProJumpFail(params, error)
       });
     },
 
@@ -226,6 +252,7 @@ Component({
 
     emitResultState() {
       const resultCount = (this.data.records || []).length;
+      this.updateShareContext(resultCount ? this.data.records[0] : null);
       this.triggerEvent("resultstatechange", {
         calculatorKey: this.data.calculatorKey,
         hasResult: resultCount > 0,
@@ -250,7 +277,22 @@ Component({
 
     setShareRecord(event) {
       const id = event.currentTarget.dataset.id || "";
-      this.setData({ currentShareRecordId: id });
+      const record = id ? this.data.records.find((item) => item.id === id) : null;
+      this.setData({ currentShareRecordId: id }, () => this.updateShareContext(record));
+    },
+
+    updateShareContext(record) {
+      const targetRecord = record || (this.data.records && this.data.records[0]);
+      if (!targetRecord && !this.data.result) {
+        setCalculatorShareContext(null);
+        return;
+      }
+      setCalculatorShareContext({
+        calculatorType: PAGE_KEY,
+        form: (targetRecord && targetRecord.form) || this.data.form,
+        result: (targetRecord && targetRecord.result) || this.data.result,
+        record: targetRecord || null
+      });
     },
 
     getRecordFromEvent(event) {

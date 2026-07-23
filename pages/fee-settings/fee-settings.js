@@ -52,8 +52,8 @@ Page({
     wx.showToast({ title: "已恢复默认", icon: "success" });
   },
 
-  onShareAppMessage() {
-    return getShareMessage();
+  onShareAppMessage(event) {
+    return getShareMessage(event);
   },
 
   onShareTimeline() {

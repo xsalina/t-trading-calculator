@@ -36,7 +36,7 @@
           bindremove="removeRecord"
         />
         <view class="result-action-row record-result-action-row">
-          <button class="button secondary result-share-button" data-id="{{item.id}}" bindtap="setShareRecord" open-type="share">分享给朋友</button>
+          <button class="button secondary result-share-button" data-share-kind="result" data-id="{{item.id}}" bindtap="setShareRecord" open-type="share">分享给朋友</button>
           <button class="button secondary result-copy-button" data-id="{{item.id}}" bindtap="copyResult">复制结果</button>
         </view>
         <calculator-pro-guide

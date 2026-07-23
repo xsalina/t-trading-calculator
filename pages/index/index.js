@@ -11,6 +11,11 @@ const {
   getEntryCalculatorType,
   isExternalEntry,
 } = require("../../utils/externalEntry");
+const {
+  reportCalculatorEntryClick,
+  reportProJumpFail,
+  reportProJumpSuccess,
+} = require("../../utils/analytics");
 
 function safeReport(eventName, params) {
   if (typeof wx.reportEvent === "function") {
@@ -163,12 +168,32 @@ Page({
   },
 
   goCalculatorPage(event) {
-    this.goCalculatorByUrl(event.currentTarget.dataset.url);
+    const dataset = event.currentTarget.dataset || {};
+    reportCalculatorEntryClick({
+      calculatorType: dataset.type || "",
+      calculatorName: dataset.name || "",
+      sourcePage: "home",
+      entryPosition: "bottom_all_calculators",
+      clickTarget: "detail_page",
+      isDefault: dataset.type === this.data.defaultCalculatorType,
+      activeCalculatorType: this.data.activeCalculatorType || "",
+    });
+    this.goCalculatorByUrl(dataset.url);
   },
 
   switchHomeCalculator(event) {
     const type = event.currentTarget.dataset.type;
     if (type === this.data.activeCalculatorType) return;
+    const calculator = this.data.calculators.find((item) => item.type === type);
+    reportCalculatorEntryClick({
+      calculatorType: type || "",
+      calculatorName: calculator ? calculator.name : "",
+      sourcePage: "home",
+      entryPosition: "top_tab",
+      clickTarget: "home_embedded",
+      previousCalculatorType: this.data.activeCalculatorType || "",
+      isDefault: type === this.data.defaultCalculatorType,
+    });
     this.setActiveCalculator(type);
     this.scrollHomeCalculatorAfterSwitch(type);
   },
@@ -183,7 +208,7 @@ Page({
     this.clearFavoriteGuideTimer();
     this.favoriteGuideTimer = setTimeout(() => {
       this.setData({ showFavoriteGuide: false });
-    }, 3000);
+    }, 5000);
   },
 
   closeFavoriteGuide() {
@@ -449,16 +474,11 @@ Page({
       extraData: params,
 
       success: () => {
-        safeReport("pro_jump_success", params);
+        reportProJumpSuccess(params);
       },
 
       fail: (error) => {
-        safeReport(
-          "pro_jump_fail",
-          Object.assign({}, params, {
-            errorMessage: (error && error.errMsg) || "",
-          }),
-        );
+        reportProJumpFail(params, error);
       },
     });
   },
@@ -499,8 +519,8 @@ Page({
     });
   },
 
-  onShareAppMessage() {
-    return getShareMessage();
+  onShareAppMessage(event) {
+    return getShareMessage(event);
   },
 
   onShareTimeline() {

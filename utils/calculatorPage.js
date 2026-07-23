@@ -8,6 +8,7 @@ const {
 const { safeNumber, roundTo } = require("./math");
 const { getShareMessage, getShareTimelineMessage } = require("./share");
 const { applyExternalFormPreset } = require("./externalEntry");
+const { reportProJumpFail, reportProJumpSuccess } = require("./analytics");
 
 function createCalculatorPage(options) {
   const defaultForm = Object.assign({
@@ -142,8 +143,17 @@ function createCalculatorPage(options) {
     },
 
     openTradeRecordMiniProgram() {
+      const params = {
+        calculatorType: options.pageKey,
+        sourcePage: "detail",
+        entryPosition: "legacy_page",
+        guideType: "legacy",
+        targetPath: "/pages/index/index"
+      };
       wx.navigateToMiniProgram({
-        appId: "wx253309efe732b547"
+        appId: "wx253309efe732b547",
+        success: () => reportProJumpSuccess(params),
+        fail: (error) => reportProJumpFail(params, error)
       });
     },
 
@@ -158,8 +168,8 @@ function createCalculatorPage(options) {
       });
     },
 
-    onShareAppMessage() {
-      return getShareMessage();
+    onShareAppMessage(event) {
+      return getShareMessage(event);
     },
 
     onShareTimeline() {

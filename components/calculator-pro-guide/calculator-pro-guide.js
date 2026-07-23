@@ -2,6 +2,10 @@ const {
   TRADE_RECORD_MINI_PROGRAM_APP_ID,
   getProGuideConfig
 } = require("../../utils/proGuide");
+const {
+  reportProJumpFail,
+  reportProJumpSuccess
+} = require("../../utils/analytics");
 
 function safeReport(eventName, params) {
   if (typeof wx.reportEvent === "function") {
@@ -196,12 +200,10 @@ Component({
         path: targetPath + "?" + query,
         extraData,
         success: () => {
-          safeReport("pro_jump_success", reportParams);
+          reportProJumpSuccess(reportParams);
         },
         fail: (error) => {
-          safeReport("pro_jump_fail", Object.assign({}, reportParams, {
-            errorMessage: (error && error.errMsg) || ""
-          }));
+          reportProJumpFail(reportParams, error);
         }
       });
     }
