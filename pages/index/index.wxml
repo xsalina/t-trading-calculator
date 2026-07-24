@@ -48,29 +48,46 @@
   </view>
 
   <view class="share-area">
-    <button class="button secondary fee-settings-button" bindtap="goFeeSettings" hover-class="btn-hover">交易费用设置</button>
     <button class="button primary share-button" open-type="share" hover-class="share-btn-hover">分享小程序</button>
   </view>
   <view class="share-copy">感谢您的分享支持，祝您投资顺利！</view>
-  <view class="action-area">
+  <view class="bottom-link-grid">
+    <view class="bottom-link-item fee-settings-link" bindtap="goFeeSettings" hover-class="bottom-link-hover">
+      <view class="bottom-link-copy">
+        <view class="bottom-link-title">交易费用设置</view>
+        <view class="bottom-link-desc">默认已按常用费率估算</view>
+      </view>
+      <view class="bottom-link-arrow">›</view>
+    </view>
+    <button class="bottom-link-item bottom-link-button" bindtap="openArticle" hover-class="bottom-link-hover">
+      <view class="bottom-link-copy">
+        <view class="bottom-link-title">使用说明 / 文章教程</view>
+      </view>
+      <view class="bottom-link-arrow">›</view>
+    </button>
     <button
-      class="button secondary contact-button"
+      class="bottom-link-item bottom-link-button"
       open-type="contact"
       show-message-card="true"
       send-message-title="做T交易计算器"
       send-message-path="/pages/index/index"
-      hover-class="btn-hover"
-    >在线客服 / 反馈建议</button>
-    <button class="button secondary contact-button" bindtap="openArticle" hover-class="btn-hover">使用说明 / 文章教程</button>
+      hover-class="bottom-link-hover"
+    >
+      <view class="bottom-link-copy">
+        <view class="bottom-link-title">在线客服 / 反馈建议</view>
+      </view>
+      <view class="bottom-link-arrow">›</view>
+    </button>
+    <view class="bottom-link-item" bindtap="toggleAllCalculators" hover-class="bottom-link-hover">
+      <view class="bottom-link-copy">
+        <view class="bottom-link-title">全部计算器</view>
+        <view class="bottom-link-desc">查看完整计算工具</view>
+      </view>
+      <view class="bottom-link-arrow">{{showAllCalculators ? '收起' : '›'}}</view>
+    </view>
   </view>
 
-  <view id="allCalculatorsEntry" class="all-calculators-entry" bindtap="toggleAllCalculators" hover-class="all-calculators-hover">
-    <view class="all-calculators-copy">
-      <view class="all-calculators-title">全部计算器</view>
-      <view class="all-calculators-desc">查看完整计算工具</view>
-    </view>
-    <view class="all-calculators-action">{{showAllCalculators ? ' 点击折叠' : '查看 8 个 >'}}</view>
-  </view>
+  <view id="allCalculatorsEntry"></view>
 
   <view wx:if="{{showAllCalculators}}" id="bottomCalculatorList" class="card calculator-card compact-calculator-card bottom-calculator-list">
     <block wx:for="{{bottomCalculators}}" wx:key="type">

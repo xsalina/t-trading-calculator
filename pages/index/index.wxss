@@ -396,62 +396,6 @@
   margin: 4rpx 0 18rpx;
 }
 
-.action-area {
-  display: flex;
-  gap: 20rpx;
-  margin-bottom: 36rpx;
-}
-
-.action-area .button {
-  flex: 1;
-  margin: 0 !important;
-}
-
-.action-area .contact-button {
-  width: 100%;
-}
-
-.all-calculators-entry {
-  width: 100%;
-  margin: -18rpx 0 18rpx;
-  padding: 18rpx 22rpx;
-  border-radius: 18rpx;
-  background: #ffffff;
-  border: 1rpx solid #edf2f7;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 18rpx;
-  box-sizing: border-box;
-}
-
-.all-calculators-hover {
-  background: #f8fafc;
-}
-
-.all-calculators-copy {
-  min-width: 0;
-}
-
-.all-calculators-title {
-  color: #1e293b;
-  font-size: 29rpx;
-  font-weight: 800;
-}
-
-.all-calculators-desc {
-  margin-top: 6rpx;
-  color: #94a3b8;
-  font-size: 24rpx;
-}
-
-.all-calculators-action {
-  flex-shrink: 0;
-  color: #2446A8;
-  font-size: 26rpx;
-  font-weight: 800;
-}
-
 .button {
   display: flex;
   justify-content: center;
@@ -482,26 +426,14 @@
 }
 
 .share-area {
-  display: flex;
-  gap: 20rpx;
+  display: block;
   margin-bottom: 14rpx;
   text-align: center;
 }
 
 .share-area .button {
-  flex: 1;
-  width: 0 !important;
+  width: 100% !important;
   margin: 0 !important;
-}
-
-.fee-settings-button {
-  min-height: 78rpx;
-  padding: 18rpx 0;
-  background: #ffffff;
-  color: #1f2937;
-  border: 1rpx solid #d8e0ef;
-  font-size: 28rpx;
-  font-weight: 600;
 }
 
 .button.primary.share-button {
@@ -526,7 +458,69 @@
   font-size: 24rpx;
   color: #94a3b8;
   text-align: center;
-  margin: 0 0 36rpx;
+  margin: 0 0 18rpx;
+}
+
+.bottom-link-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14rpx;
+  margin-bottom: 30rpx;
+}
+
+.bottom-link-item {
+  width: 100%;
+  min-height: 76rpx;
+  padding: 10rpx 14rpx;
+  border-radius: 14rpx;
+  background: #ffffff;
+  border: 1rpx solid #edf2f7;
+  box-shadow: none;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8rpx;
+  box-sizing: border-box;
+  color: #64748B;
+}
+
+.bottom-link-button {
+  margin: 0;
+  line-height: 1.3;
+  text-align: left;
+}
+
+.bottom-link-button::after {
+  border: none;
+}
+
+.bottom-link-copy {
+  min-width: 0;
+}
+
+.bottom-link-title {
+  color: #64748B;
+  font-size: 24rpx;
+  font-weight: 600;
+  line-height: 1.25;
+}
+
+.bottom-link-desc {
+  margin-top: 4rpx;
+  color: #94A3B8;
+  font-size: 20rpx;
+  line-height: 1.2;
+}
+
+.bottom-link-arrow {
+  flex-shrink: 0;
+  color: #94A3B8;
+  font-size: 26rpx;
+  line-height: 1;
+}
+
+.bottom-link-hover {
+  background: #f8fafc !important;
 }
 
 .notice {

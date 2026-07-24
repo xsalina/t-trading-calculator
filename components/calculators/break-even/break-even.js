@@ -39,11 +39,12 @@ Component(createCalculatorComponent({
         { label: "当前盈利", value: findRow(result, "当前盈利").value || "-", className: findRow(result, "当前盈利").className || "" }
       ] : [
         { label: "每股还需上涨", value: findRow(result, "每股还需上涨").value || "-", className: findRow(result, "每股还需上涨").className || "" },
-        { label: "当前亏损", value: findRow(result, "当前亏损").value || "-", className: findRow(result, "当前亏损").className || "" }
+        { label: "距回本还差", value: findRow(result, "距回本还差").value || "-", className: findRow(result, "距回本还差").className || "" }
       ]).concat([
-        { label: "持仓成本", value: findRow(result, "持仓成本").value || "-" },
+        { label: "持仓金额", value: findRow(result, "持仓金额").value || "-" },
+        { label: "预计交易费用", value: findRow(result, "预计交易费用").value || "-" },
         { label: "当前市值", value: findRow(result, "当前市值").value || "-" },
-        { label: "回本目标市值", value: findRow(result, "回本目标市值").value || "-" },
+        { label: "含费回本成本", value: findRow(result, "含费回本成本").value || "-" },
         { label: "持仓股数", value: formatNumber(shares, 0) + "股" }
       ])
     };

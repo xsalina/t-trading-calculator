@@ -329,6 +329,8 @@ function calcBreakEven(input, feeSettings) {
   const aboveBreakEvenPrice = safeSubtract(currentPrice, breakEvenPrice);
   const profitAmount = safeSubtract(currentValue, breakEvenValue);
   const profitRate = safeMultiply(safeDivide(profitAmount, breakEvenValue), 100);
+  const estimatedFee = safeSubtract(breakEvenValue, costAmount);
+  const recoverGap = safeSubtract(breakEvenValue, currentValue);
 
   if (isRecovered) {
     return {
@@ -338,9 +340,10 @@ function calcBreakEven(input, feeSettings) {
         { label: "每股高于回本价", value: " " + formatPrice(aboveBreakEvenPrice, input.costPrice), className: "positive" },
         { label: "当前盈利比例", value: formatRate(profitRate), className: resultClass(profitRate) },
         { label: "当前盈利", value: " " + formatMoney(profitAmount), className: resultClass(profitAmount) },
-        { label: "持仓成本", value: " " + formatMoney(costAmount) },
+        { label: "持仓金额", value: " " + formatMoney(costAmount) },
+        { label: "预计交易费用", value: " " + formatMoney(estimatedFee) },
         { label: "当前市值", value: " " + formatMoney(currentValue) },
-        { label: "回本目标市值", value: " " + formatMoney(breakEvenValue) }
+        { label: "含费回本成本", value: " " + formatMoney(breakEvenValue) }
       ]
     };
   }
@@ -349,12 +352,13 @@ function calcBreakEven(input, feeSettings) {
     rows: [
       { label: "状态", value: "未回本", className: "negative" },
       { label: "回本目标价", value: " " + formatPrice(breakEvenPrice, input.costPrice) },
-      { label: "每股还需上涨", value: " " + formatPrice(priceGap, input.costPrice), className: resultClass(priceGap) },
-      { label: "还需上涨比例", value: formatRate(riseRate), className: resultClass(riseRate) },
-      { label: "当前亏损", value: " " + formatMoney(profitAmount), className: resultClass(profitAmount) },
-      { label: "持仓成本", value: " " + formatMoney(costAmount) },
+      { label: "每股还需上涨", value: " " + formatPrice(priceGap, input.costPrice), className: "negative" },
+      { label: "还需上涨比例", value: formatRate(riseRate), className: "negative" },
+      { label: "距回本还差", value: " " + formatMoney(recoverGap), className: "negative" },
+      { label: "持仓金额", value: " " + formatMoney(costAmount) },
+      { label: "预计交易费用", value: " " + formatMoney(estimatedFee) },
       { label: "当前市值", value: " " + formatMoney(currentValue) },
-      { label: "回本目标市值", value: " " + formatMoney(breakEvenValue) }
+      { label: "含费回本成本", value: " " + formatMoney(breakEvenValue) }
     ]
   };
 }
