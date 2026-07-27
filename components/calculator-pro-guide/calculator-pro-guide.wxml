@@ -1,4 +1,5 @@
 <view wx:if="{{visible}}" class="calculator-pro-guide">
+  <view class="pro-guide-brand">做T记录助手Pro</view>
   <view class="pro-guide-title">{{guide.title}}</view>
   <view class="pro-guide-desc">{{guide.description}}</view>
   <view class="pro-guide-tags">

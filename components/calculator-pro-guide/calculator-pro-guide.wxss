@@ -8,6 +8,14 @@
   box-sizing: border-box;
 }
 
+.pro-guide-brand {
+  margin-bottom: 6rpx;
+  color: #94A3B8;
+  font-size: 21rpx;
+  font-weight: 500;
+  line-height: 1.2;
+}
+
 .pro-guide-title {
   color: #1F2937;
   font-size: 28rpx;

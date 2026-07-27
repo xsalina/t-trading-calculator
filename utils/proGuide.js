@@ -1,10 +1,10 @@
 const TRADE_RECORD_MINI_PROGRAM_APP_ID = "wx253309efe732b547";
 const PRO_GUIDE_CONFIG = {
   "t-profit": {
-    title: "做T次数多了，最怕买入和卖出对不上",
-    description: "Pro 会单独记录每笔正T和反T，并持续更新每笔收益率。卖出时可以选择具体买入仓位，也可以单独记录成一笔反T。",
-    tags: ["每笔收益率独立", "卖出指定仓位", "反T单独记录"],
-    buttonText: "去Pro记录这笔做T",
+    title: "同一只股票买了很多笔，先卖哪一笔？",
+    description: "每次买入单独记录，按现价查看每笔收益率，卖出时可指定平掉哪一笔",
+    tags: ["多笔不混", "指定卖出", "每笔收益单独算"],
+    buttonText: "去把每笔分开记",
     targetAction: "add_deal",
     targetPath: "/subpackages/deal/add-deal/index"
   },
@@ -17,10 +17,10 @@ const PRO_GUIDE_CONFIG = {
     targetPath: "/pages/index/index"
   },
   "reverse-t": {
-    title: "卖出去以后，跌到多少接回才有利润？",
-    description: "记录反T卖出后，系统会根据现价持续更新预计收益率和待回补数量。完成回补后，再计算这笔反T的实际收益。",
-    tags: ["反T单独记录", "预计收益率更新", "回补后计算收益"],
-    buttonText: "去Pro记录这笔反T",
+    title: "卖出后一直等回补，多笔反T是不是已经记乱了？",
+    description: "每笔反T单独记录卖出价、回补进度和收益，避免多笔反T混在一起",
+    tags: ["反T单独记", "回补继续跟", "收益单独算"],
+    buttonText: "去记录这笔反T",
     targetAction: "add_deal",
     targetPath: "/subpackages/deal/add-deal/index"
   },
@@ -33,10 +33,10 @@ const PRO_GUIDE_CONFIG = {
     targetPath: "/pages/index/index"
   },
   "average-down": {
-    title: "买了好几笔，跌下来到底先看哪一笔？",
-    description: "同一只股票买得越多，越容易分不清哪笔亏得最多。Pro 会单独计算每笔盈亏，并优先展示亏损较多的前3笔。",
-    tags: ["每笔亏损分开看", "补后成本算清", "先看亏损前3笔"],
-    buttonText: "去Pro记录这笔补仓",
+    title: "同一只股票补了很多次，哪一笔赚了？",
+    description: "每次补仓作为独立买入记录，按现价查看每笔成本和收益率",
+    tags: ["多笔补仓不混", "每笔成本独立", "可指定卖出"],
+    buttonText: "去把每笔分开记",
     targetAction: "add_deal",
     targetPath: "/subpackages/deal/add-deal/index"
   },
