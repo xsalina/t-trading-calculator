@@ -7,5 +7,9 @@
       <text class="pro-guide-tag">{{item}}</text>
     </block>
   </view>
-  <button class="pro-guide-button" bindtap="openPro">{{guide.buttonText}}</button>
+  <view class="pro-guide-button" bindtap="openPro">
+    <view>{{guide.buttonText}}</view>
+    <view class="arrow-right">></view>
+  </view>
+  <view wx:if="{{guide.tipText}}" class="pro-guide-tip">{{guide.tipText}}</view>
 </view>

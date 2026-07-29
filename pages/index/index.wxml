@@ -36,17 +36,24 @@
   </view>
   </view>
 
-  <view wx:if="{{!activeCalculatorHasResult}}" class="miniapp-card compact-pro-card" bindtap="openTradeRecordMiniProgram" hover-class="miniapp-card-hover">
+  <view wx:if="{{!activeCalculatorHasResult}}" class="compact-pro-card" bindtap="openTradeRecordMiniProgram" hover-class="miniapp-card-hover">
     <view class="miniapp-content">
       <view class="miniapp-icon">📱</view>
       <view class="miniapp-copy">
         <view class="miniapp-brand">做T记录助手Pro</view>
-        <view class="miniapp-title">同一只股票买了很多笔，怎么分清？</view>
-        <view class="miniapp-desc">每次买入、每笔反T单独记录，现价和每笔收益率自动更新</view>
-        <view class="miniapp-tags">指定卖出哪一笔 · 反T回补继续记</view>
+        <view class="miniapp-title">{{commonProGuide.title}}</view>
+        <view class="miniapp-desc">{{commonProGuide.description}}</view>
       </view>
     </view>
-    <view class="arrow-white">去把每笔分开记</view>
+    <view class="miniapp-bottom">
+      <view class="miniapp-tags">
+        <block wx:for="{{commonProGuide.tags}}" wx:key="*this">
+          <text>{{item}}</text><text wx:if="{{index < commonProGuide.tags.length - 1}}"> · </text>
+        </block>
+      </view>
+    </view>
+    <view class="arrow-white"><view>{{commonProGuide.buttonText}}</view> <view class="arrow-right">></view></view>
+    <view class="miniapp-tip">{{commonProGuide.tipText}}</view>
   </view>
 
   <view class="share-area">

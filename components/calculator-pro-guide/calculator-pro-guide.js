@@ -1,5 +1,6 @@
 const {
   TRADE_RECORD_MINI_PROGRAM_APP_ID,
+  PRO_EXAMPLE_TARGET_PATH,
   getProGuideConfig
 } = require("../../utils/proGuide");
 const {
@@ -94,12 +95,15 @@ Component({
     },
 
     buildReportParams() {
+      const guide = this.data.guide || {};
       return {
         calculatorType: this.data.calculatorType,
         sourcePage: this.data.sourcePage,
         entryPosition: this.data.entryPosition || "",
         guideType: "personalized",
-        buttonText: this.data.guide.buttonText,
+        buttonText: guide.buttonText,
+        targetAction: guide.targetAction || "",
+        targetPath: guide.targetPath || "",
         resultCount: this.data.resultCount,
         direction: this.data.direction || "",
         hasResult: Boolean(this.data.visible)
@@ -165,7 +169,7 @@ Component({
         sourcePage: this.data.sourcePage,
         entryPosition: this.data.entryPosition || "",
         targetAction: guide.targetAction || "",
-        targetPath: guide.targetPath || "/pages/index/index",
+        targetPath: guide.targetPath || PRO_EXAMPLE_TARGET_PATH,
         direction: tradePayload.tradeDirection || ""
       };
       if (isDirectAddDeal) {
@@ -176,7 +180,7 @@ Component({
 
     openPro() {
       const guide = this.data.guide || {};
-      const targetPath = guide.targetPath || "/pages/index/index";
+      const targetPath = guide.targetPath || PRO_EXAMPLE_TARGET_PATH;
       const traceId = "calc_" + Date.now() + "_" + Math.random().toString(36).slice(2, 8);
       const extraData = this.buildJumpPayload(traceId);
       const finalDirection = (extraData.payload && extraData.payload.tradeDirection) || extraData.direction || "";

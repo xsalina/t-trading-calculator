@@ -16,6 +16,9 @@ const {
   reportProJumpFail,
   reportProJumpSuccess,
 } = require("../../utils/analytics");
+const {
+  COMMON_PRO_GUIDE_CONFIG,
+} = require("../../utils/proGuide");
 
 function safeReport(eventName, params) {
   if (typeof wx.reportEvent === "function") {
@@ -103,6 +106,7 @@ Page({
     showDefaultPicker: false,
     showFavoriteGuide: false,
     showBackToTop: false,
+    commonProGuide: COMMON_PRO_GUIDE_CONFIG,
   },
 
   onLoad(options) {
@@ -436,7 +440,8 @@ Page({
   noop() {},
 
   openTradeRecordMiniProgram() {
-    const targetPath = "/pages/index/index";
+    const guide = this.data.commonProGuide || COMMON_PRO_GUIDE_CONFIG;
+    const targetPath = guide.targetPath;
     const traceId =
       "calc_" + Date.now() + "_" + Math.random().toString(36).slice(2, 8);
 
@@ -447,9 +452,9 @@ Page({
       sourcePage: "home",
       entryPosition: "home_bottom",
       guideType: "common",
-      targetAction: "open_home",
+      targetAction: guide.targetAction,
       targetPath,
-      buttonText: "去记一笔",
+      buttonText: guide.buttonText,
       hasResult: Boolean(this.data.activeCalculatorHasResult),
       resultCount: 0,
       direction: "",
@@ -463,7 +468,7 @@ Page({
       "sourcePage=home",
       "entryPosition=home_bottom",
       "guideType=common",
-      "targetAction=open_home",
+      "targetAction=" + encodeURIComponent(guide.targetAction),
     ].join("&");
 
     safeReport("pro_guide_click", params);
@@ -497,8 +502,9 @@ Page({
       sourcePage: "home",
       entryPosition: "home_bottom",
       guideType: "common",
-      buttonText: "去记一笔",
-      targetPath: "/pages/index/index",
+      buttonText: this.data.commonProGuide.buttonText,
+      targetAction: this.data.commonProGuide.targetAction,
+      targetPath: this.data.commonProGuide.targetPath,
       hasResult: false,
       resultCount: 0,
       direction: "",
