@@ -205,13 +205,13 @@ Page({
   initFavoriteGuide() {
     if (wx.getStorageSync(FAVORITE_GUIDE_DISMISSED_KEY)) return;
 
-    this.setData({
-      showFavoriteGuide: true,
-    });
-
     this.clearFavoriteGuideTimer();
     this.favoriteGuideTimer = setTimeout(() => {
-      this.setData({ showFavoriteGuide: false });
+      this.setData({ showFavoriteGuide: true });
+      this.clearFavoriteGuideTimer();
+      this.favoriteGuideTimer = setTimeout(() => {
+        this.setData({ showFavoriteGuide: false });
+      }, 5000);
     }, 5000);
   },
 
