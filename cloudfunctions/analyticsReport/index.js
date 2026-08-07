@@ -22,6 +22,7 @@ const ALLOWED_EVENTS = {
 
 // 这里放需要排除的测试 openid / from_openid。不要放 FROM_APPID，否则会过滤所有计算器用户。
 const IGNORED_OPENIDS = [
+  "oo1kc5Aw2pE-EZD3VZVLdlnCedWo"
 ];
 
 const COUNT_FIELD_MAP = {
