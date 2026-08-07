@@ -5,7 +5,7 @@ const PRO_GUIDE_TIP_TEXT = "当前计算数据已保存，回来还能继续算"
 
 let tipsText = '股票';
 const now = new Date().getTime();
-if(now < 1785891600000){
+if(now < 1786068000000){
   tipsText = '标的'
 }
 const COMMON_PRO_GUIDE_CONFIG = {

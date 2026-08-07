@@ -4,19 +4,10 @@ const {
   getProGuideConfig
 } = require("../../utils/proGuide");
 const {
+  reportAnalyticsEvent,
   reportProJumpFail,
   reportProJumpSuccess
 } = require("../../utils/analytics");
-
-function safeReport(eventName, params) {
-  if (typeof wx.reportEvent === "function") {
-    try {
-      wx.reportEvent(eventName, params);
-    } catch (error) {
-      // 埋点不可用时不影响用户继续使用计算器。
-    }
-  }
-}
 
 function hasValue(value) {
   return value !== undefined && value !== null && value !== "";
@@ -100,6 +91,7 @@ Component({
         calculatorType: this.data.calculatorType,
         sourcePage: this.data.sourcePage,
         entryPosition: this.data.entryPosition || "",
+        guideId: [this.data.calculatorType, this.data.entryPosition || "result"].join("_"),
         guideType: "personalized",
         buttonText: guide.buttonText,
         targetAction: guide.targetAction || "",
@@ -120,7 +112,7 @@ Component({
       ].join("|");
       if (key === this.data.exposedKey) return;
       this.setData({ exposedKey: key });
-      safeReport("pro_guide_expose", this.buildReportParams());
+      reportAnalyticsEvent("pro_guide_expose", this.buildReportParams());
     },
 
     buildTradePayload() {
@@ -189,7 +181,7 @@ Component({
         targetPath,
         direction: finalDirection
       });
-      safeReport("pro_guide_click", reportParams);
+      reportAnalyticsEvent("pro_guide_click", reportParams, { immediate: true });
       const query = [
         "source=calculator",
         "traceId=" + encodeURIComponent(traceId),

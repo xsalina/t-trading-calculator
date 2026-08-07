@@ -1,0 +1,127 @@
+<view class="admin-page">
+  <view class="page-head">
+    <view>
+      <view class="page-title">数据看板</view>
+      <view class="page-subtitle">仅展示统计数据，不展示交易隐私</view>
+    </view>
+    <view class="refresh" bindtap="refreshData">刷新</view>
+  </view>
+
+  <scroll-view scroll-x class="range-scroll" show-scrollbar="{{false}}">
+    <view class="range-list">
+      <block wx:for="{{ranges}}" wx:key="key">
+        <view
+          class="range-pill {{activeRange === item.key ? 'active' : ''}}"
+          data-range="{{item.key}}"
+          bindtap="onRangeTap"
+        >{{item.label}}</view>
+      </block>
+    </view>
+  </scroll-view>
+
+  <view wx:if="{{loading}}" class="status-card">数据加载中...</view>
+  <view wx:elif="{{errorText}}" class="status-card error">{{errorText}}</view>
+
+  <block wx:else>
+    <view class="section-card">
+      <view class="section-head">
+        <view>
+          <view class="section-title">{{rangeLabel}}核心指标</view>
+          <view class="section-desc">UV 以最近一次聚合结果为准</view>
+        </view>
+        <view class="update-time">{{updateText}}</view>
+      </view>
+      <view class="metric-grid">
+        <block wx:for="{{coreMetrics}}" wx:key="label">
+          <view class="metric-item">
+            <view class="metric-label">{{item.label}}</view>
+            <view class="metric-value">{{item.value}}</view>
+            <view class="metric-desc">{{item.desc}}</view>
+          </view>
+        </block>
+      </view>
+      <view class="conversion-block">
+        <view class="conversion-title">核心转化率</view>
+        <view class="conversion-grid">
+          <block wx:for="{{coreRates}}" wx:key="label">
+            <view class="conversion-item">
+              <view class="conversion-label">{{item.label}}</view>
+              <view class="conversion-value">{{item.value}}</view>
+            </view>
+          </block>
+        </view>
+      </view>
+    </view>
+
+    <view class="section-card">
+      <view class="section-title">Pro漏斗</view>
+      <view class="funnel-row">
+        <block wx:for="{{funnel}}" wx:key="label">
+          <view class="funnel-item">
+            <view class="funnel-label">{{item.label}}</view>
+            <view class="funnel-value">{{item.userCount}}人</view>
+            <view class="funnel-desc">{{item.count}}次</view>
+          </view>
+          <view wx:if="{{item.conversionText}}" class="funnel-conversion">
+            <view class="funnel-rate">{{item.conversionText}}</view>
+            <view class="funnel-rate-label">{{item.conversionLabel}}</view>
+            <view class="funnel-arrow">→</view>
+          </view>
+        </block>
+      </view>
+      <view class="fail-row">
+        <block wx:for="{{failStats}}" wx:key="label">
+          <view class="fail-pill">
+            <text>{{item.label}}</text>
+            <text>{{item.value}} 次</text>
+          </view>
+        </block>
+      </view>
+    </view>
+
+    <view class="section-card">
+      <view class="section-head compact">
+        <view class="section-title">计算器排行榜</view>
+        <scroll-view scroll-x class="sort-scroll" show-scrollbar="{{false}}">
+          <view class="sort-list">
+            <block wx:for="{{sorts}}" wx:key="key">
+              <view
+                class="sort-pill {{activeSort === item.key ? 'active' : ''}}"
+                data-sort="{{item.key}}"
+                bindtap="onSortTap"
+              >{{item.label}}</view>
+            </block>
+          </view>
+        </scroll-view>
+      </view>
+
+      <scroll-view scroll-x class="ranking-scroll">
+        <view class="ranking-table">
+          <view class="ranking-row ranking-head">
+            <view class="cell name">计算器</view>
+            <view class="cell">使用人数</view>
+            <view class="cell">结果人数</view>
+            <view class="cell">结果次数</view>
+            <view class="cell">结果生成率</view>
+            <view class="cell">Pro点击人数</view>
+            <view class="cell">Pro到达人数</view>
+            <view class="cell">导流率</view>
+          </view>
+          <block wx:for="{{ranking}}" wx:key="calculatorType">
+            <view class="ranking-row">
+              <view class="cell name">{{item.calculatorName}}</view>
+              <view class="cell">{{item.viewUserCount}}</view>
+              <view class="cell">{{item.resultGeneratedUserCount}}</view>
+              <view class="cell">{{item.resultGeneratedCount}}</view>
+              <view class="cell rate">{{item.resultGenerateRateText}}</view>
+              <view class="cell">{{item.proClickUserCount}}</view>
+              <view class="cell">{{item.proArriveUserCount}}</view>
+              <view class="cell rate">{{item.diversionRateText}}</view>
+            </view>
+          </block>
+        </view>
+      </scroll-view>
+      <view wx:if="{{!ranking.length}}" class="empty">暂无数据</view>
+    </view>
+  </block>
+</view>

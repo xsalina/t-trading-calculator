@@ -14,6 +14,7 @@ const { setCalculatorShareContext } = require("./share");
 const {
   reportCalculatorExport,
   reportCalculatorResult,
+  reportCalculatorView,
   reportProJumpFail,
   reportProJumpSuccess
 } = require("./analytics");
@@ -144,6 +145,11 @@ function createCalculatorComponent(options) {
               displayRecords: this.getDisplayRecords ? this.getDisplayRecords(this.data.records) : this.data.records
             }, () => {
               this.emitResultState();
+              reportCalculatorView({
+                calculatorType: options.pageKey,
+                sourcePage: this.data.embedded ? "tab" : "detail",
+                entryPosition: this.data.embedded ? "home_embedded" : "detail_page"
+              });
               if (typeof options.afterInit === "function") {
                 options.afterInit.call(this, externalPreset);
               }
@@ -174,6 +180,11 @@ function createCalculatorComponent(options) {
           result: hasExternalEntry ? null : this.data.result
         }, () => {
           this.emitResultState();
+          reportCalculatorView({
+            calculatorType: options.pageKey,
+            sourcePage: this.data.embedded ? "tab" : "detail",
+            entryPosition: this.data.embedded ? "home_embedded" : "detail_page"
+          });
           if (typeof options.afterInit === "function") {
             options.afterInit.call(this, externalPreset);
           }
@@ -371,7 +382,8 @@ function createCalculatorComponent(options) {
           reportCalculatorExport({
             calculatorType: options.pageKey,
             sourcePage: this.data.embedded ? "tab" : "detail",
-            groupCount: groups.length
+            groupCount: groups.length,
+            resultCount: groups.reduce((total, group) => total + (((group && group[listKey]) || []).length), 0)
           });
           exportCalculatorGroups({
             type: options.pageKey,
@@ -440,6 +452,7 @@ function createCalculatorComponent(options) {
         const group = index >= 0 ? groups[index] : null;
         return {
           groupIndex: index >= 0 ? index + 1 : 1,
+          groupId: group ? group.id : "",
           groupName: group ? (group.customName || group.defaultName || "") : ""
         };
       },
@@ -449,6 +462,7 @@ function createCalculatorComponent(options) {
           calculatorType: options.pageKey,
           action,
           sourcePage: this.data.embedded ? "tab" : "detail",
+          hasFee: this.data.includeFee !== undefined ? this.data.includeFee : this.data.form.includeFee,
           hasResult: Boolean((this.data.records || []).length || this.data.result)
         }, this.getActiveGroupReportInfo(), extraParams || {}));
       },

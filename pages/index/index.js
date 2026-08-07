@@ -12,6 +12,7 @@ const {
   isExternalEntry,
 } = require("../../utils/externalEntry");
 const {
+  reportAnalyticsEvent,
   reportCalculatorEntryClick,
   reportProJumpFail,
   reportProJumpSuccess,
@@ -19,16 +20,10 @@ const {
 const {
   COMMON_PRO_GUIDE_CONFIG,
 } = require("../../utils/proGuide");
-
-function safeReport(eventName, params) {
-  if (typeof wx.reportEvent === "function") {
-    try {
-      wx.reportEvent(eventName, params);
-    } catch (error) {
-      // 埋点不可用时不影响首页正常使用。
-    }
-  }
-}
+const {
+  callCloudFunction,
+  canCallCloudFunction,
+} = require("../../utils/cloud");
 
 const CALCULATORS = [
   {
@@ -106,6 +101,7 @@ Page({
     showDefaultPicker: false,
     showFavoriteGuide: false,
     showBackToTop: false,
+    isAdmin: false,
     commonProGuide: COMMON_PRO_GUIDE_CONFIG,
   },
 
@@ -114,10 +110,12 @@ Page({
     this.initDefaultCalculator();
     this.applyEntryQuery(options || {});
     this.initFavoriteGuide();
+    this.checkAdminVisible();
   },
 
   onShow() {
     this.initDefaultCalculator();
+    this.checkAdminVisible();
   },
 
   onReady() {
@@ -451,6 +449,7 @@ Page({
       calculatorType: this.data.activeCalculatorType || "",
       sourcePage: "home",
       entryPosition: "home_bottom",
+      guideId: "common_home_bottom",
       guideType: "common",
       targetAction: guide.targetAction,
       targetPath,
@@ -471,7 +470,7 @@ Page({
       "targetAction=" + encodeURIComponent(guide.targetAction),
     ].join("&");
 
-    safeReport("pro_guide_click", params);
+    reportAnalyticsEvent("pro_guide_click", params, { immediate: true });
 
     wx.navigateToMiniProgram({
       appId: TRADE_RECORD_MINI_PROGRAM_APP_ID,
@@ -497,10 +496,11 @@ Page({
     const exposeKey = "common|" + calculatorType;
     if (this.commonProGuideExposeKey === exposeKey) return;
     this.commonProGuideExposeKey = exposeKey;
-    safeReport("pro_guide_expose", {
+    reportAnalyticsEvent("pro_guide_expose", {
       calculatorType,
       sourcePage: "home",
       entryPosition: "home_bottom",
+      guideId: "common_home_bottom",
       guideType: "common",
       buttonText: this.data.commonProGuide.buttonText,
       targetAction: this.data.commonProGuide.targetAction,
@@ -522,6 +522,34 @@ Page({
   goFeeSettings() {
     wx.navigateTo({
       url: "/pages/fee-settings/fee-settings",
+    });
+  },
+
+  checkAdminVisible() {
+    if (!canCallCloudFunction()) {
+      console.warn("管理员数据入口未检查：共享云函数调用未就绪");
+      return;
+    }
+    console.log("开始检查管理员数据入口");
+    callCloudFunction({
+      name: "analyticsDashboard",
+      data: {
+        action: "checkAdmin",
+      },
+      success: (res) => {
+        const result = (res && res.result) || {};
+        console.log("管理员数据入口检查结果", result);
+        this.setData({ isAdmin: Boolean(result.isAdmin) });
+      },
+      fail: (error) => {
+        console.error("管理员数据入口检查失败", error);
+      },
+    });
+  },
+
+  goAnalyticsDashboard() {
+    wx.navigateTo({
+      url: "/subpackages/admin/analytics/index",
     });
   },
 

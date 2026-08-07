@@ -6,6 +6,7 @@ const { appendSource, copyText, rowMap } = require("../../../utils/resultCopy");
 const { setCalculatorShareContext } = require("../../../utils/share");
 const {
   reportCalculatorResult,
+  reportCalculatorView,
   reportProJumpFail,
   reportProJumpSuccess
 } = require("../../../utils/analytics");
@@ -99,6 +100,11 @@ Component({
         result: isExternalEntry(entryQuery) ? null : this.data.result
       }, () => {
         this.emitResultState();
+        reportCalculatorView({
+          calculatorType: PAGE_KEY,
+          sourcePage: this.data.embedded ? "tab" : "detail",
+          entryPosition: this.data.embedded ? "home_embedded" : "detail_page"
+        });
         if (externalPreset.applied) {
           this.persistForm();
         }

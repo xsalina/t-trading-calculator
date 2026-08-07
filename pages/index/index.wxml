@@ -94,6 +94,13 @@
       </view>
       <view class="bottom-link-arrow">{{showAllCalculators ? '收起' : '›'}}</view>
     </view>
+    <view wx:if="{{isAdmin}}" class="bottom-link-item admin-data-link" bindtap="goAnalyticsDashboard" hover-class="bottom-link-hover">
+      <view class="bottom-link-copy">
+        <view class="bottom-link-title">数据</view>
+        <view class="bottom-link-desc">查看计算器统计</view>
+      </view>
+      <view class="bottom-link-arrow">›</view>
+    </view>
   </view>
 
   <view id="allCalculatorsEntry"></view>

@@ -3,6 +3,7 @@
     "appid": "wx2d335ad7d259fad0",
     "projectname": "t-trading-calculator",
     "miniprogramRoot": "",
+    "cloudfunctionRoot": "cloudfunctions/",
     "compileType": "miniprogram",
     "setting": {
         "es6": true,
@@ -13,7 +14,21 @@
             "ignore": [],
             "disablePlugins": [],
             "outputPath": ""
-        }
+        },
+        "compileWorklet": false,
+        "uglifyFileName": false,
+        "uploadWithSourceMap": true,
+        "enhance": false,
+        "packNpmManually": false,
+        "packNpmRelationList": [],
+        "minifyWXSS": true,
+        "minifyWXML": true,
+        "localPlugins": false,
+        "disableUseStrict": false,
+        "useCompilerPlugins": false,
+        "condition": false,
+        "swc": false,
+        "disableSWC": true
     },
     "libVersion": "3.16.2",
     "packOptions": {
@@ -24,5 +39,6 @@
     "editorSetting": {
         "tabIndent": "auto",
         "tabSize": 4
-    }
+    },
+    "simulatorPluginLibVersion": {}
 }

@@ -130,3 +130,510 @@
 ```text
 /Users/xiaoyueping/WeChatProjects/t-trading-calculator
 ```
+
+
+
+
+
+
+做T交易计算器自有埋点方案
+
+一、整体方案
+
+1. 保留现有微信官方埋点 wx.reportEvent。
+2. 新增自有云数据库埋点，前端统一走 utils/analytics.js。
+3. 前端不直接写数据库，只调用云函数 analyticsReport。
+4. 云函数负责：
+   - 校验事件白名单
+   - 从云函数上下文获取 openid
+   - 补充 serverTime、date、hour
+   - 写入 calculator_analytics_events 原始明细
+   - 更新 calculator_analytics_daily 每日聚合表
+5. 普通事件进入本地队列批量上报，每次最多 10 条。
+6. Pro 点击、跳转成功、跳转失败立即上报。
+7. 保留双写 7～14 天，后续可对比微信后台和云数据库数据。
+
+二、云数据库集合
+
+1. calculator_analytics_events
+用途：保存每条原始事件明细。
+
+2. calculator_analytics_daily
+用途：按 date + calculatorType 聚合，供管理员后台查排行和转化率。
+
+三、事件白名单
+
+calculator_view
+calculator_entry_click
+calculator_result_generated
+calculator_result_save
+calculator_export_click
+pro_guide_expose
+pro_guide_click
+pro_jump_success
+pro_jump_fail
+
+四、统一公共字段
+
+每条事件保存：
+
+{
+  eventId,
+  eventName,
+  openid,
+  clientId,
+  sessionId,
+
+  calculatorType,
+  calculatorName,
+
+  sourcePage,
+  entryPosition,
+
+  eventTime,
+  serverTime,
+  date,
+  hour,
+
+  appVersion,
+  platform,
+
+  properties
+}
+
+说明：
+- eventId：前端生成，用于防重复
+- openid：云函数从 cloud.getWXContext() 获取，前端不传
+- clientId：前端本地生成并缓存，用于无 openid 场景辅助去重
+- sessionId：每次小程序冷启动生成
+- serverTime/date/hour：云函数补充
+- 高频统计字段放顶层
+- 其他事件字段放 properties
+
+五、事件定义
+
+1. calculator_view
+
+触发：
+当前计算器首次真实展示时上报，包括首页默认计算器和独立页面。
+
+用途：
+统计每个计算器的展示次数、展示人数。
+
+properties：
+{}
+
+2. calculator_entry_click
+
+触发：
+用户点击首页顶部 Tab，或点击底部全部计算器里的单个计算器入口。
+
+properties：
+{
+  clickTarget,
+  isDefault,
+  previousCalculatorType
+}
+
+用途：
+统计用户主动点击了哪个计算器入口。
+
+3. calculator_result_generated
+
+触发：
+输入校验通过，并成功生成计算结果。
+
+适用：
+8 个计算器全部适用。
+
+properties：
+{
+  resultCount,
+  market,
+  hasFee
+}
+
+注意：
+不保存股票代码、股票名称、价格、数量、金额、收益等用户交易明细。
+
+4. calculator_result_save
+
+触发：
+仅用于多步骤计算器：
+- t-profit 做T
+- reverse-t 反T回补
+- average-down 补仓降本
+
+触发动作：
+- 初始化
+- 保存操作 / 保存回补 / 保存补仓
+
+properties：
+{
+  action,
+  direction,
+  groupId,
+  groupIndex,
+  operationIndex,
+  resultCount
+}
+
+action 口径：
+- initialize：初始化
+- save_operation：保存一笔操作
+
+用途：
+统计多步骤计算器里用户真正保存了多少笔操作。
+
+5. calculator_export_click
+
+触发：
+做T、反T、补仓点击“导出”。
+
+properties：
+{
+  groupCount,
+  resultCount
+}
+
+用途：
+统计导出使用情况，以及导出时有多少组、多少条结果。
+
+6. pro_guide_expose
+
+触发：
+Pro 引导卡真实展示时。
+
+properties：
+{
+  guideId,
+  guideType,
+  traceId,
+  hasResult,
+  resultCount,
+  targetAction,
+  targetPath,
+  direction,
+  buttonText
+}
+
+用途：
+统计 Pro 卡曝光人数和曝光次数。
+
+7. pro_guide_click
+
+触发：
+用户点击 Pro 引导卡按钮。
+
+上报方式：
+立即上报。
+
+properties：
+{
+  guideId,
+  guideType,
+  traceId,
+  hasResult,
+  resultCount,
+  targetAction,
+  targetPath,
+  direction,
+  buttonText
+}
+
+用途：
+统计 Pro 点击率。
+
+8. pro_jump_success
+
+触发：
+wx.navigateToMiniProgram 跳转 Pro 成功。
+
+上报方式：
+立即上报。
+
+properties：
+{
+  guideId,
+  guideType,
+  traceId,
+  hasResult,
+  resultCount,
+  targetAction,
+  targetPath,
+  direction,
+  buttonText
+}
+
+用途：
+统计 Pro 跳转成功率和导流率。
+
+9. pro_jump_fail
+
+触发：
+wx.navigateToMiniProgram 跳转 Pro 失败。
+
+上报方式：
+立即上报。
+
+properties：
+{
+  guideId,
+  traceId,
+  failReason,
+  failCategory,
+  isUserCancel,
+  errorMessage
+}
+
+说明：
+- errorMessage 最多保存 500 字符
+- 用户取消时：
+  failReason = user_cancel
+  failCategory = cancel
+  isUserCancel = true
+- 其他失败：
+  failReason = other
+  failCategory = error
+  isUserCancel = false
+
+六、每日聚合表 calculator_analytics_daily
+
+唯一维度：
+
+date + calculatorType
+
+字段：
+
+{
+  date,
+  calculatorType,
+  calculatorName,
+
+  viewCount,
+  viewUserCount,
+
+  entryClickCount,
+  entryClickUserCount,
+
+  resultCount,
+  resultUserCount,
+
+  saveOperationCount,
+  exportCount,
+
+  proExposeCount,
+  proExposeUserCount,
+
+  proClickCount,
+  proClickUserCount,
+
+  proJumpSuccessCount,
+  proJumpSuccessUserCount,
+
+  proJumpFailCount,
+
+  updatedAt
+}
+
+内部辅助去重字段：
+
+{
+  viewUsers,
+  entryClickUsers,
+  resultUsers,
+  proExposeUsers,
+  proClickUsers,
+  proJumpSuccessUsers
+}
+
+七、管理员后台可计算指标
+
+1. 今日、近7天、近15天、近30天计算器使用排行
+依据：
+- viewCount
+- viewUserCount
+- resultCount
+- resultUserCount
+
+2. 哪个计算器生成结果最多
+依据：
+- resultCount
+
+3. 哪个计算器点击 Pro 最多
+依据：
+- proClickCount
+- proClickUserCount
+
+4. 哪个计算器成功跳转 Pro 最多
+依据：
+- proJumpSuccessCount
+- proJumpSuccessUserCount
+
+5. Pro 点击率
+
+Pro点击率 = Pro点击人数 ÷ Pro曝光人数
+
+字段：
+proClickUserCount ÷ proExposeUserCount
+
+6. 跳转成功率
+
+跳转成功率 = Pro跳转成功人数 ÷ Pro点击人数
+
+字段：
+proJumpSuccessUserCount ÷ proClickUserCount
+
+7. 导流率
+
+导流率 = Pro跳转成功人数 ÷ 结果生成人数
+
+字段：
+proJumpSuccessUserCount ÷ resultUserCount
+
+八、隐私口径
+
+自有云库不保存以下用户交易明细：
+
+- 股票代码
+- 股票名称
+- 价格
+- 数量
+- 金额
+- 收益
+- 成本
+- 市值
+
+只保存统计分析需要的非敏感字段：
+
+- 计算器类型
+- 计算器名称
+- 来源页面
+- 入口位置
+- 是否计入手续费
+- 结果数量
+- 分组序号
+- 操作类型
+- Pro 引导曝光/点击/跳转状态
+
+九、前端文件改动
+
+1. utils/analytics.js
+
+作用：
+统一埋点入口。
+
+包含：
+- wx.reportEvent 保留
+- 云函数双写
+- 本地队列
+- 事件字段白名单
+- clientId/sessionId/eventId 生成
+- Pro 跳转失败原因识别
+- calculator_view 去重上报
+
+2. pages/index/index.js
+
+接入：
+- 首页 Pro 卡曝光
+- 首页 Pro 卡点击
+- 顶部 Tab 点击
+- 底部计算器入口点击
+
+3. components/calculator-pro-guide/calculator-pro-guide.js
+
+接入：
+- 结果页 Pro 卡曝光
+- 结果页 Pro 卡点击
+- Pro 跳转成功
+- Pro 跳转失败
+
+4. utils/calculatorComponent.js
+
+接入：
+- 通用计算器展示
+- 通用计算结果生成
+- 通用导出点击
+- 反T、补仓等多组计算器初始化/保存结果
+
+5. components/calculators/t-profit/t-profit.js
+
+接入：
+- 做T计算器展示
+- 初始化底仓
+- 保存操作
+- 导出点击
+- 分组信息上报
+
+6. components/calculators/price-projection/price-projection.js
+
+接入：
+- 涨跌幅推演计算器展示
+- 计算结果生成
+
+十、云函数改动
+
+新增：
+
+cloudfunctions/analyticsReport
+
+文件：
+- index.js
+- package.json
+
+职责：
+1. 接收前端 events 数组。
+2. 每次最多处理 10 条。
+3. 校验事件名是否在白名单。
+4. 从 cloud.getWXContext() 获取 openid。
+5. 补充 serverTime、date、hour。
+6. 按 eventId 写入 calculator_analytics_events，防重复。
+7. 按 date + calculatorType 更新 calculator_analytics_daily。
+8. 返回 accepted/rejected 数量。
+
+十一、项目配置
+
+project.config.json 增加：
+
+cloudfunctionRoot: "cloudfunctions/"
+
+十二、上报策略
+
+普通事件：
+- calculator_view
+- calculator_entry_click
+- calculator_result_generated
+- calculator_result_save
+- calculator_export_click
+- pro_guide_expose
+
+进入本地队列，批量上报。
+
+立即事件：
+- pro_guide_click
+- pro_jump_success
+- pro_jump_fail
+
+点击和跳转类事件优先级更高，立即调用云函数。
+
+失败处理：
+- 云函数调用失败时，事件重新放回本地队列。
+- 下次触发上报时继续重试。
+
+十三、上线注意事项
+
+1. 需要在微信开发者工具中上传并部署云函数：
+analyticsReport
+
+2. 需要确认云开发环境：
+cloud1-7gdq3emj774ac1dd
+
+3. 建议提前创建或授权集合：
+calculator_analytics_events
+calculator_analytics_daily
+
+4. 上线后先双写 7～14 天：
+- 对比微信后台 wx.reportEvent 数据
+- 对比云数据库 calculator_analytics_daily 数据
+
+5. 数据稳定后，再决定是否减少或停止微信官方埋点。

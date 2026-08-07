@@ -12,6 +12,14 @@
     "pages/article-webview/article-webview",
     "pages/fee-settings/fee-settings"
   ],
+  "subPackages": [
+    {
+      "root": "subpackages/admin",
+      "pages": [
+        "analytics/index"
+      ]
+    }
+  ],
   "window": {
     "navigationBarTitleText": "做T交易计算器",
     "navigationBarBackgroundColor": "#3157C8",

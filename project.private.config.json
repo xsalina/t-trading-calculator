@@ -3,6 +3,32 @@
     "projectname": "t-trading-calculator",
     "setting": {
         "compileHotReLoad": true,
-        "bigPackageSizeSupport": true
+        "bigPackageSizeSupport": true,
+        "urlCheck": false,
+        "coverView": false,
+        "lazyloadPlaceholderEnable": false,
+        "preloadBackgroundData": false,
+        "autoAudits": false,
+        "useApiHook": true,
+        "showShadowRootInWxmlPanel": false,
+        "useStaticServer": false,
+        "useLanDebug": false,
+        "showES6CompileOption": false,
+        "checkInvalidKey": true,
+        "ignoreDevUnusedFiles": true
+    },
+    "libVersion": "3.16.2",
+    "condition": {
+        "miniprogram": {
+            "list": [
+                {
+                    "name": "subpackages/admin/analytics/index",
+                    "pathName": "subpackages/admin/analytics/index",
+                    "query": "",
+                    "launchMode": "default",
+                    "scene": null
+                }
+            ]
+        }
     }
 }

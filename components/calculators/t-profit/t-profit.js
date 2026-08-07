@@ -25,6 +25,7 @@ const { buildFeeSummary } = require("../../../utils/feeSummary");
 const {
   reportCalculatorExport,
   reportCalculatorResult,
+  reportCalculatorView,
   reportProJumpFail,
   reportProJumpSuccess,
 } = require("../../../utils/analytics");
@@ -196,6 +197,11 @@ Component({
               { operations: this.rebuildOperations(operations) },
               () => {
                 this.refreshAll();
+                reportCalculatorView({
+                  calculatorType: "t-profit",
+                  sourcePage: this.data.embedded ? "tab" : "detail",
+                  entryPosition: this.data.embedded ? "home_embedded" : "detail_page",
+                });
                 if (externalPreset.applied) {
                   this.persistState();
                 }
@@ -205,6 +211,11 @@ Component({
           }
 
           this.refreshAll();
+          reportCalculatorView({
+            calculatorType: "t-profit",
+            sourcePage: this.data.embedded ? "tab" : "detail",
+            entryPosition: this.data.embedded ? "home_embedded" : "detail_page",
+          });
           if (externalPreset.applied) {
             this.persistState();
           }
@@ -436,6 +447,7 @@ Component({
           calculatorType: "t-profit",
           sourcePage: this.data.embedded ? "tab" : "detail",
           groupCount: groups.length,
+          resultCount: groups.reduce((total, group) => total + (((group && group.operations) || []).length), 0),
         });
         exportCalculatorGroups({
           type: "t-profit",
@@ -493,6 +505,7 @@ Component({
       const group = index >= 0 ? groups[index] : null;
       return {
         groupIndex: index >= 0 ? index + 1 : 1,
+        groupId: group ? group.id : "",
         groupName: group ? (group.customName || group.defaultName || "") : "",
       };
     },
@@ -502,6 +515,7 @@ Component({
         calculatorType: "t-profit",
         action,
         sourcePage: this.data.embedded ? "tab" : "detail",
+        hasFee: this.data.includeFee,
         hasResult: Boolean((this.data.operations || []).length),
       }, this.getActiveGroupReportInfo(), extraParams || {}));
     },
